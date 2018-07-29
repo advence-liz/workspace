@@ -2,8 +2,9 @@ const path = require('path')
 const webpack = require('webpack')
 const CleanWebpackPlugin = require('clean-webpack-plugin')
 const HtmlWebpackPlugin = require('html-webpack-plugin')
+const getCurrentModule = require('./gulp/util/getCurrentModule')
 module.exports = {
-  entry: './src/',
+  entry: path.join(__dirname, 'src', getCurrentModule()),
   mode: 'development',
   context: __dirname,
   output: {
@@ -14,12 +15,12 @@ module.exports = {
     rules: [
       {
         test: /\.jsx?$/,
-        exclude: /(node_modules|bower_components)/,
-        use: [
-          {
-            loader: 'babel-loader'
-          }
-        ]
+        exclude: /(node_modules|bower_components)/
+        // use: [
+        //   {
+        //     loader: 'babel-loader'
+        //   }
+        // ]
       },
       {
         test: /\.scss$/,

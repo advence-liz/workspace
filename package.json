@@ -1,15 +1,16 @@
 {
-  "name": "template",
+  "name": "algorithms",
   "version": "1.0.0",
   "description": "a webpack template ",
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "start": "webpack-dev-server --content-base=build --color",
-    "build":"webpack"
+    "build": "webpack"
   },
   "keywords": [
-    "webpack"
+    "webpack",
+    "algorithms"
   ],
   "author": "advence-liz",
   "license": "ISC",
@@ -22,13 +23,27 @@
     "babel-preset-env": "^1.7.0",
     "babel-preset-react": "^6.24.1",
     "babel-preset-stage-2": "^6.24.1",
+    "chalk": "^2.4.1",
     "clean-webpack-plugin": "^0.1.19",
     "css-loader": "^1.0.0",
+    "eslint": "^5.2.0",
+    "eslint-config-standard": "^11.0.0",
+    "eslint-plugin-import": "^2.13.0",
+    "eslint-plugin-node": "^7.0.1",
+    "eslint-plugin-promise": "^3.8.0",
+    "eslint-plugin-standard": "^3.1.0",
+    "gulp": "^3.9.1",
     "html-webpack-plugin": "^3.2.0",
+    "require-dir": "^1.0.0",
     "sass-loader": "^7.0.3",
+    "shelljs": "^0.8.2",
     "style-loader": "^0.21.0",
     "webpack": "^4.16.1",
     "webpack-cli": "^3.1.0",
-    "webpack-dev-server": "^3.1.4"
+    "webpack-dev-server": "^3.1.4",
+    "yargs": "^12.0.1"
+  },
+  "dependencies": {
+    "fs-extra": "^7.0.0"
   }
 }
