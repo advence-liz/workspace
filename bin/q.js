@@ -1,20 +1,16 @@
-const vfs = require('vinyl-fs')
 const path = require('path')
 const fs = require('fs-extra')
 const yargs = require('yargs')
-const chalk = require('chalk')
+const { red, blue, green } = require('chalk')
 const shell = require('shelljs')
 const inquirer = require('inquirer')
 
-const { defaultDemo, qrcPath, root } = fs.readJsonSync('.qrc.json')
-const CurrentRootPath = root
-const AllModules = fs.readdirSync(CurrentRootPath)
-let CurrentModule = getCurrentModule()
-
 function main (options) {
   if (options.branch) {
-    switchModule(CurrentModule, options.branch)
+    const { currentModule } = getConfig()
+    switchModule(currentModule, options.branch)
   } else if (options.new) {
+    const { defaultDemo } = getConfig()
     switchModule(defaultDemo, options.new)
   } else if (options.delete) {
     deleteModule(options.delete)
@@ -23,7 +19,7 @@ function main (options) {
   } else if (options.init) {
     init()
   } else {
-    console.info(chalk.blue('Usage:q --help'))
+    console.info(blue('Usage: q --help'))
   }
 }
 function init () {
@@ -55,80 +51,101 @@ function init () {
   ]
 
   inquirer.prompt(questions).then(answers => {
+    const { qrcPath, defaultDemo } = answers
     console.info(JSON.stringify(answers, null, '  '))
     fs.outputJSONSync('.qrc.json', answers)
+    fs.outputJsonSync(qrcPath, { module: defaultDemo })
   })
 }
 
-function getCurrentModule () {
-  let CurrentModule
-  try {
-    CurrentModule = fs.readJsonSync(qrcPath).module
-  } catch (error) {
-    fs.writeJsonSync(qrcPath, { module: defaultDemo })
+function getConfig () {
+  let config, currentModule
+  if (fs.pathExistsSync(path.resolve(process.cwd(), '.qrc.json'))) {
+    config = require(path.resolve(process.cwd(), '.qrc.json'))
+    const { qrcPath, defaultDemo } = config
+    currentModule = getCurrentModule(qrcPath, defaultDemo)
+    return { ...config, currentModule }
+  } else {
+    console.info(red('can not found .qrc.json'))
+    console.info(blue('use: q --init'))
+    process.exit(0)
   }
-  return CurrentModule || defaultDemo
+}
+function getCurrentModule (qrcPath, defaultDemo) {
+  let currentModule
+  currentModule = fs.readJsonSync(qrcPath).module
+  return currentModule || defaultDemo
 }
 function printModule () {
-  AllModules.forEach(item => {
+  const { currentModule, root } = getConfig()
+  const allModules = fs.readdirSync(root)
+  allModules.forEach(item => {
     let isFile = /\./g.test(item)
-    if (item === CurrentModule) {
-      !isFile && console.info(chalk.green(item))
+    if (item === currentModule) {
+      !isFile && console.info(green(item))
     } else {
       !isFile && console.info(item)
     }
   })
 }
 function switchModule (currentModule, nextModule) {
-  // console.log(currentModule, nextModule)
+  const { root } = getConfig()
+  const allModules = fs.readdirSync(root)
   if (currentModule === nextModule) {
     console.info(
-      chalk.red('The target module cannot be equal to the current module!')
+      red('The target module cannot be equal to the current module!')
     )
     return
   }
-  if (AllModules.indexOf(nextModule) > -1) {
-    changePackge(nextModule)
+  if (allModules.indexOf(nextModule) > -1) {
+    rewriteModule(nextModule)
     return
   }
   if (nextModule) {
     createModule(currentModule, nextModule)
-    changePackge(nextModule)
+    rewriteModule(nextModule)
   }
 }
-function changePackge (nextModule) {
+function rewriteModule (nextModule) {
+  const { qrcPath } = getConfig()
   fs.writeJson(qrcPath, { module: nextModule })
-  console.info(chalk.green(`Successfully written ${nextModule} to .qrc.json`))
+  console.info(green(`Successfully written ${nextModule} to .qrc.json`))
 }
 function createModule (sourceModule, targetModule) {
+  const { root } = getConfig()
+  console.log(root)
+  console.log(path.join(root, sourceModule))
+  if (!fs.pathExistsSync(path.join(root, sourceModule))) {
+    console.info(red(`${sourceModule} directory not found`))
+    process.exit(0)
+  }
   if (sourceModule === targetModule) {
     console.info(
-      chalk.red('The target module cannot be equal to the current module!')
+      red('The target module cannot be equal to the current module!')
     )
-    return
+    process.exit(0)
   }
-  return vfs
-    .src(path.join(CurrentRootPath, sourceModule, '**'))
-    .pipe(vfs.dest(path.join(CurrentRootPath, targetModule)))
-    .on('end', () => {
-      console.info(chalk.green(`create ${targetModule} from ${sourceModule}`))
-    })
+
+  shell.exec(
+    `cp -r ${path.join(root, sourceModule)} ${path.join(root, targetModule)}`
+  )
+  console.info(green(`create ${targetModule} from ${sourceModule}`))
+  // return vfs
+  //   .src(path.join(root, sourceModule, '**'))
+  //   .pipe(vfs.dest(path.join(root, targetModule)))
+  //   .on('end', () => {
+  //     console.info(green(`create ${targetModule} from ${sourceModule}`))
+  //   })
 }
 function deleteModule (targetModule) {
-  if (targetModule === 'demo') {
-    console.info(chalk.red('The demo directory should not be removed!'))
+  const { root, defaultDemo } = getConfig()
+  if (targetModule === defaultDemo) {
+    console.info(red('The demo directory should not be removed!'))
     return
   }
-  shell.rm('-rf', path.join(CurrentRootPath, targetModule))
-  console.info(chalk.green(`${targetModule} successfully deleted`))
+  shell.rm('-rf', path.join(root, targetModule))
+  console.info(green(`${targetModule} successfully deleted`))
 }
-/**
- *  生成切换组件脚手架
- *    列出现有的component
- *  -n <name> new
- *  -b <name> branch 如果name 不存在 则新建
- *  -d <name> delete
- */
 yargs.usage('Usage:q --args')
 const options = yargs.options({
   new: {
