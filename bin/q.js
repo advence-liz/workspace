@@ -5,9 +5,11 @@ const fs = require('fs-extra')
 const argv = require('yargs').argv
 const chalk = require('chalk')
 const shell = require('shelljs')
-const getCurrentModule = require('../util/getCurrentModule')
-
-const { defaultDemo, qrcPath, root } = require('../config').q
+const { defaultDemo, qrcPath, root } = {
+  root: 'src',
+  defaultDemo: '_demo',
+  qrcPath: '.qrc.json'
+}
 const CurrentRootPath = root
 const AllModules = fs.readdirSync(CurrentRootPath)
 let CurrentModule = getCurrentModule()
@@ -33,6 +35,15 @@ gulp.task('q', function () {
   }
   printModule()
 })
+function getCurrentModule () {
+  let CurrentModule
+  try {
+    CurrentModule = fs.readJsonSync(qrcPath).module
+  } catch (error) {
+    fs.writeJsonSync(qrcPath, { module: defaultDemo })
+  }
+  return CurrentModule || defaultDemo
+}
 function printModule () {
   AllModules.forEach(item => {
     let isFile = /\./g.test(item)
