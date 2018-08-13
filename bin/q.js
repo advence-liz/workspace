@@ -53,27 +53,32 @@ function init () {
   inquirer.prompt(questions).then(answers => {
     const { qrcPath, defaultDemo } = answers
     console.info(JSON.stringify(answers, null, '  '))
-    fs.outputJSONSync('.qrc.json', answers)
+    fs.outputJSONSync('.qconfig.json', answers)
     fs.outputJsonSync(qrcPath, { module: defaultDemo })
   })
 }
 
 function getConfig () {
   let config, currentModule
-  if (fs.pathExistsSync(path.resolve(process.cwd(), '.qrc.json'))) {
-    config = require(path.resolve(process.cwd(), '.qrc.json'))
+  if (fs.pathExistsSync(path.resolve(process.cwd(), '.qconfig.json'))) {
+    config = require(path.resolve(process.cwd(), '.qconfig.json'))
     const { qrcPath, defaultDemo } = config
     currentModule = getCurrentModule(qrcPath, defaultDemo)
     return { ...config, currentModule }
   } else {
-    console.info(red('can not found .qrc.json'))
+    console.info(red('can not found .qconfig.json'))
     console.info(blue('use: q --init'))
     process.exit(0)
   }
 }
 function getCurrentModule (qrcPath, defaultDemo) {
   let currentModule
-  currentModule = fs.readJsonSync(qrcPath).module
+  try {
+    currentModule = fs.readJsonSync(qrcPath).module
+  } catch (error) {
+    console.info('use: q --eslint or q -b <name>')
+  }
+
   return currentModule || defaultDemo
 }
 function printModule () {
