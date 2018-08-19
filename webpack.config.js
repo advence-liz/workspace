@@ -2,9 +2,10 @@ const path = require('path')
 const webpack = require('webpack')
 const CleanWebpackPlugin = require('clean-webpack-plugin')
 const HtmlWebpackPlugin = require('html-webpack-plugin')
-const getCurrentModule = require('./gulp/util/getCurrentModule')
+const fs = require('fs-extra')
+const { moduleStorePath } = fs.readJsonSync('.qsrc')
 module.exports = {
-  entry: path.join(__dirname, 'src', getCurrentModule()),
+  entry: path.join(__dirname, 'src', require(moduleStorePath).module),
   mode: 'development',
   context: __dirname,
   output: {

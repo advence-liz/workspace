@@ -4,7 +4,8 @@ const yargs = require('yargs')
 const { red, blue, green } = require('chalk')
 const shell = require('shelljs')
 const inquirer = require('inquirer')
-
+const ConfigOutputPath = '.qsrc'
+// const moduleStorePath = './node_modules/.qrc.json'
 function main (options) {
   if (options.branch) {
     const { currentModule } = getConfig()
@@ -21,6 +22,30 @@ function main (options) {
   } else {
     console.info(blue('Usage: q --help'))
   }
+}
+
+function getConfig () {
+  let config, currentModule
+  if (fs.pathExistsSync(path.resolve(process.cwd(), ConfigOutputPath))) {
+    config = fs.readJsonSync(path.resolve(process.cwd(), ConfigOutputPath))
+    const { moduleStorePath, defaultDemo } = config
+    currentModule = getCurrentModule(moduleStorePath, defaultDemo)
+    return { ...config, currentModule }
+  } else {
+    console.info(red(`can not found ${ConfigOutputPath}`))
+    console.info(blue('use: q --init'))
+    process.exit(0)
+  }
+}
+function getCurrentModule (moduleStorePath, defaultDemo) {
+  let currentModule
+  try {
+    currentModule = fs.readJsonSync(moduleStorePath).module
+  } catch (error) {
+    console.info('use: q --eslint or q -b <name>')
+  }
+
+  return currentModule || defaultDemo
 }
 function init () {
   const questions = [
@@ -42,44 +67,20 @@ function init () {
     },
     {
       type: 'input',
-      name: 'qrcPath',
-      message: "What's your qrcPath",
+      name: 'moduleStorePath',
+      message: "What's your moduleStorePath",
       default: function () {
-        return './node_modules/.qrc.json'
+        return './node_modules/.qsrc.json'
       }
     }
   ]
 
   inquirer.prompt(questions).then(answers => {
-    const { qrcPath, defaultDemo } = answers
+    const { moduleStorePath, defaultDemo } = answers
     console.info(JSON.stringify(answers, null, '  '))
-    fs.outputJSONSync('.qconfig.json', answers)
-    fs.outputJsonSync(qrcPath, { module: defaultDemo })
+    fs.outputJSONSync(ConfigOutputPath, answers)
+    fs.outputJsonSync(moduleStorePath, { module: defaultDemo })
   })
-}
-
-function getConfig () {
-  let config, currentModule
-  if (fs.pathExistsSync(path.resolve(process.cwd(), '.qconfig.json'))) {
-    config = require(path.resolve(process.cwd(), '.qconfig.json'))
-    const { qrcPath, defaultDemo } = config
-    currentModule = getCurrentModule(qrcPath, defaultDemo)
-    return { ...config, currentModule }
-  } else {
-    console.info(red('can not found .qconfig.json'))
-    console.info(blue('use: q --init'))
-    process.exit(0)
-  }
-}
-function getCurrentModule (qrcPath, defaultDemo) {
-  let currentModule
-  try {
-    currentModule = fs.readJsonSync(qrcPath).module
-  } catch (error) {
-    console.info('use: q --eslint or q -b <name>')
-  }
-
-  return currentModule || defaultDemo
 }
 function printModule () {
   const { currentModule, root } = getConfig()
@@ -112,9 +113,11 @@ function switchModule (currentModule, nextModule) {
   }
 }
 function rewriteModule (nextModule) {
-  const { qrcPath } = getConfig()
-  fs.writeJson(qrcPath, { module: nextModule })
-  console.info(green(`Successfully written ${nextModule} to .qrc.json`))
+  const { moduleStorePath } = getConfig()
+  fs.writeJson(moduleStorePath, { module: nextModule })
+  console.info(
+    green(`Successfully written ${nextModule} to ${moduleStorePath}`)
+  )
 }
 function createModule (sourceModule, targetModule) {
   const { root } = getConfig()

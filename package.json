@@ -1,7 +1,7 @@
 {
-  "name": "algorithms",
+  "name": "tomorrow",
   "version": "1.0.0",
-  "description": "a webpack template ",
+  "description": "tomorrow sometime is respond future,but most times is Delay ",
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",

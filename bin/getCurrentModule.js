@@ -1,6 +1,6 @@
 const fs = require('fs-extra')
 
-const { defaultDemo, qrcPath } = require('../config').q
+const { defaultDemo, qrcPath } = require('../.qconfig')
 
 module.exports = () => {
   let CurrentModule
