@@ -44,6 +44,7 @@
   },
   "dependencies": {
     "fs-extra": "^7.0.0",
-    "inquirer": "^6.1.0"
+    "inquirer": "^6.1.0",
+    "mockjs": "^1.0.1-beta3"
   }
 }
