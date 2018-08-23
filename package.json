@@ -44,7 +44,6 @@
   },
   "dependencies": {
     "fs-extra": "^7.0.0",
-    "gulp": "^3.9.1",
     "inquirer": "^6.1.0"
   }
 }
