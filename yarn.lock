@@ -4063,6 +4063,18 @@ querystringify@^2.0.0:
   version "2.0.0"
   resolved "https://registry.yarnpkg.com/querystringify/-/querystringify-2.0.0.tgz#fa3ed6e68eb15159457c89b37bc6472833195755"
 
+quickly-switch@^0.0.1:
+  version "0.0.1"
+  resolved "https://registry.yarnpkg.com/quickly-switch/-/quickly-switch-0.0.1.tgz#808d6a7a5b99a9fdcdd7c8f8914b37e8253d9a81"
+  dependencies:
+    chalk "^2.4.1"
+    debug "^3.1.0"
+    fs-extra "^7.0.0"
+    glob "^7.1.2"
+    inquirer "^6.1.0"
+    shelljs "^0.8.2"
+    yargs "^12.0.1"
+
 randombytes@^2.0.0, randombytes@^2.0.1, randombytes@^2.0.5:
   version "2.0.6"
   resolved "https://registry.yarnpkg.com/randombytes/-/randombytes-2.0.6.tgz#d302c522948588848a8d300c932b44c24231da80"

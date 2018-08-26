@@ -1,4 +1,5 @@
-import random from '../../util/random'
+const random = require('../../util/random')
+const { log, info } = console
 let arr = [
   random(0, 10),
   random(0, 10),
@@ -14,7 +15,7 @@ let arr = [
 // return [0, 1].
 
 function twoSum (arr = [], target) {
-  console.log(arr, target)
+  log(arr, target)
   for (let i = 0, len = arr.length; i < len; i++) {
     for (let j = i, len = arr.length; j < len; j++) {
       let sum = arr[i] + arr[j]
@@ -25,4 +26,4 @@ function twoSum (arr = [], target) {
   }
   return []
 }
-console.log(twoSum([2, 7, 11, 15], 13))
+log(twoSum([2, 7, 11, 15], 13))

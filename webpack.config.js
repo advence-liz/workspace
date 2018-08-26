@@ -2,10 +2,10 @@ const path = require('path')
 const webpack = require('webpack')
 const CleanWebpackPlugin = require('clean-webpack-plugin')
 const HtmlWebpackPlugin = require('html-webpack-plugin')
-const fs = require('fs-extra')
-const { moduleStorePath } = fs.readJsonSync('.qsrc')
+const { getConfig } = require('quickly-switch')
+const { currentModule } = getConfig()
 module.exports = {
-  entry: path.join(__dirname, 'src', require(moduleStorePath).module),
+  entry: path.join(__dirname, 'src', currentModule),
   mode: 'development',
   context: __dirname,
   output: {

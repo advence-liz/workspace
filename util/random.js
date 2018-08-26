@@ -10,4 +10,4 @@ function randomNum (minNum, maxNum) {
       return 0
   }
 }
-export default randomNum
+module.exports = randomNum
