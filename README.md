@@ -1,10 +1,3 @@
 # 算法
-.qrc.json
- --init 命令
- -n
- -b
-## ref
-## TODO
 
-创建新模块的时候给两种命名方式
-[readline_readline](http://nodejs.cn/api/readline.html#readline_readline)
+生活中的拦路虎，能拦住你一次就能能拦住你第二次，你越是逃避就越是会在更关键的时刻相遇，此工程仅为我的痛点`算法`而创建
