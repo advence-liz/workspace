@@ -1,1 +1,1 @@
-console.log('_demo')
+console.log(module.i)

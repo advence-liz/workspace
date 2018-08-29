@@ -15,8 +15,6 @@
   "author": "advence-liz",
   "license": "ISC",
   "devDependencies": {
-    "art-template": "^4.12.2",
-    "art-template-loader": "^1.4.3",
     "babel-core": "^6.26.3",
     "babel-loader": "^7.1.5",
     "babel-polyfill": "^6.26.0",
@@ -34,18 +32,15 @@
     "eslint-plugin-standard": "^3.1.0",
     "html-webpack-plugin": "^3.2.0",
     "quickly-switch": "^0.0.1",
-    "require-dir": "^1.0.0",
     "sass-loader": "^7.0.3",
     "shelljs": "^0.8.2",
     "style-loader": "^0.21.0",
     "webpack": "^4.16.1",
     "webpack-cli": "^3.1.0",
-    "webpack-dev-server": "^3.1.4",
-    "yargs": "^12.0.1"
+    "webpack-dev-server": "^3.1.4"
   },
   "dependencies": {
     "fs-extra": "^7.0.0",
-    "inquirer": "^6.1.0",
     "mockjs": "^1.0.1-beta3"
   }
 }

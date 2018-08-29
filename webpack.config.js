@@ -36,13 +36,6 @@ module.exports = {
             loader: 'sass-loader'
           }
         ]
-      },
-      {
-        test: /\.(art|ejs)$/,
-        loader: 'art-template-loader',
-        options: {
-          compileDebug: true
-        }
       }
     ]
   },
@@ -59,7 +52,7 @@ module.exports = {
       template: 'template/_layout.ejs',
       favicon: 'template/favicon.ico',
       // inject: false,
-      title: 'webpack'
+      title: '学习算法'
     })
   ]
 }
