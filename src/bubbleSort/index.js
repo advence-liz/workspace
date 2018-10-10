@@ -1,4 +1,5 @@
-console.log('_demo')
+console.log(module.i)
+
 function exchange (arr, i, j) {
   let tmp = arr[i]
   arr[i] = arr[j]

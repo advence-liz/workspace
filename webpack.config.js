@@ -3,7 +3,8 @@ const webpack = require('webpack')
 const CleanWebpackPlugin = require('clean-webpack-plugin')
 const HtmlWebpackPlugin = require('html-webpack-plugin')
 const { getConfig } = require('quickly-switch')
-const { currentModule } = getConfig()
+const { currentModule, moduleStorePath } = getConfig()
+console.log(moduleStorePath, process.cwd())
 module.exports = {
   entry: path.join(__dirname, 'src', currentModule),
   mode: 'development',

@@ -1,3 +1,5 @@
+console.log(module.i)
+
 const random = require('../../util/random')
 const { log, info } = console
 let arr = [

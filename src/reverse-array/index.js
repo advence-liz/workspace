@@ -1,4 +1,5 @@
-console.log('_demo')
+console.log(module.i)
+
 function reverseArray (arr = []) {
   for (let i = 0, len = arr.length; i < Math.floor(len / 2); i++) {
     let tmp = arr[i]
