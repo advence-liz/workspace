@@ -1,3 +1,19 @@
 module.exports = {
-    "extends": "standard"
-};
+    env: {
+      es6: true,
+      node: true
+    },
+    parser: 'babel-eslint',
+    extends: ['standard', 'plugin:react/recommended'],
+    parserOptions: {
+      ecmaFeatures: {
+        jsx: true
+      }
+    },
+    plugins: ['react'],
+    rules: {
+      'no-console': 'off',
+      // 'react/jsx-uses-vars': 2
+    }
+  }
+  

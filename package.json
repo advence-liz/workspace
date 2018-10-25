@@ -14,33 +14,18 @@
   ],
   "author": "advence-liz",
   "license": "ISC",
-  "devDependencies": {
-    "babel-core": "^6.26.3",
-    "babel-loader": "^7.1.5",
-    "babel-polyfill": "^6.26.0",
-    "babel-preset-env": "^1.7.0",
-    "babel-preset-react": "^6.24.1",
-    "babel-preset-stage-2": "^6.24.1",
-    "chalk": "^2.4.1",
-    "clean-webpack-plugin": "^0.1.19",
-    "css-loader": "^1.0.0",
-    "eslint": "^5.2.0",
-    "eslint-config-standard": "^11.0.0",
-    "eslint-plugin-import": "^2.13.0",
-    "eslint-plugin-node": "^7.0.1",
-    "eslint-plugin-promise": "^3.8.0",
-    "eslint-plugin-standard": "^3.1.0",
-    "html-webpack-plugin": "^3.2.0",
-    "quickly-switch": "^0.0.9",
-    "sass-loader": "^7.0.3",
-    "shelljs": "^0.8.2",
-    "style-loader": "^0.21.0",
-    "webpack": "^4.16.1",
-    "webpack-cli": "^3.1.0",
-    "webpack-dev-server": "^3.1.4"
-  },
   "dependencies": {
-    "fs-extra": "^7.0.0",
-    "mockjs": "^1.0.1-beta3"
+    "babel-eslint": "^10.0.1",
+    "chalk": "^2.4.1",
+    "eslint-plugin-react": "^7.11.1",
+    "fs-extra": "^7.0.0"
+  },
+  "devDependencies": {
+    "eslint": "^5.7.0",
+    "eslint-config-standard": "^12.0.0",
+    "eslint-plugin-import": "^2.14.0",
+    "eslint-plugin-node": "^7.0.1",
+    "eslint-plugin-promise": "^4.0.1",
+    "eslint-plugin-standard": "^4.0.0"
   }
 }

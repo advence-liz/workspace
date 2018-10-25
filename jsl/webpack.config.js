@@ -5,7 +5,7 @@ const CleanWebpackPlugin = require('clean-webpack-plugin')
 const HtmlWebpackPlugin = require('html-webpack-plugin')
 
 module.exports = {
-  entry: fs.readJsonSync('.qsrc.json'),
+  entry: fs.readJsonSync('.qsrc.json').module,
   mode: 'development',
   context: __dirname,
   output: {
