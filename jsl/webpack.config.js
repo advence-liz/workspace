@@ -49,8 +49,8 @@ module.exports = {
     new CleanWebpackPlugin(['build']),
     new HtmlWebpackPlugin({
       filename: 'index.html',
-      template: '../template/_layout.ejs',
-      favicon: '../template/favicon.ico',
+      template: '../_template/_layout.ejs',
+      favicon: '../_template/favicon.ico',
       // inject: false,
       title: 'jsl'
     })
