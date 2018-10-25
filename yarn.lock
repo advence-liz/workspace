@@ -4065,9 +4065,9 @@ querystringify@^2.0.0:
   version "2.0.0"
   resolved "https://registry.yarnpkg.com/querystringify/-/querystringify-2.0.0.tgz#fa3ed6e68eb15159457c89b37bc6472833195755"
 
-quickly-switch@^0.0.7:
-  version "0.0.7"
-  resolved "https://registry.yarnpkg.com/quickly-switch/-/quickly-switch-0.0.7.tgz#a5474cd6bc3278e14bfc158d16f1d0268697db08"
+quickly-switch@^0.0.9:
+  version "0.0.9"
+  resolved "https://registry.yarnpkg.com/quickly-switch/-/quickly-switch-0.0.9.tgz#0cf36b50466dad461b1e61776b2a612209e8af43"
   dependencies:
     chalk "^2.4.1"
     debug "^3.1.0"

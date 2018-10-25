@@ -3,10 +3,10 @@ const webpack = require('webpack')
 const CleanWebpackPlugin = require('clean-webpack-plugin')
 const HtmlWebpackPlugin = require('html-webpack-plugin')
 const { getConfig } = require('quickly-switch')
-const { currentModule, moduleStorePath } = getConfig()
-console.log(moduleStorePath, process.cwd())
+const { currentModule, relativeRoot, moduleStorePath } = getConfig()
+console.log(moduleStorePath, relativeRoot, process.cwd())
 module.exports = {
-  entry: path.join(__dirname, 'src', currentModule),
+  entry: path.join(__dirname, relativeRoot, currentModule),
   mode: 'development',
   context: __dirname,
   output: {
