@@ -5,7 +5,7 @@ const CleanWebpackPlugin = require('clean-webpack-plugin')
 const HtmlWebpackPlugin = require('html-webpack-plugin')
 
 module.exports = {
-  entry: fs.readJsonSync('.qsrc.json').module,
+  entry: path.resolve(fs.readJsonSync('.qsrc.json').module),
   mode: 'development',
   context: __dirname,
   output: {
@@ -49,10 +49,10 @@ module.exports = {
     new CleanWebpackPlugin(['build']),
     new HtmlWebpackPlugin({
       filename: 'index.html',
-      template: 'template/_layout.ejs',
-      favicon: 'template/favicon.ico',
+      template: '../template/_layout.ejs',
+      favicon: '../template/favicon.ico',
       // inject: false,
-      title: '学习算法'
+      title: 'jsl'
     })
   ]
 }
