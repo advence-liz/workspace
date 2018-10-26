@@ -1,0 +1,77 @@
+body {
+  color: rebeccapurple;
+}
+
+.block {
+  height: 300px;
+  border: 1px solid gray;
+}
+.inner {
+  margin: 0 50px;
+  height: 300px;
+  background: red;
+  transform: translate(0px, -50%);
+}
+
+.top-1px {
+  position: relative;
+  &:before {
+    content: ' ';
+    position: absolute;
+    left: 0;
+    top: 0;
+    right: 0;
+    height: 1px;
+    border-top: 1px solid #e6e6e6;
+    color: #e6e6e6;
+    transform-origin: 0 0;
+    transform: scaleY(0.5);
+  }
+}
+
+.servant-filter {
+  background: #fff;
+  display: flex;
+
+  &-item {
+    display: flex;
+    flex: 1;
+    .triangle {
+      margin: 5px;
+      width: 0;
+      height: 0;
+      border: 6px transparent solid;
+      /*这里我们将元素的边框宽度设置为50px，transparent表示边框颜色是透明的，solid表示边框是实线的*/
+      border-top-color: black;
+      /*这里我们仅将上边框的颜色设置为黑色，众所周知，css后面的样式代码会覆盖之前的相同的样式代码，至于其他三边的还是透明色*/
+      /*border-bottom-color: black; //这里设置底部边框色为黑色
+        border-left-color: black;   //这里设置左边边框色为黑色
+        border-right-color:black    //这里设置右边边框色为黑色*/
+    }
+  }
+
+  &-wrap {
+    position: relative;
+    background: #fff;
+    z-index: 1;
+    .dropdown-menu {
+      background: #fff;
+      position: absolute;
+      width: 100%;
+      top: 100%;
+      &-item {
+        &:extend(.top-1px all);
+      }
+    }
+    .mask {
+      position: fixed;
+      top: 0;
+      left: 0;
+      bottom: 0;
+      right: 0;
+      background: gray;
+      opacity: 1;
+      z-index: -1;
+    }
+  }
+}
