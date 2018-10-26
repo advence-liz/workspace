@@ -1,14 +1,16 @@
 {
-  "name": "tomorrow",
+  "name": "template",
   "version": "1.0.0",
-  "description": "tomorrow sometimes is future,but most times is delay",
+  "description": "a webpack template ",
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "start": "webpack-dev-server --content-base=build --color",
     "build": "webpack"
   },
-  "keywords": ["webpack", "algorithms"],
+  "keywords": [
+    "webpack"
+  ],
   "author": "advence-liz",
   "license": "ISC",
   "devDependencies": {
@@ -21,10 +23,16 @@
     "clean-webpack-plugin": "^0.1.19",
     "css-loader": "^1.0.0",
     "html-webpack-plugin": "^3.2.0",
+    "less": "^2.3.1",
+    "less-loader": "^4.1.0",
     "sass-loader": "^7.0.3",
     "style-loader": "^0.21.0",
     "webpack": "^4.16.1",
     "webpack-cli": "^3.1.0",
     "webpack-dev-server": "^3.1.4"
+  },
+  "dependencies": {
+    "react": "^16.4.2",
+    "react-dom": "^16.4.2"
   }
 }
