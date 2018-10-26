@@ -3,9 +3,9 @@ const webpack = require('webpack')
 const fs = require('fs-extra')
 const CleanWebpackPlugin = require('clean-webpack-plugin')
 const HtmlWebpackPlugin = require('html-webpack-plugin')
-const currentModule = fs.readJsonSync('.qsrc.json').module
+const { module: currentModule, root } = fs.readJsonSync('.qsrc.json')
 module.exports = {
-  entry: path.resolve(currentModule),
+  entry: path.resolve(root, currentModule),
   mode: 'development',
   context: __dirname,
   output: {

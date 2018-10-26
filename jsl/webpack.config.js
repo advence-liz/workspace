@@ -3,9 +3,9 @@ const webpack = require('webpack')
 const fs = require('fs-extra')
 const CleanWebpackPlugin = require('clean-webpack-plugin')
 const HtmlWebpackPlugin = require('html-webpack-plugin')
-
+const { module: currentModule, root } = fs.readJsonSync('.qsrc.json')
 module.exports = {
-  entry: path.resolve(fs.readJsonSync('.qsrc.json').module),
+  entry: path.resolve(root, currentModule),
   mode: 'development',
   context: __dirname,
   output: {
@@ -52,7 +52,7 @@ module.exports = {
       template: '../_template/_layout.ejs',
       favicon: '../_template/favicon.ico',
       // inject: false,
-      title: 'jsl'
+      title: currentModule
     })
   ]
 }
