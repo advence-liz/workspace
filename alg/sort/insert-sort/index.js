@@ -6,12 +6,13 @@ function exchange (arr, i, j) {
 }
 function sort (arr = [6, 7, 3, 4, 1, 5, 2]) {
   const len = arr.length
-
-  for (let i = 1; i < len; i++) {
+  let i = 1
+  while (i < len) {
     for (let j = i; j > 0 && arr[j] < arr[j - 1]; j--) {
       exchange(arr, j, j - 1)
       //   if (arr[j] < arr[j - 1]) exchange(arr, j, j - 1)
     }
+    i++
   }
 
   // let temp
