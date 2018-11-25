@@ -1,9 +1,9 @@
 const { log } = console
-function twoSum (arr = [], target) {
-  log(arr, target)
-  for (let i = 0, len = arr.length; i < len; i++) {
-    for (let j = i, len = arr.length; j < len; j++) {
-      let sum = arr[i] + arr[j]
+function twoSum (nums = [], target) {
+  const len = nums.length
+  for (let i = 0; i < len; i++) {
+    for (let j = i + 1; j < len; j++) {
+      let sum = nums[i] + nums[j]
       if (sum === target) {
         return [i, j]
       }

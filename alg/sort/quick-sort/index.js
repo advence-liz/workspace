@@ -2,7 +2,7 @@ console.log(module.i)
 const arr = [8, 4, 5, 7, 1, 3, 6, 2]
 const quickSort = function (arr) {
   const len = arr.length
-  if (len <= 1) {
+  if (len < 2) {
     return arr
   }
 
