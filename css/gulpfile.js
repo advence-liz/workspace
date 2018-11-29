@@ -17,6 +17,9 @@ gulp.task('html', function () {
       path.join(modulePath, '*.html')
     ])
     .pipe(gulp.dest('app'))
+    .on('end', () => {
+      browserSync.reload()
+    })
 })
 /**
  * 如果有必要可以可以扩展js 预编译
@@ -67,5 +70,5 @@ gulp.task('start', ['less', 'js', 'html'], function () {
 
   gulp.watch(path.join(modulePath, '*.less'), ['less'])
   gulp.watch(path.join(modulePath, '*.js'), ['js'])
-  gulp.watch(path.join(modulePath, '*.html'), ['html', reload])
+  gulp.watch(path.join(modulePath, '*.html'), ['html'])
 })
