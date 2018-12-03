@@ -31,9 +31,9 @@
   },
   "devDependencies": {
     "browser-sync": "^2.18.13",
-    "gulp": "^3.9.1",
+    "del": "^3.0.0",
+    "gulp": "^4.0.0",
     "gulp-less": "^3.3.2",
-    "gulp-plumber": "^1.2.1",
     "gulp-swig": "^0.8.0",
     "gulp-template": "^5.0.0",
     "less": "^2.3.1",
