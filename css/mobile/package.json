@@ -6,15 +6,13 @@
   "main": "index.js",
   "scripts": {
     "start": "gulp start",
-    "dev": "nodemon  ./node_modules/.bin/gulp start"
+    "dev": " nodemon  ./node_modules/.bin/gulp start"
   },
   "repository": {
     "type": "git",
     "url": "git+https://github.com/advence-liz/CSS.git"
   },
-  "keywords": [
-    "branch"
-  ],
+  "keywords": ["branch"],
   "author": "advence-liz",
   "license": "MIT",
   "bugs": {
@@ -22,12 +20,7 @@
   },
   "homepage": "https://github.com/advence-liz/CSS#readme",
   "nodemonConfig": {
-    "watch": [
-      ".qsrc.json",
-      "gulpfile.js",
-      "package.json",
-      "gulp/**"
-    ]
+    "watch": [".qsrc.json", "gulpfile.js", "package.json", "gulp/**"]
   },
   "devDependencies": {
     "browser-sync": "^2.18.13",
