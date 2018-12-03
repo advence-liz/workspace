@@ -1,15 +1,24 @@
 const gulp = require('gulp')
 const browserSync = require('browser-sync')
 const reload = browserSync.reload
+const sourcemaps = require('gulp-sourcemaps')
 const path = require('path')
 const plumber = require('gulp-plumber')
 const less = require('gulp-less')
-const handleErrors = require('../util/handleErrors')
+const pxtorem = require('postcss-pxtorem')
+const postcss = require('gulp-postcss')
+
 const fs = require('fs-extra')
 // const fileinclude = require('gulp-file-include')
 
 const template = require('gulp-template')
-var IsStartIng = false
+const handleErrors = require('../util/handleErrors')
+const config = require('../config')
+let { options } = config.styles
+const processors = [
+  // autoprefixer(options.autoprefixer),
+  pxtorem(options.pxtorem)
+]
 const { module: currentModule, root } = fs.readJsonSync('.qsrc.json')
 
 const CurrentModulePath = path.join(root, currentModule)
@@ -23,7 +32,6 @@ gulp.task('html', function () {
     .pipe(template({ name: currentModule }))
     .pipe(gulp.dest('app'))
     .pipe(reload({ stream: true }))
-  // .on('end', () => {})
 })
 /**
  * 如果有必要可以可以扩展js 预编译
@@ -36,32 +44,19 @@ gulp.task('js', function () {
 })
 
 gulp.task('less', function () {
-  return (
-    gulp
-      .src(path.join(CurrentModulePath, '*.less'))
-      .pipe(plumber({ errorHandler: handleErrors }))
-      .pipe(less())
-      // .pipe(
-      //   pxtorem({
-      //     rootValue: 37.5,
-      //     unitPrecision: 5,
-      //     // propList: ['*'],
-      //     propList: ['font', 'font-size', 'line-height', 'letter-spacing'],
-      //     selectorBlackList: [],
-      //     replace: true,
-      //     mediaQuery: false,
-      //     minPixelValue: 0
-      //   })
-      // )
-      // .pipe(sourcemaps.write('./maps'))
-      .pipe(gulp.dest('app'))
-      .pipe(reload({ stream: true }))
-  )
+  return gulp
+    .src(path.join(CurrentModulePath, '*.less'))
+    .pipe(plumber({ errorHandler: handleErrors }))
+    .pipe(sourcemaps.init())
+    .pipe(less())
+    .pipe(postcss(processors))
+    .pipe(sourcemaps.write('./maps'))
+    .pipe(gulp.dest('app'))
+    .pipe(reload({ stream: true }))
 })
 
 // 监视 less 文件的改动，如果发生变更，运行 'less' 任务，并且重载文件
 gulp.task('start', ['less', 'js', 'html'], function () {
-  IsStartIng = true
   browserSync.init({
     server: {
       baseDir: 'app'

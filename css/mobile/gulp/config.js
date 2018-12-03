@@ -5,9 +5,17 @@ module.exports = {
     dest: { prod: 'dist/css', dev: 'build/css' },
     options: {
       pxtorem: {
-        rootValue: 16,
+        rootValue: 37.5,
         unitPrecision: 5,
-        propList: ['font', 'font-size', 'line-height', 'letter-spacing'],
+        propList: [
+          '*',
+          '!letter-spacing',
+          '!border',
+          '!border-top',
+          '!border-left',
+          '!border-right',
+          '!border-bottom'
+        ],
         selectorBlackList: [],
         replace: true,
         mediaQuery: false,
@@ -24,7 +32,7 @@ module.exports = {
     lessName: 'index.less',
     src: path.join('src', 'images', 'base64.less'), // pre:base64 的出口，base64 的入口
     dest: 'src/images/',
-    getName(fileName) {
+    getName (fileName) {
       return `q-${fileName.replace(/(@|\s|\dx)/g, '').replace(/_/g, '-')}`
     },
     options: {

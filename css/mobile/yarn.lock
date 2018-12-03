@@ -1583,7 +1583,7 @@ gulp-pxtorem@^3.0.0:
 
 gulp-sourcemaps@^2.6.4:
   version "2.6.4"
-  resolved "https://registry.yarnpkg.com/gulp-sourcemaps/-/gulp-sourcemaps-2.6.4.tgz#cbb2008450b1bcce6cd23bf98337be751bf6e30a"
+  resolved "http://registry.npm.taobao.org/gulp-sourcemaps/download/gulp-sourcemaps-2.6.4.tgz#cbb2008450b1bcce6cd23bf98337be751bf6e30a"
   integrity sha1-y7IAhFCxvM5s0jv5gze+dRv24wo=
   dependencies:
     "@gulp-sourcemaps/identity-map" "1.X"
@@ -3142,7 +3142,7 @@ postcss-load-config@^2.0.0:
 
 postcss-pxtorem@^4.0.1:
   version "4.0.1"
-  resolved "https://registry.yarnpkg.com/postcss-pxtorem/-/postcss-pxtorem-4.0.1.tgz#9c64d0efe4885473cc1cb0305c6ffc3ebb45b1cd"
+  resolved "http://registry.npm.taobao.org/postcss-pxtorem/download/postcss-pxtorem-4.0.1.tgz#9c64d0efe4885473cc1cb0305c6ffc3ebb45b1cd"
   integrity sha1-nGTQ7+SIVHPMHLAwXG/8PrtFsc0=
   dependencies:
     object-assign "^4.1.0"
