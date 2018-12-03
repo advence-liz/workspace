@@ -3,15 +3,13 @@ const browserSync = require('browser-sync')
 const reload = browserSync.reload
 const sourcemaps = require('gulp-sourcemaps')
 const path = require('path')
-const plumber = require('gulp-plumber')
 const less = require('gulp-less')
 const pxtorem = require('postcss-pxtorem')
 const postcss = require('gulp-postcss')
 const swig = require('gulp-swig')
 const template = require('gulp-template')
 const fs = require('fs-extra')
-
-const handleErrors = require('../util/handleErrors')
+const del = require('del')
 const config = require('../config')
 let { options } = config.styles
 const processors = [
@@ -24,39 +22,42 @@ const CurrentModulePath = path.join(root, currentModule)
 // https://libraries.io/npm/postcss-pxtorem
 // defaults: Browserslist’s default browsers (> 0.5%, last 2 versions, Firefox ESR, not dead).
 
-gulp.task('html', function () {
-  // console.log(currentModule, CurrentModulePath)
-  return gulp
-    .src([path.join(CurrentModulePath, '*.html')])
-    // .pipe(swig({ name: currentModule }))
-    .pipe(template({ name: currentModule }))
-    .pipe(gulp.dest('app'))
-    .pipe(reload({ stream: true }))
-})
+function cleanTask () {
+  return del(['app'])
+}
+function htmlTask () {
+  return (
+    gulp
+      .src([path.join(CurrentModulePath, '*.html')])
+      // .pipe(swig({ name: currentModule }))
+      .pipe(template({ name: currentModule }))
+      .pipe(gulp.dest('app'))
+      .pipe(reload({ stream: true }))
+  )
+}
 /**
  * 如果有必要可以可以扩展js 预编译
  */
-gulp.task('js', function () {
+function jsTask () {
   return gulp
     .src(path.join(CurrentModulePath, '*.js'))
     .pipe(gulp.dest('app'))
     .pipe(reload({ stream: true }))
-})
+}
 
-gulp.task('less', function () {
+function lessTask () {
   return gulp
     .src(path.join(CurrentModulePath, '*.less'))
-    .pipe(plumber({ errorHandler: handleErrors }))
     .pipe(sourcemaps.init())
     .pipe(less())
     .pipe(postcss(processors))
     .pipe(sourcemaps.write('./maps'))
     .pipe(gulp.dest('app'))
     .pipe(reload({ stream: true }))
-})
+}
 
 // 监视 less 文件的改动，如果发生变更，运行 'less' 任务，并且重载文件
-gulp.task('start', ['less', 'js', 'html'], function () {
+function initTask () {
   browserSync.init({
     server: {
       baseDir: ['app', 'asserts']
@@ -68,9 +69,9 @@ gulp.task('start', ['less', 'js', 'html'], function () {
     // reloadOnRestart: true
   })
   // browserSync.reload()
-  gulp.watch(path.join(CurrentModulePath, '*.less'), ['less'])
-  gulp.watch(path.join(CurrentModulePath, '*.js'), ['js'])
-  gulp.watch(path.join(CurrentModulePath, '*.html'), ['html'])
+  gulp.watch(path.join('src', '**', '*.less'), lessTask)
+  gulp.watch(path.join(CurrentModulePath, '*.js'), jsTask)
+  gulp.watch(path.join(CurrentModulePath, '*.html'), htmlTask)
 
   /**
    * 当使用qs命令切换当前模块的时候 browser-sync 不会稳定的刷新当前页面，所以加了下面的延迟强制刷新 hack,
@@ -80,4 +81,8 @@ gulp.task('start', ['less', 'js', 'html'], function () {
   setTimeout(() => {
     reload()
   }, 2000)
-})
+}
+gulp.task(
+  'start',
+  gulp.series(cleanTask, gulp.parallel(htmlTask, jsTask, lessTask), initTask)
+)
