@@ -1,0 +1,96 @@
+﻿//
+// Scaffolding
+// --------------------------------------------------
+
+// Reset the box-sizing
+//
+// Heads up! This reset may cause conflicts with some third-party widgets.
+// For recommendations on resolving such conflicts, see
+// http://getbootstrap.com/getting-started/#third-box-sizing
+// * {
+//   .box-sizing(border-box);
+// }
+// *:before,
+// *:after {
+//   .box-sizing(border-box);
+// }
+
+// Body reset
+
+html {
+  -webkit-tap-highlight-color: rgba(0, 0, 0, 0);
+  height: 100%;
+}
+
+body {
+  font-family: @font-family-base;
+  font-size: @font-size-base;
+  line-height: 1.5;
+  color: @text-color;
+  background-color: @body-bg;
+  height: 100%;
+}
+
+// #app {
+//   font-size: @font-size-base;
+//   // line-height: 1.5;
+//   color: @text-color;
+//   background-color: @body-bg;
+//   height: 100%;
+// }
+
+img {
+  vertical-align: middle;
+}
+
+.init-icon(@x:24) {
+  height: @x* @px;
+  width: @x* @px;
+}
+
+[class*="q-icon"] {
+  display: inline-block;
+  background-repeat: no-repeat;
+  background-position: center;
+  background-size: contain;
+  .init-icon();
+  &.x16 {
+    .init-icon(16);
+  }
+
+  &.x24 {
+    .init-icon(24);
+  }
+  &.x28 {
+    .init-icon(28);
+  }
+  &.x30 {
+    .init-icon(30);
+  }
+  &.x36 {
+    .init-icon(36);
+  }
+  &.x48 {
+    .init-icon(48);
+  }
+
+  // filter: grayscale(20%);
+  // opacity: 0.8;
+
+  &:hover {
+    filter: grayscale(10%);
+    opacity: 0.9;
+  }
+
+  &:active,
+  &:focus {
+    filter: grayscale(0%);
+    opacity: 1;
+    outline: 0;
+  }
+  &:disabled,
+  &.disabled {
+    filter: grayscale(100%);
+    opacity: 0.6;
+  }
+}

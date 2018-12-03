@@ -5,11 +5,21 @@ const sourcemaps = require('gulp-sourcemaps')
 const path = require('path')
 const plumber = require('gulp-plumber')
 const less = require('gulp-less')
-const fs = require('fs-extra')
+const pxtorem = require('postcss-pxtorem')
+const postcss = require('gulp-postcss')
+const swig = require('gulp-swig')
 const template = require('gulp-template')
+const fs = require('fs-extra')
 
 const handleErrors = require('../util/handleErrors')
+const config = require('../config')
+let { options } = config.styles
+const processors = [
+  // autoprefixer(options.autoprefixer),
+  pxtorem(options.pxtorem)
+]
 const { module: currentModule, root } = fs.readJsonSync('.qsrc.json')
+
 const CurrentModulePath = path.join(root, currentModule)
 // https://libraries.io/npm/postcss-pxtorem
 // defaults: Browserslist’s default browsers (> 0.5%, last 2 versions, Firefox ESR, not dead).
@@ -18,6 +28,7 @@ gulp.task('html', function () {
   // console.log(currentModule, CurrentModulePath)
   return gulp
     .src([path.join(CurrentModulePath, '*.html')])
+    // .pipe(swig({ name: currentModule }))
     .pipe(template({ name: currentModule }))
     .pipe(gulp.dest('app'))
     .pipe(reload({ stream: true }))
@@ -38,6 +49,7 @@ gulp.task('less', function () {
     .pipe(plumber({ errorHandler: handleErrors }))
     .pipe(sourcemaps.init())
     .pipe(less())
+    // .pipe(postcss(processors))
     .pipe(sourcemaps.write('./maps'))
     .pipe(gulp.dest('app'))
     .pipe(reload({ stream: true }))
@@ -47,8 +59,10 @@ gulp.task('less', function () {
 gulp.task('start', ['less', 'js', 'html'], function () {
   browserSync.init({
     server: {
-      baseDir: 'app'
+      baseDir: ['app', 'asserts']
+      // baseDir: 'app'
     },
+    ui: false,
     open: false,
     notify: true
     // reloadOnRestart: true

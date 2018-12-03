@@ -6,7 +6,7 @@ module.exports = {
     options: {
       pxtorem: {
         rootValue: 37.5,
-        unitPrecision: 5,
+
         propList: [
           '*',
           '!letter-spacing',
