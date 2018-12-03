@@ -1,19 +1,6 @@
-.block {
-  height: 300px;
-  border: 1px solid gray;
+.page__header {
+  text-align: center;
 }
-.top {
-  background: red;
-  margin-bottom: 30px;
-}
-.bottom {
-  background: gold;
-}
-h1 {
-  font-size: 16px;
-}
-.line {
-  border: 1px solid green;
-  height: 100px;
-  margin: 30px;
+.page__body {
+  padding: 0px 12px;
 }

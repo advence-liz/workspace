@@ -9,6 +9,7 @@ const fs = require('fs-extra')
 // const fileinclude = require('gulp-file-include')
 
 const template = require('gulp-template')
+var IsStartIng = false
 const { module: currentModule, root } = fs.readJsonSync('.qsrc.json')
 
 const CurrentModulePath = path.join(root, currentModule)
@@ -23,7 +24,8 @@ gulp.task('html', function () {
     .pipe(gulp.dest('app'))
     .pipe(reload({ stream: true }))
     .on('end', () => {
-      reload()
+      if (IsStartIng) return
+      setTimeout(reload, 1000)
     })
 })
 /**
@@ -62,20 +64,19 @@ gulp.task('less', function () {
 
 // 监视 less 文件的改动，如果发生变更，运行 'less' 任务，并且重载文件
 gulp.task('start', ['less', 'js', 'html'], function () {
-  //   try {
-  //     fs.emptyDirSync('app')
-  //   } catch (error) {}
-
+  IsStartIng = true
   browserSync.init({
     server: {
       baseDir: 'app'
     },
-    open: true
+    open: false
   })
   // browserSync.reload()
   gulp.watch(path.join(CurrentModulePath, '*.less'), ['less'])
   gulp.watch(path.join(CurrentModulePath, '*.js'), ['js'])
   gulp.watch(path.join(CurrentModulePath, '*.html'), ['html'])
-  //   reload()
-  //   gulp.watch('app/*.html').on('change', reload)
+  // gulp.watch('app/*.html').on('change', () => {
+  //   console.info('app/*.html change')
+  //   setTimeout(reload, 500)
+  // })
 })
