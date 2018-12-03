@@ -7,11 +7,10 @@ const plumber = require('gulp-plumber')
 const less = require('gulp-less')
 const pxtorem = require('postcss-pxtorem')
 const postcss = require('gulp-postcss')
-
-const fs = require('fs-extra')
-// const fileinclude = require('gulp-file-include')
-
+const swig = require('gulp-swig')
 const template = require('gulp-template')
+const fs = require('fs-extra')
+
 const handleErrors = require('../util/handleErrors')
 const config = require('../config')
 let { options } = config.styles
@@ -29,6 +28,7 @@ gulp.task('html', function () {
   // console.log(currentModule, CurrentModulePath)
   return gulp
     .src([path.join(CurrentModulePath, '*.html')])
+    // .pipe(swig({ name: currentModule }))
     .pipe(template({ name: currentModule }))
     .pipe(gulp.dest('app'))
     .pipe(reload({ stream: true }))
@@ -59,8 +59,10 @@ gulp.task('less', function () {
 gulp.task('start', ['less', 'js', 'html'], function () {
   browserSync.init({
     server: {
-      baseDir: 'app'
+      baseDir: ['app', 'asserts']
+      // baseDir: 'app'
     },
+    ui: false,
     open: false,
     notify: true
     // reloadOnRestart: true
