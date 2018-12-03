@@ -23,10 +23,7 @@ gulp.task('html', function () {
     .pipe(template({ name: currentModule }))
     .pipe(gulp.dest('app'))
     .pipe(reload({ stream: true }))
-    .on('end', () => {
-      if (IsStartIng) return
-      setTimeout(reload, 1000)
-    })
+  // .on('end', () => {})
 })
 /**
  * 如果有必要可以可以扩展js 预编译
@@ -69,14 +66,21 @@ gulp.task('start', ['less', 'js', 'html'], function () {
     server: {
       baseDir: 'app'
     },
-    open: false
+    open: false,
+    notify: true
+    // reloadOnRestart: true
   })
   // browserSync.reload()
   gulp.watch(path.join(CurrentModulePath, '*.less'), ['less'])
   gulp.watch(path.join(CurrentModulePath, '*.js'), ['js'])
   gulp.watch(path.join(CurrentModulePath, '*.html'), ['html'])
-  // gulp.watch('app/*.html').on('change', () => {
-  //   console.info('app/*.html change')
-  //   setTimeout(reload, 500)
-  // })
+
+  /**
+   * 当使用qs命令切换当前模块的时候 browser-sync 不会稳定的刷新当前页面，所以加了下面的延迟强制刷新 hack,
+   * 这个hack 的作用为在browser-sync 重新启动后强制刷新页面,如果没起效那就是电脑慢，延迟时间加点
+   * reloadOnRestart: true  未达到预期效果
+   */
+  setTimeout(() => {
+    reload()
+  }, 2000)
 })
