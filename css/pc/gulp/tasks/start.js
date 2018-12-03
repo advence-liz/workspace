@@ -42,10 +42,10 @@ gulp.task('less', function () {
     gulp
       .src(path.join(CurrentModulePath, '*.less'))
       .pipe(plumber({ errorHandler: handleErrors }))
-      // .pipe(sourcemaps.init())
+      .pipe(sourcemaps.init())
       .pipe(less())
       // .pipe(postcss(processors))
-      // .pipe(sourcemaps.write('./maps'))
+      .pipe(sourcemaps.write('./maps'))
       .pipe(gulp.dest('app'))
       .pipe(reload({ stream: true }))
   )
@@ -55,8 +55,8 @@ gulp.task('less', function () {
 gulp.task('start', ['less', 'js', 'html'], function () {
   browserSync.init({
     server: {
-      // baseDir: ['app', 'asserts']
-      baseDir: 'app'
+      baseDir: ['app', 'asserts']
+      // baseDir: 'app'
     },
     ui: false,
     open: false,
@@ -64,7 +64,7 @@ gulp.task('start', ['less', 'js', 'html'], function () {
     // reloadOnRestart: true
   })
   // browserSync.reload()
-  gulp.watch(path.join(CurrentModulePath, '*.less'), ['less'])
+  gulp.watch(path.join('src', '**', '*.less'), ['less'])
   gulp.watch(path.join(CurrentModulePath, '*.js'), ['js'])
   gulp.watch(path.join(CurrentModulePath, '*.html'), ['html'])
 

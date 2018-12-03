@@ -157,7 +157,7 @@ body {
   font-size: 14px;
   line-height: 1.5;
   color: #333;
-  background-color: #F0F0FA;
+  background-color: #fff;
   height: 100%;
 }
 img {
@@ -315,3 +315,5 @@ p {
 .page__body {
   padding: 0px 12px;
 }
+
+/*# sourceMappingURL=maps/index.css.map */
