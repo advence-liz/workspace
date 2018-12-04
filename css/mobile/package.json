@@ -2,7 +2,7 @@
   "name": "css-server",
   "version": "1.0.0",
   "description": "for css hot test scafflod",
-  "module": "vip",
+  "private": true,
   "main": "index.js",
   "scripts": {
     "start": "gulp start",
