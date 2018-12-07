@@ -1,0 +1,1 @@
+{"version":3,"sources":["index.less"],"names":[],"mappings":"AACE,KAAC;EACC,kBAAA;;AAEF,KAAC;EACC,iBAAA","sourcesContent":[".page {\n  &__header {\n    text-align: center;\n  }\n  &__body {\n    padding: 0px 12px;\n  }\n}\n"],"file":"../index.css"}
