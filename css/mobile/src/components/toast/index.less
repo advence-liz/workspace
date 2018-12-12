@@ -1,0 +1,77 @@
+@import "../../base";
+.page {
+  &__header {
+    text-align: center;
+  }
+  &__body {
+    padding: 0px 12px;
+  }
+}
+// rmc-notification
+@prefix: q;
+
+.@{prefix} {
+  position: fixed;
+  z-index: 1000;
+
+  &-toast {
+    padding: 7px 20px 7px 10px;
+    border-radius: 3px 3px;
+    border: 1px solid #999;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.2);
+    border: 0px solid rgba(0, 0, 0, 0);
+    background: rgba(0, 0, 0, 0.7);
+    color: #fff;
+    display: block;
+    width: auto;
+    line-height: 1.5;
+    // vertical-align: middle;
+    position: relative;
+    margin: 10px 0;
+  }
+  // }
+  .fade-effect() {
+    animation-duration: 0.3s;
+    animation-fill-mode: both;
+    animation-timing-function: cubic-bezier(0.55, 0, 0.55, 0.2);
+  }
+
+  &-fade-enter {
+    opacity: 0;
+    .fade-effect();
+    animation-play-state: paused;
+  }
+
+  &-fade-leave {
+    .fade-effect();
+    animation-play-state: paused;
+  }
+
+  &-fade-enter&-fade-enter-active {
+    animation-name: rcNotificationFadeIn;
+    animation-play-state: running;
+  }
+
+  &-fade-leave&-fade-leave-active {
+    animation-name: rcDialogFadeOut;
+    animation-play-state: running;
+  }
+
+  @keyframes rcNotificationFadeIn {
+    0% {
+      opacity: 0;
+    }
+    100% {
+      opacity: 1;
+    }
+  }
+
+  @keyframes rcDialogFadeOut {
+    0% {
+      opacity: 1;
+    }
+    100% {
+      opacity: 0;
+    }
+  }
+}

@@ -315,5 +315,60 @@ p {
 .page__body {
   padding: 0 0.32rem;
 }
+.q {
+  position: fixed;
+  z-index: 1000;
+}
+.q-toast {
+  padding: 0.18667rem 0.53333rem 0.18667rem 0.26667rem;
+  border-radius: 0.08rem 0.08rem;
+  border: 1px solid #999;
+  box-shadow: 0 0 0.26667rem rgba(0, 0, 0, 0.2);
+  border: 0px solid rgba(0, 0, 0, 0);
+  background: rgba(0, 0, 0, 0.7);
+  color: #fff;
+  display: block;
+  width: auto;
+  line-height: 1.5;
+  position: relative;
+  margin: 0.26667rem 0;
+}
+.q-fade-enter {
+  opacity: 0;
+  animation-duration: 0.3s;
+  animation-fill-mode: both;
+  animation-timing-function: cubic-bezier(0.55, 0, 0.55, 0.2);
+  animation-play-state: paused;
+}
+.q-fade-leave {
+  animation-duration: 0.3s;
+  animation-fill-mode: both;
+  animation-timing-function: cubic-bezier(0.55, 0, 0.55, 0.2);
+  animation-play-state: paused;
+}
+.q-fade-enter.q-fade-enter-active {
+  animation-name: rcNotificationFadeIn;
+  animation-play-state: running;
+}
+.q-fade-leave.q-fade-leave-active {
+  animation-name: rcDialogFadeOut;
+  animation-play-state: running;
+}
+@keyframes rcNotificationFadeIn {
+  0% {
+    opacity: 0;
+  }
+  100% {
+    opacity: 1;
+  }
+}
+@keyframes rcDialogFadeOut {
+  0% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+  }
+}
 
 /*# sourceMappingURL=maps/index.css.map */
