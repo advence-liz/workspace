@@ -315,5 +315,14 @@ p {
 .page__body {
   padding: 0px 12px;
 }
+.element {
+  background: cadetblue;
+  animation: 1s blink-smooth 3 steps(1);
+}
+@keyframes blink-soooth {
+  50% {
+    color: transparent;
+  }
+}
 
 /*# sourceMappingURL=maps/index.css.map */
