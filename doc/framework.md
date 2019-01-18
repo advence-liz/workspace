@@ -242,6 +242,8 @@ Vue.directive('focus', {
 
 而`react`完全就是打开的新世界的大门，React 以 JavaScript 为中心,一个 JSX element 就是一个 JavaScript 对象，你能对 “对象”做什么，你就可以对 JSX 做什么
 
+- [react in pattern](https://github.com/SangKa/react-in-patterns-cn)A free book that talks about design patterns/techniques used while developing with React.
+
 ```jsx
 class Calculator extends React.Component {
   constructor(props) {
