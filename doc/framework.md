@@ -152,6 +152,17 @@ app.directive("color", function() {
 })
 ```
 
+```jsx
+<hello></hello>
+
+angular.module("app",[]).directive("hello",function(){
+                return{
+                 restrict:'EA',
+                 template:"<div><h3>hello world</h3></div>"
+                };
+            })
+```
+
 ## vue
 
 vue 形式上看起来就是借鉴上俩个框架的思想化为己用，并将其整合简化，是一个非常易上手的作品（vue viewmodel 计算属性看起来就是借鉴了knockout，组件的的封装和绑定语法看起来就是借鉴了angular）
@@ -194,7 +205,7 @@ new Vue({
 })
 ```
 
-### 自定义指令
+### 组件与指令
 
 ```jsx
 ;<div id="components-demo">
@@ -213,11 +224,53 @@ Vue.component("button-counter", {
 })
 ```
 
+```jsx
+<input v-focus>
+
+Vue.directive('focus', {
+  // 当被绑定的元素插入到 DOM 中时……
+  inserted: function (el) {
+    // 聚焦元素
+    el.focus()
+  }
+})
+```
+
 ## react
 
 `ko`,`angular`,`vue` 或多或少都跟 DOM Tree 有着暧昧的关系
 
 而`react`完全就是打开的新世界的大门，React 以 JavaScript 为中心,一个 JSX element 就是一个 JavaScript 对象，你能对 “对象”做什么，你就可以对 JSX 做什么
+
+```jsx
+class Calculator extends React.Component {
+  constructor(props) {
+    super(props);
+    this.handleChange = this.handleChange.bind(this);
+    this.state = {temperature: ''};
+  }
+
+  handleChange(e) {
+    this.setState({temperature: e.target.value});
+  }
+
+  render() {
+    const temperature = this.state.temperature;
+    return (
+      <fieldset>
+        <legend>Enter temperature in Celsius:</legend>
+        <input
+          value={temperature}
+          onChange={this.handleChange} />
+
+        <BoilingVerdict
+          celsius={parseFloat(temperature)} />
+
+      </fieldset>
+    );
+  }
+}
+```
 
 ## 综合对比
 
