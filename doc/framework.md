@@ -2,7 +2,7 @@
 
 JavaScript 发展历程大概这么个流程 script -> libary -> framework
 一开始的关注重点是对 DOM 操作的封装对,BOM 操作的封装,对 JavaScript 语言的补全(数组，字符串，函数)
-发展为现在关注重点变为如何快速便捷的开发健壮且易维护的APP也就是现在的 MVC or MVVM框架（其一些公共特征见文章尾部）
+发展为现在关注重点变为如何快速便捷的开发健壮且易维护的APP也就是现在的 MVC or MVVM框架
 
 ## knockout
 
