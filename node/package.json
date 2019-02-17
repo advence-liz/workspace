@@ -24,5 +24,8 @@
   "homepage": "https://github.com/advence-liz/nodecmd#readme",
   "dependencies": {
     "node-schedule": "^1.2.5"
+  },
+  "devDependencies": {
+    "glob": "^7.1.3"
   }
 }
