@@ -10,7 +10,7 @@
             "iOS >= 8",
             "Android >= 4"]
         },
-        "debug": true
+        "debug": false
       }
     ],
     "react",
