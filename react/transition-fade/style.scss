@@ -1,0 +1,67 @@
+.demo {
+  height: 200px;
+  text-align: center;
+  border: 1px solid #666;
+  &-wrap {
+    height: 200px;
+  }
+}
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes fadeOut {
+  from {
+    opacity: 1;
+  }
+
+  to {
+    opacity: 0;
+  }
+}
+
+.fade-animation {
+  &-enter {
+    animation-name: fadeIn;
+    animation-duration: 2s;
+    animation-timing-function: linear;
+    animation-fill-mode: both;
+  }
+  &-exit {
+    animation-name: fadeOut;
+    animation-duration: 2s;
+    animation-timing-function: linear;
+    animation-fill-mode: both;
+  }
+}
+
+.fade-transition {
+  &-enter {
+    opacity: 0;
+    &-active {
+      opacity: 1;
+      // transition: all 2s ease-out;
+      transition-property: all;
+      transition-duration: 2s;
+      transition-timing-function: linear;
+    }
+  }
+}
+.fade-transition {
+  &-exit {
+    opacity: 1;
+    &-active {
+      opacity: 0;
+      // transition: all 2s ease-out;
+      transition-property: all;
+      transition-duration: 2s;
+      transition-timing-function: linear;
+    }
+  }
+}

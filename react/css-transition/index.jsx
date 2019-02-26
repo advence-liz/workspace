@@ -44,9 +44,9 @@ class Example extends React.Component {
             />
             <CSSTransition
               in={showValidationMessage}
-              timeout={1000}
+              timeout={5000}
               classNames="message"
-              unmountOnExit
+              // unmountOnExit
               onExited={() => {
                 this.setState({
                   showValidationButton: true
@@ -60,7 +60,7 @@ class Example extends React.Component {
                     in={state === 'entered'}
                     timeout={300}
                     classNames="star"
-                    unmountOnExit
+                    // unmountOnExit
                   >
                     <div className="star">⭐</div>
                   </CSSTransition>
