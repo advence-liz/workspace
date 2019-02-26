@@ -6,6 +6,17 @@
     height: 200px;
   }
 }
+.animated {
+  animation-duration: 1s;
+  animation-fill-mode: both;
+}
+@media (print), (prefers-reduced-motion) {
+  .animated {
+    animation: unset !important;
+    transition: none !important;
+  }
+}
+
 @keyframes fadeIn {
   from {
     opacity: 0;
@@ -29,15 +40,10 @@
 .fade-animation {
   &-enter {
     animation-name: fadeIn;
-    animation-duration: 2s;
-    animation-timing-function: linear;
-    animation-fill-mode: both;
+   
   }
   &-exit {
     animation-name: fadeOut;
-    animation-duration: 2s;
-    animation-timing-function: linear;
-    animation-fill-mode: both;
   }
 }
 
@@ -48,7 +54,7 @@
       opacity: 1;
       // transition: all 2s ease-out;
       transition-property: all;
-      transition-duration: 2s;
+      // transition-duration: 2s;
       transition-timing-function: linear;
     }
   }
@@ -60,7 +66,7 @@
       opacity: 0;
       // transition: all 2s ease-out;
       transition-property: all;
-      transition-duration: 2s;
+      // transition-duration: 2s;
       transition-timing-function: linear;
     }
   }

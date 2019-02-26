@@ -25,18 +25,17 @@
     opacity: 0;
   }
 }
-
 .fade-animation {
   &-enter {
     animation-name: fadeIn;
-    animation-duration: 2s;
-    animation-timing-function: linear;
+    animation-duration: 2000ms;
+    animation-timing-function: ease;
     animation-fill-mode: both;
   }
   &-exit {
     animation-name: fadeOut;
-    animation-duration: 2s;
-    animation-timing-function: linear;
+    animation-duration: 2000ms;
+    animation-timing-function: ease;
     animation-fill-mode: both;
   }
 }
@@ -48,20 +47,18 @@
       opacity: 1;
       // transition: all 2s ease-out;
       transition-property: all;
-      transition-duration: 2s;
-      transition-timing-function: linear;
+      transition-duration: 2000ms;
+      transition-timing-function: ease;
     }
   }
-}
-.fade-transition {
   &-exit {
     opacity: 1;
     &-active {
       opacity: 0;
       // transition: all 2s ease-out;
       transition-property: all;
-      transition-duration: 2s;
-      transition-timing-function: linear;
+      transition-duration: 2000ms;
+      transition-timing-function: ease;
     }
   }
 }

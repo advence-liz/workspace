@@ -50,7 +50,7 @@ class Example extends React.Component {
             //   })
             // }}
           >
-            <div className="demo">fade-{fadeIn ? 'in' : 'out'}</div>
+            <div className="demo" >fade-{fadeIn ? 'in' : 'out'}</div>
           </CSSTransition>
         </div>
 
