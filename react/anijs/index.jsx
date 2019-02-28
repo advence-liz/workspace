@@ -34,6 +34,9 @@ class Example extends React.Component {
         <button onClick={this.toggle}>toggle </button>
         <hr />
         <h2>animation</h2>
+        <div id="main" data-anijs="if: mouseover, do: swing animated">
+        Main (MouseOver)
+    </div>
         <Animation
           in={fadeIn}
           timeout={2000}
