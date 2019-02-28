@@ -35,8 +35,8 @@ class Example extends React.Component {
         <hr />
         <h2>animation</h2>
         <div id="main" data-anijs="if: mouseover, do: swing animated">
-        Main (MouseOver)
-    </div>
+          Main (MouseOver)
+        </div>
         <Animation
           in={fadeIn}
           timeout={2000}
