@@ -74,9 +74,11 @@ class Example extends React.Component {
           toggle
         </button>
         <div className="demo-wrap">
-          <Animation in={zoomIn} classNames="zoom-animation">
-            {<div className="demo zoom">zoom-{zoomIn ? 'in' : 'out'}</div>}
-          </Animation>
+          <div className="zoom__wrap">
+            <Animation in={zoomIn} classNames="zoom-animation">
+              {<div className="demo zoom">zoom-{zoomIn ? 'in' : 'out'}</div>}
+            </Animation>
+          </div>
         </div>
       </div>
     )
