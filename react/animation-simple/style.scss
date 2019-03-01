@@ -1,0 +1,123 @@
+.demo {
+  height: 200px;
+  text-align: center;
+  border: 1px solid #666;
+  &-wrap {
+    height: 200px;
+  }
+}
+.animated {
+  animation-duration: 1s;
+  animation-fill-mode: both;
+}
+@media (print), (prefers-reduced-motion) {
+  .animated {
+    animation: unset !important;
+    transition: none !important;
+  }
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes fadeOut {
+  from {
+    opacity: 1;
+  }
+
+  to {
+    opacity: 0;
+  }
+}
+
+@keyframes slideInUp {
+  from {
+    transform: translate3d(0, 100%, 0);
+    visibility: visible;
+  }
+
+  to {
+    transform: translate3d(0, 0, 0);
+  }
+}
+@keyframes slideOutDown {
+  from {
+    transform: translate3d(0, 0, 0);
+  }
+
+  to {
+    visibility: hidden;
+    transform: translate3d(0, 100%, 0);
+  }
+}
+@keyframes zoomIn {
+  from {
+    opacity: 0;
+    transform: scale3d(0.3, 0.3, 0.3);
+  }
+
+  50% {
+    opacity: 1;
+  }
+}
+@keyframes zoomOut {
+  from {
+    opacity: 1;
+    transform: scale3d(1, 1, 1);
+  }
+
+  50% {
+    opacity: 0;
+    transform: scale3d(0.3, 0.3, 0.3);
+  }
+
+  to {
+    opacity: 0;
+    transform: scale3d(1, 1, 1);
+  }
+}
+.fade-animation {
+  &-enter {
+    animation-name: fadeIn;
+  }
+  &-exit {
+    animation-name: fadeOut;
+  }
+}
+.slide-animation {
+  &-enter {
+    animation-name: slideInUp;
+  }
+  &-exit {
+    animation-name: slideOutDown;
+  }
+}
+.zoom-animation {
+  &-enter {
+    animation-name: zoomIn;
+  }
+  &-exit {
+    animation-name: zoomOut;
+  }
+}
+
+// .slide {
+//   position: fixed;
+//   bottom: 0;
+//   width: 100%;
+// }
+// .zoom {
+//   position: fixed;
+//   width: 200px;
+//   top: 50%;
+
+//   left: 50%;
+//   transform: translate3d(-50%, -50%, 0);
+// }

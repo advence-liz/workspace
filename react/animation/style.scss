@@ -51,18 +51,16 @@
     opacity: 0;
     &-active {
       opacity: 1;
-      transition-property: all;
-      transition-timing-function: linear;
     }
   }
   &-exit {
     opacity: 1;
     &-active {
       opacity: 0;
-      // transition: all 2s ease-out;
-      transition-property: all;
-      // transition-duration: 2s;
-      transition-timing-function: linear;
     }
   }
 }
+// transition: all 2s ease-out;
+// transition-property: all;
+// transition-duration: 2s;
+// transition-timing-function: linear;

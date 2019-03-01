@@ -33,18 +33,32 @@ export default class Animation extends React.Component {
     console.timeEnd(`exit${this.count}`)
     this.props.onExited()
   }
+  get children () {
+    const { children, timeout } = this.props
+    let currentChildren = children
+    // 发现个小问题同样的动画效果 children 为function 时比 children DOM 慢一一丢
+    if (children.constructor !== Function) {
+      const {
+        props: { className = '', style = {} }
+      } = children
+
+      currentChildren = React.cloneElement(children, {
+        className: `animated ${className}`,
+        style: {
+          ...{
+            '--webkit-animation-duration': `${timeout}ms`,
+            animationDuration: `${timeout}ms`
+          },
+          ...style
+        }
+      })
+    }
+
+    return currentChildren
+  }
 
   render () {
-    const {
-      in: isIn,
-      timeout,
-      unmountOnExit,
-      classNames,
-      children
-    } = this.props
-    const {
-      props: { className = '', style = {} }
-    } = children
+    const { in: isIn, timeout, unmountOnExit, classNames } = this.props
 
     return (
       <CSSTransition
@@ -57,16 +71,7 @@ export default class Animation extends React.Component {
         onExit={this.onExit}
         onExited={this.onExited}
       >
-        {React.cloneElement(children, {
-          className: `animated ${className}`,
-          style: {
-            ...{
-              '--webkit-animation-duration': `${timeout}ms`,
-              animationDuration: `${timeout}ms`
-            },
-            ...style
-          }
-        })}
+        {this.children}
       </CSSTransition>
     )
   }

@@ -31,16 +31,26 @@ class Example extends React.Component {
     return (
       <div>
         <h1>test animation </h1>
-        <button onClick={this.toggle}>toggle </button>
+        <button type="button" className="btn btn-default" onClick={this.toggle}>
+          toggle
+        </button>
+
         <hr />
-        <h2>animation</h2>
-        <Animation
-          in={fadeIn}
-          timeout={2000}
-          // unmountOnExit={false}
-          classNames="fade-animation"
-        >
-          <div className="demo">fade-{fadeIn ? 'in' : 'out'}</div>
+        <h2>animation function</h2>
+        <Animation in={fadeIn} classNames="fade-animation">
+          {state => (
+            <div className="demo">
+              fade-{fadeIn ? 'in' : 'out'}-{state}
+            </div>
+          )}
+        </Animation>
+        <h2>animation dom</h2>
+        <Animation in={fadeIn} classNames="fade-animation">
+          {<div className="demo">fade-{fadeIn ? 'in' : 'out'}</div>}
+        </Animation>
+        <h2>animation dom</h2>
+        <Animation in={fadeIn} classNames="fade-animation">
+          {<div className="demo">fade-{fadeIn ? 'in' : 'out'}</div>}
         </Animation>
       </div>
     )
