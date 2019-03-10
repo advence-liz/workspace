@@ -8,7 +8,10 @@
     "start": "webpack-dev-server --content-base=build --color",
     "build": "webpack"
   },
-  "keywords": ["webpack", "algorithms"],
+  "keywords": [
+    "webpack",
+    "algorithms"
+  ],
   "author": "advence-liz",
   "license": "ISC",
   "dependencies": {
@@ -17,13 +20,14 @@
     "shelljs": "^0.8.2"
   },
   "devDependencies": {
-    "eslint-plugin-react": "^7.11.1",
     "babel-eslint": "^10.0.1",
     "eslint": "^5.7.0",
     "eslint-config-standard": "^12.0.0",
     "eslint-plugin-import": "^2.14.0",
     "eslint-plugin-node": "^7.0.1",
     "eslint-plugin-promise": "^4.0.1",
-    "eslint-plugin-standard": "^4.0.0"
+    "eslint-plugin-react": "^7.11.1",
+    "eslint-plugin-standard": "^4.0.0",
+    "json-server": "^0.14.2"
   }
 }
