@@ -30,6 +30,8 @@
 
 [带sourcemap的DEMO站点](https://advence-liz.github.io/animate.css/)打开控制台开启复制粘贴之旅
 
+![an](http://img003.qufenqi.com/products/f7/11/f7116a7eddd4f275504826c3ea014904.png)
+
 ## 简单介绍一下react-transition-group 中的 CSSTransition
 
 CSSTransiotn 会在动画的生命周期内为其指定的子元素添加代表其处于指定生命周期的`class`
@@ -193,4 +195,4 @@ export default class Animation extends React.Component {
 
 ## 在线 DEMO
 
-<iframe src="https://codesandbox.io/embed/3y24kvrz45?fontsize=14" style="width:100%; height:500px; border:0; border-radius: 4px; overflow:hidden;" sandbox="allow-modals allow-forms allow-popups allow-scripts allow-same-origin"></iframe>
+[![Edit animation-simple](https://codesandbox.io/static/img/play-codesandbox.svg)](https://codesandbox.io/s/3y24kvrz45?fontsize=14)
