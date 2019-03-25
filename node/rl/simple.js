@@ -5,9 +5,22 @@ const rl = readline.createInterface({
   output: process.stdout
 })
 
-rl.question('你如何看待 Node.js 中文网？', answer => {
-  // TODO：将答案记录在数据库中。
-  console.log(`感谢您的宝贵意见：${answer}`)
-
+function question (text) {
+  return new Promise(function (resolve, reject) {
+    rl.question(text, answer => {
+      console.log(`感谢您的宝贵意见：${answer}`)
+      resolve([answer, rl])
+    })
+  })
+}
+async function ask (q) {
+  const [answer, rl] = await question(q)
   rl.close()
-})
+  return answer
+}
+
+async function main () {
+  await ask('are you ok ?')
+  console.log('after ok')
+}
+main()
