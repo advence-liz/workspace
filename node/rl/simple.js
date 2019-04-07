@@ -8,7 +8,6 @@ const rl = readline.createInterface({
 function question (text) {
   return new Promise(function (resolve, reject) {
     rl.question(text, answer => {
-      console.log(`感谢您的宝贵意见：${answer}`)
       resolve([answer, rl])
     })
   })
