@@ -10,6 +10,7 @@ JavaScript 发展历程大概这么个流程 script -> libary -> framework
 
 > 微软出品，使用函数偷龙转凤，最短编辑长度算法实现 DOM 的同步，兼容 IE6，实现高超，但源码极其难读([引用自司徒正美](https://segmentfault.com/q/1010000000307033)，说道源码难读其实也还好我当年也就读了半年囧）
 
+代码大概这样
 ```jsx
 <div data-bind="visible: myValues().length > 0">
     You will see this message only when 'myValues' has at least one member.
@@ -95,6 +96,7 @@ ko.bindingHandlers.yourBindingName = {
 
 > google 出品，思想来自 flex，IoC， 脏检测，自定义标签，受限于绑定数量，一般不能超过 2000 个，入门容易上手难，大量避不开的概念([引用自司徒正](https://segmentfault.com/q/1010000000307033)）
 
+代码大概这样
 ```xml
 <div ng-controller="BoxCtrl">
     <div style="width: 100px; height: 100px; background-color: red;"
@@ -169,6 +171,7 @@ vue 形式上看起来就是借鉴上俩个框架的思想化为己用，并将�
 
 > 使用 Object.defineProperties 实现同步，实现精致，但功能薄弱([引用自司徒正美](https://segmentfault.com/q/1010000000307033)关于功能薄弱如尤雨溪最开始的构想 Vue.js 是一个用来开发 web 界面的前端库那确实功能不强，但是随着 vue 生态的发展现在也是很强大的）
 
+代码大概这样
 ```xml
 <div id="app">
   <div v-bind:class="{ active: isActive }"></div>
@@ -244,6 +247,7 @@ Vue.directive('focus', {
 
 - [react in pattern](https://github.com/SangKa/react-in-patterns-cn)A free book that talks about design patterns/techniques used while developing with React.
 
+代码大概这样
 ```jsx
 class Calculator extends React.Component {
   constructor(props) {

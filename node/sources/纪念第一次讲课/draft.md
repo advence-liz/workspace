@@ -1,5 +1,7 @@
 # [由webpack引发的前端自动化讲解](https://www.zybuluo.com/advence-liz/note/755852)
 
+纪念第一次讲课，纪念 avepont ,纪念长春
+
 ## 对NODE的误解
 
 - NODE 肯定是几个前端工程师在实验室里捣鼓出来的。
@@ -8,7 +10,9 @@
 - javascript 承担的责任太重了
 - 直觉上，JavaScript不应该运行在后端
 - 前端工程师要逆袭了
+  
 ## 图灵完备语言
+
 一切可计算的问题都能计算，这样的虚拟机或者编程语言就叫图灵完备的。
 
 一个能计算出每个图灵可计算函数（Turing-computable function）的计算系统被称为图灵完备的。一个语言是图灵完备的，意味着该语言的计算能力与一个通用图灵机 （Universal Turing Machine）相当，这也是现代计算机语言所能拥有的最高能力。
@@ -18,6 +22,7 @@
 因此，这世上也不存在一种语言可以做，而另一种语言不可以做的事儿
 
 ## NODE
+
 Ryan Dahl 是一名资深的程序员，在创造出NODE之前，他的主要工作都是围绕高性能Web服务器进行的。经历过一些尝试和失败之后，他找到了设计高性能Web服务器的几个要点：事件驱动，非阻塞I/O.
 
 经过C,Lua,Haskell,Ruby,javascript等权衡最终选择的了javascript。
@@ -27,34 +32,40 @@ Ryan Dahl 是一名资深的程序员，在创造出NODE之前，他的主要工
 虽然NODE这么酷炫但是我们都不用我们只用它写脚本。
 
 ### Chrome&Node
+
 ![](pic/chrome_node.png)
 
 - [Electron](https://electron.atom.io/)
 - [node-webkit](https://github.com/nwjs/nw.js)
 - [React Native](http://reactnative.cn/cases.html)
+  
 ### NODE&Browser&W3C&ECMASCRIPT
 
 ![](pic/node_w3c.png)
+
 ## NPM
+
 npm 即node的安装包管理工具(就像nuget之于.NET,pip之于python)
 
 [npm 命令手册](http://javascript.ruanyifeng.com/nodejs/npm.html#toc1)
 
 - npm -v 显示版本信息
 - npm install <packageName> [--save]?
-```
+  
+```bash
 $ npm install sax@latest
 $ npm install sax@0.1.1
 $ npm install sax@">=0.1.0 <0.2.0"
 ```
+
 - npm update
 - npm -l //查看每个命令的用法
 - npm info npm
-
 - npm run 
 
-```
-npm install eslint  uglify-js --save
+`npm install eslint  uglify-js --save`
+
+```bash
 "scripts": {
   "lint": "eslint script.js ",
   "compile": "babel script.js",
@@ -65,8 +76,8 @@ npm install eslint  uglify-js --save
   ""
 },
 
-
 ```
+
 ## 指令&数据
 
 这两个概念在计算机世界无处不在，一般数据的载体的就是文件，而这个文件在一定的环境下又变成了指令。如：一个HTML文件放在服务器上就是数据，而当浏览器获取了它，并将其解析绚丽的页面它就成了指令。
@@ -90,7 +101,8 @@ npm install eslint  uglify-js --save
 ## 命令行程序
 
 ### PATH
-```
+
+```bash
 PATH=
 C:\Windows\system32;
 C:\Windows;C:\Windows\System32\Wbem;
@@ -102,16 +114,22 @@ C:\Program Files\TortoiseGit\bin;C:\Users\Zhuo.Li\AppData\Local\Programs\Python\
 C:\Users\Zhuo.Li\AppData\Local\Programs\Python\Python35\;
 C:\Users\Zhuo.Li\AppData\Roaming\npm;
 ```
+
 ### PATHEXT
+
 ```bash
 C:\Users\Zhuo.Li>echo %PATHEXT%
 .COM;.EXE;.BAT;.CMD;.VBS;.VBE;.JS;.JSE;.WSF;.WSH;.MSC
 ```
+
 ### Hello World
+
 ```bash
 echo  Hello World
 ```
+
 ### node 全局命令调用方式
+
 ```bash
 @IF EXIST "%~dp0\node.exe" (
   "%~dp0\node.exe"  "%~dp0\node_modules\gulp\bin\gulp.js" %*
@@ -123,8 +141,10 @@ echo  Hello World
 ```
 
 ## 模块组织
+
 随着javascript发展，从增强显示的脚本到解决一类问题的库，然后构建应用，一个有效的模块加载方案也就成为了必须的元素。
 因为当想用一个语言构建一个大型应用，模块机制不可或缺。
+
 - 浏览器端运用最广泛的为 AMD 规范
 - 服务端使用 CommonJS 规范
 - 而ES6 Module 加载规范不远的将来将要统一前后端（我们要是采用ES6 加载规范）
@@ -134,15 +154,12 @@ echo  Hello World
 require AMD 写在回调中是因为如果同步等他浏览器可能会卡死.
 
 ### 关于javascriptIDE 目前功能薄弱的思考
+
 javascript 尤其运行在浏览器端并没标准统一的入口，通过简陋的\<script\>标签引入，所以无法判断一个文件中出现的对象该有何种行为，而且script 还可能是动态加载的。
 必然不能像其他语言那样智能检验差错与提示，如果以后模块化编程根深蒂固，javascriptIDE也会像其他语言一样强大。
 有必要的话兴许还能实时预览，因为现在集成webkit渲染引擎开发桌面的应用正在蓬勃发展（比如我正在使用的vscode）
 
-
-
-
-
-## AMD 
+## AMD
 
 ```javascript
 define(['module1', 'module2'], function(m1, m2) {
@@ -160,7 +177,9 @@ require(['foo', 'bar'], function ( foo, bar ) {
         foo.doSomething();
 });
 ```
+
 ## cmomonjs
+
 ```javascript
 //index.js
 const m1=require("module1");
@@ -180,7 +199,9 @@ dosomething:function(){
 ```
 
 ## ES6
+
 ### import
+
 ```javascript
 //import
 import { stat as _stat, exists, readFile } from 'fs';
@@ -201,7 +222,9 @@ if (x === 1) {
 }
 //上面三种写法都会报错，因为它们用到了表达式、变量和if结构。在静态分析阶段，这些语法都是没法得到值的。
 ```
+
 ### export
+
 ```javascript
 export var firstName = 'Michael';
 export var lastName = 'Jackson';
@@ -219,7 +242,9 @@ export {firstName as _firstName, lastName, year};
 
 
 ```
+
 ### export default
+
 ```javascript
 / export-default.js
 export default function () {
@@ -235,6 +260,7 @@ customName(); // 'foo'
 ```
 
 ### aui.js
+
 ```javascript
 "use strict";
 
@@ -248,7 +274,9 @@ function func(){
 //export default aui;
 export default func;
 ```
+
 ### widget.js
+
 ```javascript
 var combobox = {
     name:'combobox'
@@ -260,7 +288,9 @@ var dialog = {
 
 export { combobox,dialog}
 ```
+
 ### index.js
+
 ```javascript
 import aui from './aui';
 
@@ -272,7 +302,9 @@ console.log(_dialog.name);
 
 console.dir(func());
 ```
+
 ### index.html
+
 ```html
 <!doctype html>
 <html lang="en">
@@ -293,6 +325,7 @@ console.dir(func());
 ```
 
 ## webpack
+
 webpack 是一个现代的 JavaScript 应用程序的模块打包器(module bundler)。当 webpack 处理应用程序时，它会递归地构建一个依赖关系图表(dependency graph)，其中包含应用程序需要的每个模块，然后将所有这些模块打包成少量的 bundle - 通常只有一个，由浏览器加载。
 
 它是高度可配置的，但是，在开始前你需要先理解四个核心概念：入口(entry)、输出(output)、loader、插件(plugins)。
@@ -310,6 +343,7 @@ webpack <entry> [<entry>] <output>
 $ webpack src/index.js dist/bundle.js
 ```
 > NODE API
+
 ```javascript
 const webpack = require("webpack");
 
@@ -338,6 +372,7 @@ var pkg = require("./package"),
 config = require("./webpack." + pkg.env);
 module.exports = config;
 ```
+
 ```javascript
 //var webpack = require('webpack');
 var path = require("path"),
@@ -397,15 +432,13 @@ module.exports = {
 };
 ```
 
-
-
-
-
 ## gulp
+
 - [gulp入门教程](http://blog.csdn.net/xllily_11/article/details/51393569)
 - [gulp-ruanyifeng](http://javascript.ruanyifeng.com/tool/gulp.html#toc3)
 - [gulpjs](http://www.gulpjs.com.cn/docs/)
-```
+
+```js
 const gulp = require('gulp');
 const eslint = require('gulp-eslint');
  
@@ -432,7 +465,8 @@ gulp.task('default', ['lint'], function () {
 ```
 
 ## grunt
-```
+
+```js
 require('load-grunt-tasks')(grunt); // npm install --save-dev load-grunt-tasks 
  
 grunt.initConfig({
@@ -469,7 +503,8 @@ echo  Hello World
 ![](pic/node-run.gif)
 
 ### package.json
-```
+
+```js
 {
   "name": "eslint-demo",
   "version": "1.0.0",
@@ -485,8 +520,10 @@ echo  Hello World
   }
 }
 ```
+
 ### index.js
-```
+
+```js
 "use strict";
 var CLIEngine = require("eslint").CLIEngine;
 
@@ -522,7 +559,9 @@ webpack(webpack_config, (err, stats) => {
   // 处理完成
 });
 ```
+
 ### webpack.config
+
 ```javascript
 //var webpack = require('webpack');
 var path = require("path"),
@@ -584,9 +623,13 @@ module.exports = {
 };
 ```
 ## 运行展示
+
 ![](pic/webpack_nodeapi.gif)
+
 ## HtmlWebpackPlugin
+
 ### _layout.html
+
 ```html
 <!doctype html>
 <html lang="en">
@@ -603,7 +646,9 @@ module.exports = {
   </body>
 </html>
 ```
+
 ### template.js
+
 ```javascript
 const fs=require("fs");
 const path= require("path");
@@ -621,7 +666,9 @@ fs.writeFile(distPath,template,(err) => {
   console.log('It\'s saved!');
 });
 ```
+
 ### index.html
+
 ```html
 <!doctype html>
 <html lang="en">
@@ -639,8 +686,6 @@ fs.writeFile(distPath,template,(err) => {
 </html>
 ```
 
-
-
 # 废稿
 
 ## javascript
@@ -653,6 +698,7 @@ fs.writeFile(distPath,template,(err) => {
 正则表达式：借鉴Perl语言。
 字符串和数组处理：借鉴Python语言。
 为了保持简单，这种脚本语言缺少一些关键的功能，比如块级作用域、模块、子类型（subtyping）等等，但是可以利用现有功能找出解决办法。这种功能的不足，直接导致了后来JavaScript的一个显著特点：对于其他语言，你需要学习语言的各种功能，而对于JavaScript，你常常需要学习各种解决问题的模式。而且由于来源多样，从一开始就注定，JavaScript的编程风格是函数式编程和面向对象编程的一种混合体。
+
 ## first-class
 
 ### 通常，编程语言会限制操作计算元素的途径。带有最少限制的元素被称为具有一等地位。一些一等元素的“权利和特权”是：
@@ -661,7 +707,9 @@ fs.writeFile(distPath,template,(err) => {
 - 它们可以作为参数向函数传递。
 - 它们可以作为函数的返回值返回。
 - 它们可以包含在好素具结构中。
+  
 ## ES6 的模块自动采用严格模式，不管你有没有在模块头部加上"use strict"
+
 - 变量必须声明后再使用
 - 函数的参数不能有同名属性，否则报错
 - 不能使用with语句
