@@ -1,14 +1,21 @@
 import React from 'react'
-
+import visibilityManager, { Task } from './visibilityChangWrap'
 export default class App extends React.Component {
   status = []
   state = {
     status: []
   }
+  task = new Task(()=>{
+    
+  })
   componentDidMount () {
+
+
     document.addEventListener('visibilitychange', () => {
       const isHidden = document.hidden
-      const item = `document: ${document.visibilityState} ${new Date().toString()}`
+      const item = `document: ${
+        document.visibilityState
+      } ${new Date().toString()}`
 
       this.status.push(item)
       this.setState({ status: this.status })
