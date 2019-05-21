@@ -7,11 +7,11 @@ class VisibilityManager {
       this.hidden = 'hidden'
       this.visibilityChange = 'visibilitychange'
     } else if (typeof document.msHidden !== 'undefined') {
-      this.hidden = 'msHidden'
-      this.visibilityChange = 'msvisibilitychange'
+      // this.hidden = 'msHidden'
+      // this.visibilityChange = 'msvisibilitychange'
     } else if (typeof document.webkitHidden !== 'undefined') {
-      this.hidden = 'webkitHidden'
-      this.visibilityChange = 'webkitvisibilitychange'
+      // this.hidden = 'webkitHidden'
+      // this.visibilityChange = 'webkitvisibilitychange'
     }
     this.initEventHandler()
   }

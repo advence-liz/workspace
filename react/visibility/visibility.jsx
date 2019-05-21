@@ -5,9 +5,9 @@ export default class App extends React.Component {
   state = {
     status: []
   }
-  task = new Task(()=>{
+  // task = new Task(()=>{
     
-  })
+  // })
   componentDidMount () {
 
 
@@ -28,6 +28,9 @@ export default class App extends React.Component {
     return (
       <div>
         <h1>visibility</h1>
+        {visibilityManager.invalid? '无效':'有效'}
+        
+        
         {status.map((item, i) => (
           <div key={i}>{item}</div>
         ))}
