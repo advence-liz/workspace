@@ -6,9 +6,9 @@ const del = require('del')
 const srcPath = path.resolve(__dirname, 'src')
 const distPath = path.resolve(__dirname, 'dist')
 
-function getTrackList () {
+function getMergeTask () {
   const times = new Date().getTime()
-  const expireTimes = 3 * 86400000
+  const expireTimes = 3 * 86400000 // 3 day
   // 遍历目录
   let dirs = glob.sync(path.join(srcPath, '!(*.*)')).map(dir => {
     const stat = fs.statSync(dir)
@@ -17,19 +17,19 @@ function getTrackList () {
   })
   // 删除过期目录
   dirs = dirs.filter(dir => {
-    const isExpire = !(times - dir.birthtimeMs > expireTimes)
-    if (isExpire) {
+    const isValid = !(times - dir.birthtimeMs > expireTimes)
+    if (!isValid) {
       del(dir.dirPath).then(() => {
         console.log('del', dir.dirPath)
       })
     }
-    return isExpire
+    return isValid
   })
   // 根据时间排序有效目录
   dirs = dirs.sort(function (m, n) {
     return m.birthtimeMs > n.birthtimeMs
   })
-
+  // 生成merge task
   dirs = dirs.map(({ dirPath }) => {
     const merge = function () {
       return gulp.src(path.join(dirPath, '**', '*')).pipe(gulp.dest(distPath))
@@ -40,12 +40,10 @@ function getTrackList () {
   return dirs
 }
 
-function mergeTask () {
-  const tasks = getTrackList()
-  gulp.series(...tasks)
-}
+const tasks = getMergeTask()
+
 module.exports = {
-  mergeTask
+  mergeTask: gulp.series(...tasks)
 }
 
 /**
