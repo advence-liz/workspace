@@ -18,25 +18,40 @@ export interface ISwiperProps extends IBaseProps {}
 @observer(['disabled'])
 export default class Swiper extends React.Component<ISwiperProps, any> {
   static defaultProps = {
-    style: {},
+    style: {}
   }
 
-  state = { disabled: false }
-  get classNames() {
+  state = { disabled: false, translateX: '' }
+  get classNames () {
     const { className } = this.props
-    return classNames(
-      'q-swiper',
-      className
-    )
+    return classNames('q-swiper', className)
   }
-  private onClick = (event: any) => {
-    if (this.props.onClick(event)) event.stopPropagation()
+  translateX = () => {
+    const { translateX } = this.state
+    console.log(1)
+    this.setState({ translateX: '-100%' })
   }
-  render() {
+
+  render () {
     const { style, children } = this.props
+    const { translateX } = this.state
     return (
-      <div className={this.classNames} style={style} onClick={this.onClick}>
-        {children}
+      <div>
+        <button onClick={this.translateX}>translateX</button>
+        <div className="q-swiper__wrap">
+          <div
+            className={this.classNames}
+            style={{
+              transform: `translate(${translateX})`,
+              transition: '0s transform'
+            }}
+          >
+            <div className="q-swiper__item">1</div>
+            <div className="q-swiper__item">2</div>
+            <div className="q-swiper__item">3</div>
+            <div className="q-swiper__item">4</div>
+          </div>
+        </div>
       </div>
     )
   }

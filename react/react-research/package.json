@@ -14,6 +14,8 @@
   "author": "advence-liz",
   "license": "ISC",
   "devDependencies": {
+    "@types/react": "^16.7.17",
+    "@types/react-dom": "^16.0.11",
     "art-template": "^4.12.2",
     "art-template-loader": "^1.4.3",
     "babel-core": "^6.26.3",

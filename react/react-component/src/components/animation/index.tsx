@@ -30,10 +30,10 @@ export default class Animation extends React.Component<IAnimationProps, any> {
     unmountOnExit: true,
     classNames: '',
     appear: true,
-    onEnter() {},
-    onEntered() {},
-    onExit() {},
-    onExited() {}
+    onEnter () {},
+    onEntered () {},
+    onExit () {},
+    onExited () {}
   }
 
   onEnter = () => {
@@ -49,7 +49,7 @@ export default class Animation extends React.Component<IAnimationProps, any> {
     this.props.onExited()
   }
 
-  get children() {
+  get children () {
     const { children, timeout } = this.props
     let currentChildren = children
     // 发现个小问题同样的动画效果 children 为function 时比 children DOM 慢一一丢
@@ -73,7 +73,7 @@ export default class Animation extends React.Component<IAnimationProps, any> {
     return currentChildren
   }
 
-  render() {
+  render () {
     const { in: isIn, timeout, unmountOnExit, classNames, appear } = this.props
 
     return (

@@ -14,7 +14,7 @@
   "nodemonConfig": {
     "watch": [
       "webpack.*.js",
-      ".qsrc.*",
+      ".qsrc.json",
       "package.json"
     ]
   },
