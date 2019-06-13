@@ -6,6 +6,7 @@ const HtmlWebpackPlugin = require('html-webpack-plugin')
 const { module: currentModule, root } = fs.readJsonSync('.qsrc.json')
 module.exports = {
   entry: path.resolve(root, currentModule),
+
   mode: 'development',
   context: __dirname,
   output: {
@@ -30,7 +31,10 @@ module.exports = {
             loader: 'babel-loader'
           },
           {
-            loader: 'ts-loader'
+            loader: 'ts-loader',
+            options: {
+              transpileOnly: true
+            }
           }
         ]
       },
@@ -62,11 +66,18 @@ module.exports = {
             loader: 'sass-loader'
           }
         ]
+      },
+      {
+        test: /\.(art|ejs)$/,
+        loader: 'art-template-loader',
+        options: {
+          compileDebug: true
+        }
       }
     ]
   },
   resolve: {
-    extensions: ['.js', '.jsx', '.less', '.scss']
+    extensions: ['.js', '.jsx', '.ts', '.tsx', '.less', '.scss']
   },
   devtool: 'source-map',
   plugins: [
@@ -81,12 +92,7 @@ module.exports = {
       title: currentModule
     }),
     new webpack.DefinePlugin({
-      // PRODUCTION: true,
-      // VERSION: JSON.stringify('5fa3b9'),
-      // BROWSER_SUPPORTS_HTML5: true,
-      // TWO: '1+1',
-      // 'typeof window': JSON.stringify('object'),
-      // 'process.env.NODE_ENV': JSON.stringify('production')
+      VERSION: JSON.stringify('5fa3b9')
     })
   ]
 }

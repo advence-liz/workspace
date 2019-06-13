@@ -1,0 +1,57 @@
+@import "./mixin.less";
+
+@keyframes slideInUp {
+  from {
+    transform: translate3d(0, 100%, 0);
+    visibility: visible;
+  }
+
+  to {
+    transform: translate3d(0, 0, 0);
+  }
+}
+@keyframes slideOutDown {
+  from {
+    transform: translate3d(0, 0, 0);
+  }
+
+  to {
+    visibility: hidden;
+
+    transform: translate3d(0, 100%, 0);
+  }
+}
+
+@keyframes drop {
+  from {
+    transform: translate3d(0, -100%, 0);
+    opacity: 0;
+  }
+
+  to {
+    transform: translate3d(0, 0, 0);
+    visibility: visible;
+    opacity: 1;
+  }
+}
+
+@keyframes lift {
+  from {
+    transform: translate3d(0, 0, 0);
+    opacity: 1;
+  }
+
+  to {
+    visibility: hidden;
+    opacity: 0;
+    transform: translate3d(0, -100%, 0);
+  }
+}
+
+.slide-animation {
+  .init-animation(slideInUp, slideOutDown);
+}
+
+.drop-animation {
+  .init-animation(drop, lift);
+}
