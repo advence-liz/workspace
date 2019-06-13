@@ -3,3 +3,5 @@ build
 .vscode
 .qsrc.*
 package-lock.json
+MochaTypescriptTest-101
+node-typescript-starter
