@@ -5,11 +5,30 @@ import Swiper from '../index'
 class SwiperDemo extends React.Component {
   state = {}
 
-  render() {
+  render () {
+    const itemStyle: React.CSSProperties = {
+      textAlign: 'center',
+      background: 'gray',
+      color: 'red',
+      fontSize: 50,
+      height:'100%'
+    }
     return (
       <div>
-        <Swiper>primary</Swiper>
-      
+        <Swiper width={300} height={200}>
+          <div className="q-swiper__item">
+            <div style={itemStyle}>1</div>
+          </div>
+          <div className="q-swiper__item">
+            <div style={itemStyle}>2</div>
+          </div>
+          <div className="q-swiper__item">
+            <div style={itemStyle}>3</div>
+          </div>
+          <div className="q-swiper__item">
+            <div style={itemStyle}>4</div>
+          </div>
+        </Swiper>
       </div>
     )
   }
