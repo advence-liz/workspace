@@ -15,18 +15,18 @@ class SwiperDemo extends React.Component {
     }
     return (
       <div>
-        <Swiper width={300} height={200}>
+        <Swiper width={300} height={200} isAutoPlay={true}>
           <SwiperItem>
-            <div style={itemStyle}>1</div>
+            <div style={{...itemStyle,...{background:'yellow'}}}>1</div>
           </SwiperItem>
           <SwiperItem>
-            <div style={itemStyle}>2</div>
+            <div  style={{...itemStyle,...{background:'gray'}}}>2</div>
           </SwiperItem>
           <SwiperItem>
-            <div style={itemStyle}>3</div>
+            <div  style={{...itemStyle,...{background:'green'}}}>3</div>
           </SwiperItem>
           <SwiperItem>
-            <div style={itemStyle}>4</div>
+            <div style={{...itemStyle,...{background:'blue'}}}>4</div>
           </SwiperItem>
         </Swiper>
       </div>

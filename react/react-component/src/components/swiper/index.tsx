@@ -5,10 +5,13 @@ import IBaseProps from '../../base/baseProps'
 import classNames from 'classnames'
 import SwiperItem from './swiper-item'
 import './style.scss'
+import { setTimeout } from 'timers'
 
 export interface ISwiperProps extends IBaseProps {
   width: number
   height: number
+  isAutoPlay?: boolean
+  autoPlayDuring?: 2000
 }
 /**
  * Button
@@ -23,15 +26,20 @@ export interface ISwiperProps extends IBaseProps {
 export default class Swiper extends React.Component<ISwiperProps, any> {
   static defaultProps = {
     index: 1,
-    width: 200
+    width: 200,
+    isAutoPlay: false,
+    autoPlayDuring: 2000
   }
   static SwiperItem = SwiperItem
   constructor (props) {
     super(props)
-    const { index, children = [], width } = props
+    const { index, width, autoPlayDuring } = props
+    this.autoPlayDuring = autoPlayDuring
     this.state.animation = this.animation(0, -1 * width * index, 0)
     this.state.index = index
   }
+  timer = 0
+  autoPlayDuring: number
   $swiper: any = React.createRef()
   state = { originX: 0, endX: 0, index: 0, animation: {}, len: 0 }
   get classNames () {
@@ -55,13 +63,13 @@ export default class Swiper extends React.Component<ISwiperProps, any> {
     const { changedTouches: touches } = event
     const touch = touches[0]
     const { clientX, clientY } = touch
+    clearTimeout(this.timer)
     this.setState({ originX: clientX })
   }
   onTouchEnd = event => {
     const { changedTouches: touches } = event
     const touch = touches[0]
     const { clientX: endX, clientY } = touch
-    const { width } = this.props
     let { originX, index } = this.state
     let nextIndex = index
     if (endX - originX < -20) {
@@ -71,24 +79,48 @@ export default class Swiper extends React.Component<ISwiperProps, any> {
       nextIndex = --index
     }
 
-    this.setState({
-      endX,
-      index: nextIndex,
-      animation: this.animation(0, -1 * width * index)
-    })
+    this.updateIndex(nextIndex)
+    setTimeout(this.autoPlay, this.autoPlayDuring)
+  }
+  /**
+   * @param {number} index preIndex
+   * @param {number} nextIndex nextIndex
+   */
+  updateIndex = nextIndex => {
+    const { width } = this.props
+    let index = nextIndex
+    this.setState({ animation: this.animation(0, -1 * width * nextIndex) })
+
     if (nextIndex === this.len + 1) {
+      index = 1
       setTimeout(() => {
-        this.setState({ index: 1, animation: this.animation(0, -1 * width, 0) })
+        this.setState({ animation: this.animation(0, -1 * width, 0) })
       }, 300)
-    }
-    if (nextIndex === 0) {
+    } else if (nextIndex === 0) {
+      index = this.len
       setTimeout(() => {
         this.setState({
-          index: this.len,
           animation: this.animation(0, -1 * width * this.len, 0)
         })
       }, 300)
     }
+    setTimeout(() => {
+      this.setState({
+        index
+      })
+    }, 300)
+  }
+  autoPlay = () => {
+    const { isAutoPlay } = this.props
+    if (!isAutoPlay) return
+    window.clearTimeout(this.timer)
+    this.timer = window.setTimeout(() => {
+      const { index } = this.state
+
+      const nextIndex = index + 1
+      this.updateIndex(nextIndex)
+      this.autoPlay()
+    }, this.autoPlayDuring)
   }
   onTouchMove = event => {
     const { changedTouches: touches } = event
@@ -97,8 +129,10 @@ export default class Swiper extends React.Component<ISwiperProps, any> {
     const { width } = this.props
 
     let { originX, index } = this.state
-    // 这里translateX没有设置阙值，使用swiper的时候正常只能一次滑动一格
-    let translateX = clientX - originX - width * index
+    // 当translateX到达阙值时不滑动
+    if (index === 0 || this.len + 1 === index) return
+    // translateX 转成Int值的原因是如果有小数点滑动的时候swiperitem之间会有细微的缝隙
+    let translateX = parseInt(clientX - originX - width * index, 10)
 
     this.setState({ animation: this.animation(0, translateX, 0) })
   }
@@ -124,6 +158,11 @@ export default class Swiper extends React.Component<ISwiperProps, any> {
     newChildren.push(children[this.len - 1], ...children, children[0])
     return React.Children.toArray(newChildren)
   }
+  /**
+   * TODO
+   * 1 做一个dot 移动的动画
+   * 2 暴露自定义dot
+   */
   get swiperDots () {
     const { index } = this.state
     const dots: JSX.Element[] = []
@@ -137,10 +176,14 @@ export default class Swiper extends React.Component<ISwiperProps, any> {
         />
       )
     }
-    return dots
+    return React.Children.toArray(dots)
+  }
+  componentWillUnmount () {
+    window.clearTimeout(this.timer)
   }
   componentDidMount () {
     // this.setState({ rect: this.rect })
+    this.autoPlay()
   }
   render () {
     const { style, children, width, height } = this.props
