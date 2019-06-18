@@ -4,6 +4,7 @@
   &__wrap {
     width: 200px;
     height: 200px;
+    position: relative;
     margin: auto;
     overflow: hidden;
   }
@@ -12,5 +13,23 @@
     height: 100%;
     width: 100%;
     flex-shrink: 0;
+  }
+  &__dot {
+    border-radius: 50%;
+    height: 10px;
+    width: 10px;
+    margin: 10px;
+    background: #fff;
+    &--active {
+      background: #333;
+    }
+    &__wrap {
+      position: absolute;
+      display: flex;
+      justify-content: center;
+      bottom: 0;
+      left: 0;
+      right: 0;
+    }
   }
 }

@@ -80,6 +80,11 @@ module.exports = {
     extensions: ['.js', '.jsx', '.ts', '.tsx', '.less', '.scss']
   },
   devtool: 'source-map',
+  devServer: {
+    overlay: true,
+    // host: '0.0.0.0',
+    useLocalIp: true
+  },
   plugins: [
     new webpack.NamedModulesPlugin(),
     new webpack.HotModuleReplacementPlugin(),

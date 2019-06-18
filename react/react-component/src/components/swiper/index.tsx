@@ -3,11 +3,12 @@ import React from 'react'
 import { observer } from '../../base/observerProps'
 import IBaseProps from '../../base/baseProps'
 import classNames from 'classnames'
+import SwiperItem from './swiper-item'
 import './style.scss'
 
 export interface ISwiperProps extends IBaseProps {
   width: number
-  height:number
+  height: number
 }
 /**
  * Button
@@ -24,9 +25,10 @@ export default class Swiper extends React.Component<ISwiperProps, any> {
     index: 1,
     width: 200
   }
+  static SwiperItem = SwiperItem
   constructor (props) {
     super(props)
-    const { index, children = [],width } = props
+    const { index, children = [], width } = props
     this.state.animation = this.animation(0, -1 * width * index, 0)
     this.state.index = index
   }
@@ -59,7 +61,7 @@ export default class Swiper extends React.Component<ISwiperProps, any> {
     const { changedTouches: touches } = event
     const touch = touches[0]
     const { clientX: endX, clientY } = touch
-    const {width } = this.props
+    const { width } = this.props
     let { originX, index } = this.state
     let nextIndex = index
     if (endX - originX < -20) {
@@ -92,54 +94,71 @@ export default class Swiper extends React.Component<ISwiperProps, any> {
     const { changedTouches: touches } = event
     const touch = touches[0]
     const { clientX, clientY } = touch
-    const {width} = this.props
+    const { width } = this.props
 
     let { originX, index } = this.state
     // 这里translateX没有设置阙值，使用swiper的时候正常只能一次滑动一格
-    let translateX = clientX - originX - width  * index
+    let translateX = clientX - originX - width * index
 
     this.setState({ animation: this.animation(0, translateX, 0) })
   }
   get len () {
-    // 三种情况 undefined ， react.element , array
+    // 三种情况 undefined ， reactnode , array
     const { children } = this.props
     if (!children) return 0
     return (children as any).length || 1
   }
+  // 目前没用
   get rect () {
     const $swiper = this.$swiper.current
     const rect = $swiper.getClientRects()[0]
     return JSON.parse(JSON.stringify(rect))
   }
-  get children () {
-    const { children=[] } = this.props
-    let newChildren :any[] = []
+  get swiperItems () {
+    const { children = [] } = this.props
+    let newChildren: any[] = []
     if (this.len === 0) return
     if (this.len === 1) {
-      newChildren =  new Array(3).fill(children, 0, 3)
+      newChildren = new Array(3).fill(children, 0, 3)
     }
     newChildren.push(children[this.len - 1], ...children, children[0])
     return React.Children.toArray(newChildren)
   }
+  get swiperDots () {
+    const { index } = this.state
+    const dots: JSX.Element[] = []
+    for (let i = 1; i <= this.len; i++) {
+      let isActive: boolean = i === index
+      dots.push(
+        <div
+          className={classNames('q-swiper__dot', {
+            'q-swiper__dot--active': isActive
+          })}
+        />
+      )
+    }
+    return dots
+  }
   componentDidMount () {
-    this.setState({ rect: this.rect })
+    // this.setState({ rect: this.rect })
   }
   render () {
-    const { style, children,width,height } = this.props
+    const { style, children, width, height } = this.props
     const { animation, index } = this.state
     return (
       <div>
-        <div className="q-swiper__wrap" style={{width,height}}>
+        <div className="q-swiper__wrap" style={{ width, height, ...style }}>
           <div
             ref={this.$swiper}
             className={this.classNames}
-            style={{ ...animation,height,...style }}
+            style={{ ...animation, height }}
             onTouchStart={this.onTouchStart}
             onTouchEnd={this.onTouchEnd}
             onTouchMove={this.onTouchMove}
           >
-            {this.children}
+            {this.swiperItems}
           </div>
+          <div className="q-swiper__dot__wrap">{this.swiperDots}</div>
         </div>
         <h1>index:{index}</h1>
       </div>
