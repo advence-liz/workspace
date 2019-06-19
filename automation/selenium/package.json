@@ -4,7 +4,7 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "dev": "export  PATH=/Users/qudian/liz/workspace/auto-test/selenium/driver:$PATH , node demo/index.js"
+    "dev": "node run.js"
   },
   "author": "",
   "license": "ISC",

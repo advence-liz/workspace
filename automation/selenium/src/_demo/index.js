@@ -9,6 +9,7 @@ async function run () {
     await driver.wait(until.titleIs('webdriver - Google Search'), 1000)
   } finally {
     await driver.quit()
+    driver.l
   }
 }
 run()
