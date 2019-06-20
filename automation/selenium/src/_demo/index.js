@@ -1,18 +1,34 @@
 const { Builder, By, Key, until } = require('selenium-webdriver')
+const fs = require('fs-extra')
+const path = require('path')
 const chrome = require('selenium-webdriver/chrome')
 
 async function run () {
   let driver = await new Builder().forBrowser('chrome').build()
+
   try {
-    await driver.get('http://www.google.com/ncr')
-    await driver.findElement(By.name('q')).sendKeys('webdriver', Key.RETURN)
-    await driver.wait(until.titleIs('webdriver - Google Search'), 1000)
+    await driver.get('https://www.baidu.com/')
+    await driver.findElement(By.id('kw')).sendKeys('webdriver', Key.RETURN)
+    await driver.wait(until.titleIs('webdriver_百度搜索'), 1500)
+
+    const data = await driver.takeScreenshot()
+    fs.ensureDir(path.join(__dirname, '__screenshot__'))
+    fs.writeFileSync(
+      path.join(__dirname, '__screenshot__', `${new Date().getTime()}.png`),
+      data,
+      'base64'
+    )
+    return 'done'
   } finally {
     await driver.quit()
-    driver.l
   }
 }
-run()
+if (!module.parent) {
+  run()
+} else {
+  module.exports = run
+}
+
 // var webdriver = require('selenium-webdriver'),
 //     By = webdriver.By,
 //     until = webdriver.until;

@@ -54,7 +54,8 @@ class Example extends React.Component {
               }}
             >
               {state => (
-                <HelpBlock>
+                <HelpBloc      
+          >
                   Your name rocks!
                   <CSSTransition
                     in={state === 'entered'}

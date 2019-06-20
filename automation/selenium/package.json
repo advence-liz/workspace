@@ -4,11 +4,15 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "dev": "node run.js"
+    "dev": "node run.js",
+    "test": "export PATH=/Users/qudian/liz/workspace/automation/selenium/driver:$PATH ; jest"
   },
   "author": "",
   "license": "ISC",
   "dependencies": {
     "selenium-webdriver": "^4.0.0-alpha.1"
+  },
+  "devDependencies": {
+    "jest": "^24.8.0"
   }
 }
