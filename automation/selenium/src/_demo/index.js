@@ -5,7 +5,7 @@ const chrome = require('selenium-webdriver/chrome')
 
 async function run () {
   let driver = await new Builder().forBrowser('chrome').build()
-
+  
   try {
     await driver.get('https://www.baidu.com/')
     await driver.findElement(By.id('kw')).sendKeys('webdriver', Key.RETURN)
