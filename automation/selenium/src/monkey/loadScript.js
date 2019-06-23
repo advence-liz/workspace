@@ -34,16 +34,16 @@ function loadScript (
   }
 }
 function unleashGremlins (ttl, callback) {
-  function stop () {
-    horde.stop()
-    callback()
-  }
-  var horde = window.gremlins.createHorde()
-  horde.seed(1234)
-  horde.after(callback)
-  window.onbeforeunload = stop
-  setTimeout(stop, ttl)
-  horde.unleash()
+  // function stop () {
+  //   horde.stop()
+  //   callback()
+  // }
+  // var horde = window.gremlins.createHorde()
+  // horde.seed(1234)
+  // horde.after(callback)
+  // window.onbeforeunload = stop
+  // setTimeout(stop, ttl)
+  // horde.unleash()
 }
 
 loadScript('https://cdn.bootcss.com/gremlins.js/0.1.0/gremlins.min.js', () => {
