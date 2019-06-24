@@ -5,30 +5,10 @@ const chrome = require('selenium-webdriver/chrome')
 
 function loadScript () {
   var head = document.getElementsByTagName('head')[0]
-  var scripts = head.getElementsByTagName('script')
   var found = false
-  for (var i = 0; i < scripts.length; i++) {
-    if (
-      scripts[i].src ===
-      'https://cdn.bootcss.com/gremlins.js/0.1.0/gremlins.min.js'
-    ) {
-      found = true
-      break
-    }
-  }
-  window.liz = 'liz'
-  if (!found) {
-    console.log('found', found)
-    var script = document.createElement('script')
-    // script.type = 'text/javascript'
 
-    // Others
-    // script.onload = (e) => {
-    //   console.log(11, e)
-    //   window.gremlins.createHorde().unleash()
-    //   // horde
-    // }
-  }
+  var script = document.createElement('script')
+
   script.src = 'https://cdn.bootcss.com/gremlins.js/0.1.0/gremlins.min.js'
   head.appendChild(script)
 }
@@ -45,9 +25,9 @@ function loadScript () {
 //   horde.unleash()
 // }
 
-const gremlinsScript = `(function(){
-  window.gremlins = 'iz'
-})()`
+// const gremlinsScript = `(function(){
+//   window.gremlins = 'iz'
+// })()`
 async function run () {
   let driver = await new Builder().forBrowser('chrome').build()
 

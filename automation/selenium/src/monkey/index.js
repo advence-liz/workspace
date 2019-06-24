@@ -5,23 +5,43 @@ const chrome = require('selenium-webdriver/chrome')
 // const loadScript = require('./loadScript')
 
 async function run () {
-  let driver = await new Builder().forBrowser('chrome').build()
+  let driver = await new Builder()
+    .forBrowser('chrome')
+    .setChromeOptions(
+      new chrome.Options()
+        .setMobileEmulation({
+          deviceName: 'iPhone X'
+        })
+        // .headless()
+      // .windowSize({ width: 375, height: 640 })
+    )
+    .build()
+
+  // driver.manage().setTimeouts(100000)
 
   try {
-    await driver.get('https://www.baidu.com/')
+    await driver.get('http://localhost:8080/')
+    let isDone = false
+    let monkeyErrors = { count: 0, done: false }
+    driver.executeScript(function () {
+      window.startMonkeyTest()
+    })
 
-    await driver.findElement(By.id('kw')).sendKeys('webdriver', Key.RETURN)
-    await driver.wait(until.titleIs('webdriver_百度搜索'), 1500)
+    while (!isDone) {
+      await driver.sleep(2000)
+      monkeyErrors = await driver.executeScript(() => {
+        return window.monkeyErrors
+      })
+      if (monkeyErrors.done) {
+        isDone = true
+      }
+    }
 
-    driver.executeScript(
-      fs.readFileSync(path.join(__dirname, 'loadScript.js')).toString()
-    )
-    driver.executeScript(`
-    var horde = window.gremlins.createHorde()
-  horde.unleash()`)
-    return 'done'
+    console.log(monkeyErrors)
+
+    return monkeyErrors
   } finally {
-    // await driver.quit()
+    await driver.quit()
   }
 }
 if (!module.parent) {

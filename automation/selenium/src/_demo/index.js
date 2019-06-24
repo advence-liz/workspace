@@ -4,8 +4,11 @@ const path = require('path')
 const chrome = require('selenium-webdriver/chrome')
 
 async function run () {
-  let driver = await new Builder().forBrowser('chrome').build()
-  
+  let driver = await new Builder()
+    .forBrowser('chrome')
+    .setChromeOptions(new chrome.Options().headless())
+    .build()
+
   try {
     await driver.get('https://www.baidu.com/')
     await driver.findElement(By.id('kw')).sendKeys('webdriver', Key.RETURN)
@@ -18,6 +21,7 @@ async function run () {
       data,
       'base64'
     )
+
     return 'done'
   } finally {
     await driver.quit()

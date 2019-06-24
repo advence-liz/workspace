@@ -1,8 +1,8 @@
 const run = require('./index.js')
 
-describe('open baidu', () => {
+describe('monkey test', () => {
   test('search webdriver', async () => {
-    const data = await run()
-    expect(data).toEqual('done')
-  })
+    const monkeyErrors = await run()
+    expect(monkeyErrors.count).toEqual(2)
+  }, 100000)
 })
