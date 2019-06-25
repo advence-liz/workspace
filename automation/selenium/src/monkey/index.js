@@ -2,41 +2,43 @@ const { Builder, By, Key, until } = require('selenium-webdriver')
 const fs = require('fs-extra')
 const path = require('path')
 const chrome = require('selenium-webdriver/chrome')
+// const condation = require('selenium-webdriver/lib//webdriver.')
 // const loadScript = require('./loadScript')
 
 async function run () {
   let driver = await new Builder()
     .forBrowser('chrome')
     .setChromeOptions(
-      new chrome.Options()
-        .setMobileEmulation({
-          deviceName: 'iPhone X'
-        })
-        // .headless()
+      new chrome.Options().setMobileEmulation({
+        deviceName: 'iPhone X'
+      })
+      // .headless()
       // .windowSize({ width: 375, height: 640 })
     )
     .build()
 
   // driver.manage().setTimeouts(100000)
+  driver.manage().addCookie()
 
   try {
-    await driver.get('http://localhost:8080/')
+    await driver.get('https://cbracco.github.io/html5-test-page')
     let isDone = false
     let monkeyErrors = { count: 0, done: false }
-    driver.executeScript(function () {
-      window.startMonkeyTest()
-    })
+    // driver.executeScript(function () {
+    //   window.startMonkeyTest()
+    // })
 
-    while (!isDone) {
-      await driver.sleep(2000)
-      monkeyErrors = await driver.executeScript(() => {
-        return window.monkeyErrors
-      })
-      if (monkeyErrors.done) {
-        isDone = true
-      }
-    }
+    // while (!isDone) {
+    //   await driver.sleep(2000)
+    //   monkeyErrors = await driver.executeScript(() => {
+    //     return window.monkeyErrors
+    //   })
+    //   if (monkeyErrors.done) {
+    //     isDone = true
+    //   }
+    // }
 
+    
     console.log(monkeyErrors)
 
     return monkeyErrors

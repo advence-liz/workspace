@@ -6,7 +6,7 @@ const chrome = require('selenium-webdriver/chrome')
 async function run () {
   let driver = await new Builder()
     .forBrowser('chrome')
-    .setChromeOptions(new chrome.Options().headless())
+    .setChromeOptions(new chrome.Options())
     .build()
 
   try {
@@ -14,14 +14,21 @@ async function run () {
     await driver.findElement(By.id('kw')).sendKeys('webdriver', Key.RETURN)
     await driver.wait(until.titleIs('webdriver_百度搜索'), 1500)
 
-    // const data = await driver.takeScreenshot()
-    // fs.ensureDir(path.join(__dirname, '__screenshot__'))
-    // fs.writeFileSync(
-    //   path.join(__dirname, '__screenshot__', `${new Date().getTime()}.png`),
-    //   data,
-    //   'base64'
-    // )
+    const opps = await driver.wait(async () => {
+      return new Promise(resolve => {
+        setTimeout(resolve, 1000, 'opps')
+      })
+    }, 2000)
+    console.log(opps)
 
+    const oppspfunc = () => {
+      return new Promise(resolve => {
+        setTimeout(resolve, 1000, 'oppsp')
+      })
+    }
+
+    const oppsp = await driver.wait(oppspfunc(), 2000)
+    console.log(oppsp)
     return 'done'
   } finally {
     await driver.quit()
