@@ -5,7 +5,8 @@
   "main": "index.js",
   "scripts": {
     "dev": "node run.js",
-    "test": "export PATH=/Users/qudian/liz/workspace/automation/selenium/driver:$PATH ; jest"
+    "test": "export PATH=/Users/qudian/liz/workspace/automation/selenium/driver:$PATH ; jest",
+    "postinstall": "cp driver/chromedriver node_modules/.bin"
   },
   "author": "",
   "license": "ISC",
