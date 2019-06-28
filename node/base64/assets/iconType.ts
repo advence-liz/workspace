@@ -1,3 +1,3 @@
-export type iconType = 'arrowRight' | 'arrowUnder' | 'arrowOn' | 'closePop' | 'navBack' | 'selectDownRadio' | 'navSearch' | 'selectUp' | 'warning' | 'success' | 'failure' | 'wait' | 'prompt' | 'delete' | 'add' | 'less' | 'notice' | 'phone' | 'refresh' | 'close' | 'slide'
-export const icons = ["arrowRight","arrowUnder","arrowOn","closePop","navBack","selectDownRadio","navSearch","selectUp","warning","success","failure","wait","prompt","delete","add","less","notice","phone","refresh","close","slide"]
+export type iconType = 'arrowRight' | 'arrowUnder' | 'arrowOn' | 'closePop' | 'navBack' | 'selectDownRadio' | 'navSearch' | 'selectUp' | 'warning' | 'success' | 'failure' | 'wait' | 'prompt' | 'delete' | 'add' | 'less' | 'notice' | 'phone' | 'refresh' | 'close' | 'slide' | 'hot' | 'failureLine' | 'successLine' | 'waitLine' | 'warningLine'
+export const icons = ["arrowRight","arrowUnder","arrowOn","closePop","navBack","selectDownRadio","navSearch","selectUp","warning","success","failure","wait","prompt","delete","add","less","notice","phone","refresh","close","slide","hot","failureLine","successLine","waitLine","warningLine"]
     
