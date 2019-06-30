@@ -11,7 +11,11 @@ class Node {
   //     this.right = val
   //   }
 }
-
+/**
+ * 将新节点插入到root，左子树小于root.value 右子树大于root.value
+ * @param {Node} root root
+ * @param {*} val val
+ */
 function insertTreeNode (root, val) {
   if (!root.value) {
     root.value = val
@@ -41,7 +45,7 @@ function createTree (arr) {
     insertTreeNode(root, val)
   })
 
-//   console.log(root)
+  //   console.log(root)
   return root
 }
 module.exports = createTree
@@ -51,4 +55,3 @@ module.exports = createTree
 //  *     2
 //  */
 // createTree([3, 1, 2, 4])
-
