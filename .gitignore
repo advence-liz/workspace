@@ -1,7 +1,7 @@
 node_modules/
 build
 .vscode
-.qsrc.*
+#.qsrc.*
 package-lock.json
 MochaTypescriptTest-101
 node-typescript-starter
