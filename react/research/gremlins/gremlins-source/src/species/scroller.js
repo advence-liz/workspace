@@ -25,85 +25,111 @@
  *     })
  *   )
  */
-define(function(require) {
-    "use strict";
+define(function (require) {
+  'use strict'
 
-    var configurable = require('../utils/configurable');
-    var Chance = require('../vendor/chance');
-    var RandomizerRequiredException = require('../exceptions/randomizerRequired');
+  var configurable = require('../utils/configurable')
+  var Chance = require('../vendor/chance')
+  var RandomizerRequiredException = require('../exceptions/randomizerRequired')
 
-    return function() {
+  return function () {
+    var document = window.document
 
-        var document = window.document,
-            documentElement = document.documentElement,
-            body = document.body;
+    var documentElement = document.documentElement
 
-        function defaultPositionSelector() {
-            var documentWidth = Math.max(body.scrollWidth, body.offsetWidth, documentElement.scrollWidth, documentElement.offsetWidth, documentElement.clientWidth),
-                documentHeight = Math.max(body.scrollHeight, body.offsetHeight, documentElement.scrollHeight, documentElement.offsetHeight, documentElement.clientHeight);
+    var body = document.body
 
-            return [
-                config.randomizer.natural({ max: documentWidth  - documentElement.clientWidth }),
-                config.randomizer.natural({ max: documentHeight  - documentElement.clientHeight })
-            ];
-        }
+    function defaultPositionSelector () {
+      var documentWidth = Math.max(
+        body.scrollWidth,
+        body.offsetWidth,
+        documentElement.scrollWidth,
+        documentElement.offsetWidth,
+        documentElement.clientWidth
+      )
 
-        function defaultShowAction(scrollX, scrollY) {
-            var scrollSignal = document.createElement('div');
-            scrollSignal.style.zIndex = 2000;
-            scrollSignal.style.border = "3px solid red";
-            scrollSignal.style.width = (documentElement.clientWidth - 25) + "px";
-            scrollSignal.style.height = (documentElement.clientHeight - 25) + "px";
-            scrollSignal.style.position = "absolute";
-            scrollSignal.style.webkitTransition = 'opacity 1s ease-out';
-            scrollSignal.style.mozTransition = 'opacity 1s ease-out';
-            scrollSignal.style.transition = 'opacity 1s ease-out';
-            scrollSignal.style.left = (scrollX + 10) + 'px';
-            scrollSignal.style.top = (scrollY + 10) + 'px';
-            var element = body.appendChild(scrollSignal);
-            setTimeout(function() {
-                body.removeChild(element);
-            }, 1000);
-            setTimeout(function() {
-                element.style.opacity = 0;
-            }, 50);
-        }
+      var documentHeight = Math.max(
+        body.scrollHeight,
+        body.offsetHeight,
+        documentElement.scrollHeight,
+        documentElement.offsetHeight,
+        documentElement.clientHeight
+      )
 
-        /**
-         * @mixin
-         */
-        var config = {
-            positionSelector: defaultPositionSelector,
-            showAction:       defaultShowAction,
-            logger:           null,
-            randomizer:       null
-        };
+      return [
+        config.randomizer.natural({
+          max: documentWidth - documentElement.clientWidth
+        }),
+        config.randomizer.natural({
+          max: documentHeight - documentElement.clientHeight
+        })
+      ]
+    }
 
-        /**
-         * @mixes config
-         */
-        function scrollerGremlin() {
-            if (!config.randomizer) {
-                throw new RandomizerRequiredException();
-            }
+    function defaultShowAction (scrollX, scrollY) {
+      var scrollSignal = document.createElement('div')
+      scrollSignal.style.zIndex = 2000
+      scrollSignal.style.border = '3px solid red'
+      scrollSignal.style.width = documentElement.clientWidth - 25 + 'px'
+      scrollSignal.style.height = documentElement.clientHeight - 25 + 'px'
+      scrollSignal.style.position = 'absolute'
+      scrollSignal.style.webkitTransition = 'opacity 1s ease-out'
+      scrollSignal.style.mozTransition = 'opacity 1s ease-out'
+      scrollSignal.style.transition = 'opacity 1s ease-out'
+      scrollSignal.style.left = scrollX + 10 + 'px'
+      scrollSignal.style.top = scrollY + 10 + 'px'
+      var element = body.appendChild(scrollSignal)
+      setTimeout(function () {
+        body.removeChild(element)
+      }, 1000)
+      setTimeout(function () {
+        element.style.opacity = 0
+      }, 50)
+    }
 
-            var position = config.positionSelector(),
-                scrollX = position[0],
-                scrollY = position[1];
+    /**
+     * @mixin
+     */
+    var config = {
+      positionSelector: defaultPositionSelector,
+      showAction: defaultShowAction,
+      logger: null,
+      randomizer: null
+    }
 
-            window.scrollTo(scrollX, scrollY);
+    /**
+     * @mixes config
+     */
+    function scrollerGremlin () {
+      if (!config.randomizer) {
+        throw new RandomizerRequiredException()
+      }
 
-            if (typeof config.showAction == 'function') {
-                config.showAction(scrollX, scrollY);
-            }
+      var position = config.positionSelector()
 
-            if (typeof config.logger.log == 'function') {
-                config.logger.log('gremlin', 'scroller  ', 'scroll to', scrollX, scrollY);
-            }
-        }
+      var scrollX = position[0]
 
-        configurable(scrollerGremlin, config);
+      var scrollY = position[1]
 
-        return scrollerGremlin;
-    };
-});
+      window.scrollTo(scrollX, scrollY)
+
+      if (typeof config.showAction === 'function') {
+        config.showAction(scrollX, scrollY)
+      }
+
+      if (typeof config.logger.log === 'function') {
+        config.logger.log(
+          'gremlin',
+          'scroller  ',
+          'scroll to',
+          scrollX,
+          scrollY
+        )
+      }
+    }
+
+    configurable(scrollerGremlin, config)
+
+    return scrollerGremlin
+  }
+})
