@@ -3,7 +3,7 @@ import React from 'react'
 import { observer } from '../../base/observerProps'
 import classNames from 'classnames'
 import IBaseProps from '../../base/baseProps'
-import './style.less'
+import './style.scss'
 
 export interface IPasswordProps extends IBaseProps {
   disabled?: boolean

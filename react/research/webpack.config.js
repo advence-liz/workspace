@@ -77,7 +77,11 @@ module.exports = {
     ]
   },
   resolve: {
-    extensions: ['.js', '.jsx', '.ts', '.tsx', '.less', '.scss']
+    extensions: ['.js', '.jsx', '.ts', '.tsx', '.less', '.scss'],
+    alias: {
+      react: 'preact-compat',
+      'react-dom': 'preact-compat'
+    }
   },
   devtool: 'source-map',
   plugins: [
