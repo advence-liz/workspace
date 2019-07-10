@@ -1,0 +1,19 @@
+{
+  "name": "upload",
+  "version": "1.0.0",
+  "description": "test upload",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "koa": "^2.7.0",
+    "koa-body": "^4.1.0",
+    "koa-router": "^7.4.0"
+  },
+  "dependencies": {
+    "@koa/cors": "^3.0.0"
+  }
+}
