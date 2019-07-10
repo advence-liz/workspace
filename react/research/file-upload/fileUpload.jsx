@@ -1,20 +1,6 @@
 import React from 'react'
 export default class App extends React.Component {
-  state = {
-    show: false,
-    name: 'liz',
-    age: 1,
-    password: 0
-  }
-  onChange = event => {
-    const {
-      target: { value, name }
-    } = event
-    this.setState({ [name]: value })
-  }
-  onPasswordChange = value => {
-    this.setState({ password: value })
-  }
+  state = {}
 
   handleUploadXhr = event => {
     var blob = new Blob([JSON.stringify({ name: 'liz' })])
@@ -24,7 +10,7 @@ export default class App extends React.Component {
 
     // define new form
     var formData = new FormData()
-    formData.append('file', blob, 'someFileName.json')
+    formData.append('file', blob, 'name.json')
 
     // action after uploading happens
     xhr.onload = function (e) {
@@ -66,7 +52,7 @@ export default class App extends React.Component {
           <input type="file" id="uploadfile" name="file" />
           <input type="submit" value="上传" />
         </form>
-        <h2>fetch upload</h2>
+        <h2>xhr upload</h2>
 
         <button
           type="button"
@@ -75,6 +61,7 @@ export default class App extends React.Component {
         >
           xhr upload
         </button>
+        <h2>fetch upload</h2>
         <button
           type="button"
           className="btn btn-primary"
