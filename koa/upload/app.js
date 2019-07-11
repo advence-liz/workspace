@@ -1,11 +1,12 @@
-var Koa = require('koa')
+const Koa = require('koa')
 const koaBody = require('koa-body')
-var Router = require('koa-router')
+const logger = require('koa-logger')
+const Router = require('koa-router')
 const cors = require('@koa/cors')
-var fs = require('fs')
+const fs = require('fs')
 
-var app = new Koa()
-var router = new Router()
+const app = new Koa()
+const router = new Router()
 app.use(
   koaBody({
     multipart: true,
@@ -14,6 +15,7 @@ app.use(
     }
   })
 )
+app.use(logger())
 app.use(cors({ origin: '*' }))
 // app.use(async (ctx, next) => {
 //   ctx.set('Access-Control-Allow-Origin', '*')
@@ -35,9 +37,11 @@ router.post('/upload', async ctx => {
   return (ctx.body = '上传成功')
 })
 app.use(router.routes())
+app.use(router.allowedMethods())
 
 app.use(async ctx => {
   console.log('Hello World')
+  ctx.body = ctx.request.path
 })
 
 app.listen(3003)
