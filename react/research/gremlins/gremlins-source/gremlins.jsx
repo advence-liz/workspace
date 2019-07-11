@@ -1,5 +1,5 @@
 import React from 'react'
-import { Simulate } from 'preact-test-utils'
+// import { Simulate } from 'preact-test-utils'
 // import Password from '../../../react-component/src/components/password'
 console.log(Simulate)
 export default class App extends React.Component {
@@ -9,11 +9,14 @@ export default class App extends React.Component {
     age: 1,
     password: 0
   }
-  onChange = event => {
-    const {
-      target: { value, name }
-    } = event
-    this.setState({ [name]: value })
+  handleInputChange = (event) => {
+    const target = event.target
+    const value = target.type === 'checkbox' ? target.checked : target.value
+    const name = target.name
+
+    this.setState({
+      [name]: value
+    })
   }
   onPasswordChange = value => {
     this.setState({ password: value })
@@ -153,7 +156,7 @@ export default class App extends React.Component {
           name="name"
           className="form-control"
           max={12}
-          onChange={this.onChange}
+          onChange={this.handleInputChange}
           value={this.state.name}
         />
         <div>{this.state.name}</div>
@@ -164,10 +167,34 @@ export default class App extends React.Component {
           ref={node => (this.textInput = node)}
           className="form-control"
           max={20}
-          onChange={this.onChange}
+          onChange={this.handleInputChange}
           value={this.state.age}
         ></input>
         <div>{this.state.age}</div>
+        <form>
+          <label>
+            参与:
+            <input
+              name="isGoing"
+              type="checkbox"
+              checked={this.state.isGoing}
+              onChange={this.handleInputChange} />
+          </label>
+          <br />
+          <label>
+            来宾人数:
+            <input
+              name="numberOfGuests"
+              type="radio"
+              value={this.state.numberOfGuests}
+              onChange={this.handleInputChange} />
+            <input
+              name="numberOfGuests"
+              type="radio"
+              value={this.state.numberOfGuests}
+              onChange={this.handleInputChange} />
+          </label>
+        </form>
         {/* <Password value={this.state.password} onChange = {this.onPasswordChange} name="password"></Password> */}
         <h2>Input file form upload</h2>
         <form
