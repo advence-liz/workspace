@@ -90,8 +90,8 @@ module.exports = {
     new CleanWebpackPlugin(['build']),
     new HtmlWebpackPlugin({
       filename: 'index.html',
-      template: '../_template/_layout.ejs',
-      favicon: '../_template/favicon.ico',
+      template: '_template/_layout.ejs',
+      favicon: '_template/favicon.ico',
       // inject: false,
       title: currentModule
     }),
