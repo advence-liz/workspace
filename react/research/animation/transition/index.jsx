@@ -1,6 +1,6 @@
 import React from 'react'
 import ReactDOM from 'react-dom'
-import { Grid, Button, Well } from 'react-bootstrap'
+import { Grid, Button, Well } from 'animation/css-transition/node_modules/react-bootstrap'
 import { Transition } from 'react-transition-group'
 
 class Example extends React.Component {

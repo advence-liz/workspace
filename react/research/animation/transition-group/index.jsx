@@ -1,7 +1,7 @@
 import React from 'react'
 import ReactDOM from 'react-dom'
-import { Grid, ListGroup, ListGroupItem, Button } from './node_modules/animation/css-transition/node_modules/react-bootstrap'
-import { CSSTransition, TransitionGroup } from './node_modules/react-transition-group'
+import { Grid, ListGroup, ListGroupItem, Button } from 'animation/css-transition/node_modules/react-bootstrap'
+import { CSSTransition, TransitionGroup } from 'react-transition-group'
 import uuid from 'uuid'
 
 import './style.scss'
