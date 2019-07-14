@@ -45,8 +45,8 @@ module.exports = {
             loader: 'style-loader' // creates style nodes from JS strings
           },
           {
-            loader: 'css-loader', // translates CSS into CommonJS
-            options: { modules: true }
+            loader: 'css-loader' // translates CSS into CommonJS
+            // options: { modules: true }
           },
           {
             loader: 'less-loader' // compiles Less to CSS
@@ -90,8 +90,8 @@ module.exports = {
     new CleanWebpackPlugin(['build']),
     new HtmlWebpackPlugin({
       filename: 'index.html',
-      template: '_template/_layout.ejs',
-      favicon: '_template/favicon.ico',
+      template: '../_template/_layout.ejs',
+      favicon: '../_template/favicon.ico',
       // inject: false,
       title: currentModule
     }),

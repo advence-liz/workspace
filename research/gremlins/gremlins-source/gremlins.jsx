@@ -1,13 +1,26 @@
 import React from 'react'
 // import { Simulate } from 'preact-test-utils'
 // import Password from '../../../react-component/src/components/password'
-console.log(Simulate)
+import MultiPicker from './m-picker/src/MultiPicker'
+import './m-picker/assets/index.css'
+import Picker from './m-picker/src/Picker'
+//  console.log(Simulate)
+let count = 0
+const len = 10
 export default class App extends React.Component {
   state = {
     show: false,
     name: 'liz',
     age: 1,
-    password: 0
+    password: 0,
+
+    value: ['1', '11']
+  }
+  onChange = (value) => {
+    console.log('onChange', value)
+    this.setState({
+      value
+    })
   }
   handleInputChange = (event) => {
     const target = event.target
@@ -70,13 +83,13 @@ export default class App extends React.Component {
     })
       .then(res => {
         if (res.ok) {
-          console.log('success',res)
+          console.log('success', res)
           return res
         } else {
           console.log('error')
         }
       })
-  
+
     // define data and connections
   }
   componentDidMount () {
@@ -101,8 +114,8 @@ export default class App extends React.Component {
       }
     }
     formFillerGremlin.elementMapTypes(elementMapTypes)
-
-    // horde.gremlin(formFillerGremlin).unleash()
+    // horde.gremlin(window.gremlins.species.toucher())
+    horde.gremlin(formFillerGremlin).unleash()
     // horde.unleash()
   }
   render () {
@@ -221,6 +234,35 @@ export default class App extends React.Component {
         >
           fetch upload
         </button>
+
+        <div style={{ background: '#f5f5f9', padding: 10 }}>
+          <MultiPicker
+            selectedValue={this.state.value}
+            onValueChange={this.onChange}
+            onScrollChange={this.onScrollChange}
+          >
+            <Picker indicatorClassName="my-picker-indicator">
+              <Picker.Item className="my-picker-view-item" value="1">one</Picker.Item>
+              <Picker.Item className="my-picker-view-item" value="2">two</Picker.Item>
+              <Picker.Item className="my-picker-view-item" value="3">three</Picker.Item>
+              <Picker.Item className="my-picker-view-item" value="4">four</Picker.Item>
+              <Picker.Item className="my-picker-view-item" value="5">five</Picker.Item>
+              <Picker.Item className="my-picker-view-item" value="6">six</Picker.Item>
+              <Picker.Item className="my-picker-view-item" value="7">seven</Picker.Item>
+              <Picker.Item className="my-picker-view-item" value="8">eight</Picker.Item>
+            </Picker>
+            <Picker indicatorClassName="my-picker-indicator">
+              <Picker.Item className="my-picker-view-item" value="11">eleven</Picker.Item>
+              <Picker.Item className="my-picker-view-item" value="12">twelve</Picker.Item>
+              <Picker.Item className="my-picker-view-item" value="13">thirteen</Picker.Item>
+              <Picker.Item className="my-picker-view-item" value="14">fourteen</Picker.Item>
+              <Picker.Item className="my-picker-view-item" value="15">fifteen</Picker.Item>
+              <Picker.Item className="my-picker-view-item" value="16">sixteen</Picker.Item>
+              <Picker.Item className="my-picker-view-item" value="17">seventeen</Picker.Item>
+              <Picker.Item className="my-picker-view-item" value="18">eighteen</Picker.Item>
+            </Picker>
+          </MultiPicker>
+        </div>
       </div>
     )
   }
