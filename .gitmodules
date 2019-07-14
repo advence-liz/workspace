@@ -1,0 +1,3 @@
+[submodule "research/gremlins/gremlins-source/m-picker"]
+	path = research/gremlins/gremlins-source/m-picker
+	url = git@github.com:react-component/m-picker.git
