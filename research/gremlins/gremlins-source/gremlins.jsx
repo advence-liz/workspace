@@ -2,11 +2,9 @@ import React from 'react'
 // import { Simulate } from 'preact-test-utils'
 // import Password from '../../../react-component/src/components/password'
 import MultiPicker from './m-picker/src/MultiPicker'
-import './m-picker/assets/index.css'
+import './m-picker/assets/index.less'
 import Picker from './m-picker/src/Picker'
 //  console.log(Simulate)
-let count = 0
-const len = 10
 export default class App extends React.Component {
   state = {
     show: false,

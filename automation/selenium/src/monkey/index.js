@@ -38,7 +38,6 @@ async function run () {
     //   }
     // }
 
-    
     console.log(monkeyErrors)
 
     return monkeyErrors
