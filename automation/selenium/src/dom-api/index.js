@@ -28,6 +28,10 @@ class Page {
       await this.selectPicker(pickers[0], 2)
       await this.driver.sleep(300) // 没有延长不行
       await this.selectPicker(pickers[1], 3)
+
+      await this.driver
+        .findElement(By.css('#uploadfile'))
+        .sendKeys(path.resolve('./carbon.png'))
       await this.driver.wait(until.titleContains('done'))
       return 'done'
     } finally {
