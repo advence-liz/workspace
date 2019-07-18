@@ -84,6 +84,12 @@ module.exports = {
     // }
   },
   devtool: 'source-map',
+  devServer: {
+    overlay: true,
+    host: '0.0.0.0',
+    useLocalIp: true,
+    historyApiFallback: true
+  },
   plugins: [
     new webpack.NamedModulesPlugin(),
     new webpack.HotModuleReplacementPlugin(),

@@ -5,6 +5,9 @@ const path = require('path')
 const chrome = require('selenium-webdriver/chrome')
 
 class Page {
+  constructor ({ url }) {
+    this.url = url
+  }
   async init () {
     this.driver = await new Builder()
       .forBrowser('chrome')
@@ -14,31 +17,19 @@ class Page {
         })
       )
       .build()
+    await this.driver.get('http://localhost:8080/')
   }
-  async run () {
+  findElement (selector) {
+    return this.driver.findElement(By.css(selector))
+  }
+  findElements (selector) {
+    return this.driver.findElements(By.css(selector))
+  }
+
+  async start () {
     await this.init()
-    try {
-      await this.driver.get('http://localhost:8080/')
-      await this.driver.findElement(By.css('#click-case')).click()
-      await this.driver.findElement(By.css('#input-case')).sendKeys('name')
-
-      const pickers = await this.driver.findElements(
-        By.css('.rmc-picker-indicator')
-      )
-      await this.selectPicker(pickers[0], 2)
-      await this.driver.sleep(300) // 没有延长不行
-      await this.selectPicker(pickers[1], 3)
-
-      await this.driver
-        .findElement(By.css('#uploadfile'))
-        .sendKeys(path.resolve('./carbon.png'))
-      await this.driver.wait(until.titleContains('done'))
-      return 'done'
-    } finally {
-      await this.driver.quit()
-    }
+    this.run()
   }
-
   async selectPicker (picker, offset) {
     const rect = await picker.getRect()
     console.log(rect)
@@ -54,8 +45,30 @@ class Page {
   }
 }
 
+class SubPage extends Page {
+  async run () {
+    try {
+      await this.findElement('#click-case').click()
+      await this.findElement('#input-case').sendKeys('name')
+
+      const pickers = await this.findElements('.rmc-picker-indicator')
+      await this.selectPicker(pickers[0], 2)
+      await this.driver.sleep(300) // 没有延长不行
+      await this.selectPicker(pickers[1], 3)
+
+      await this.driver
+        .findElement(By.css('#uploadfile'))
+        .sendKeys(path.resolve('./carbon.png'))
+      await this.driver.wait(until.titleContains('done'))
+      return 'done'
+    } finally {
+      await this.driver.quit()
+    }
+  }
+}
+
 if (!module.parent) {
-  new Page().run()
+  new SubPage().start()
 } else {
   module.exports = new Page()
 }
