@@ -17,7 +17,7 @@ class Page {
         })
       )
       .build()
-    await this.driver.get('http://localhost:8080/')
+    await this.driver.get(this.url)
   }
   findElement (selector) {
     return this.driver.findElement(By.css(selector))
@@ -47,28 +47,26 @@ class Page {
 
 class SubPage extends Page {
   async run () {
-    try {
+
       await this.findElement('#click-case').click()
       await this.findElement('#input-case').sendKeys('name')
 
       const pickers = await this.findElements('.rmc-picker-indicator')
       await this.selectPicker(pickers[0], 2)
-      await this.driver.sleep(300) // 没有延长不行
+      await this.driver.sleep(300) // 没有延迟不行
       await this.selectPicker(pickers[1], 3)
 
-      await this.driver
-        .findElement(By.css('#uploadfile'))
-        .sendKeys(path.resolve('./carbon.png'))
+      // await this.driver
+      //   .findElement(By.css('#uploadfile'))
+      //   .sendKeys(path.resolve('./carbon.png'))
       await this.driver.wait(until.titleContains('done'))
       return 'done'
-    } finally {
-      await this.driver.quit()
-    }
+   
   }
 }
 
 if (!module.parent) {
-  new SubPage().start()
+  new SubPage({ url: 'http://localhost:8080/' }).start()
 } else {
   module.exports = new Page()
 }
