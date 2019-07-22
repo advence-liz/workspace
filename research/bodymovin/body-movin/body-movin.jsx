@@ -1,17 +1,18 @@
 import React from 'react'
+import bodymovin from './lottie'
 
 export default class App extends React.Component {
   state = {
     show: false
   }
-  onChange = e => {}
+  onChange = e => { }
   componentDidMount () {
-    var animation = bodymovin.loadAnimation({
+    const animation = bodymovin.loadAnimation({
       container: document.getElementById('bm'),
       renderer: 'svg',
       loop: true,
       autoplay: true,
-      path: 'data.json'
+      path: './asserts/data.json'
     })
   }
   render () {

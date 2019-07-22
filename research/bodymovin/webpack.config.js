@@ -96,7 +96,7 @@ module.exports = {
     new webpack.HotModuleReplacementPlugin(),
     new CleanWebpackPlugin(['build']),
     new CopyPlugin([
-      { from: 'asserts', to: 'build' }
+      { from: 'asserts/**/*' }
     ]),
     new HtmlWebpackPlugin({
       filename: 'index.html',
