@@ -3,6 +3,7 @@ const webpack = require('webpack')
 const fs = require('fs-extra')
 const CleanWebpackPlugin = require('clean-webpack-plugin')
 const HtmlWebpackPlugin = require('html-webpack-plugin')
+const CopyPlugin = require('copy-webpack-plugin')
 const { module: currentModule, root } = fs.readJsonSync('.qsrc.json')
 module.exports = {
   entry: path.resolve(root, currentModule),
@@ -94,6 +95,9 @@ module.exports = {
     new webpack.NamedModulesPlugin(),
     new webpack.HotModuleReplacementPlugin(),
     new CleanWebpackPlugin(['build']),
+    new CopyPlugin([
+      { from: 'asserts', to: 'build' }
+    ]),
     new HtmlWebpackPlugin({
       filename: 'index.html',
       template: '../_template/_layout.ejs',
