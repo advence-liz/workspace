@@ -1,5 +1,5 @@
 import React from 'react'
-import bodymovin from './lottie'
+import bodymovin from '../player/lottie_svg'
 
 export default class App extends React.Component {
   state = {
@@ -9,7 +9,7 @@ export default class App extends React.Component {
   componentDidMount () {
     const animation = bodymovin.loadAnimation({
       container: document.getElementById('bm'),
-      renderer: 'svg',
+      // renderer: 'svg',
       loop: true,
       autoplay: true,
       path: './asserts/data.json'

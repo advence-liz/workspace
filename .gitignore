@@ -5,3 +5,5 @@ build
 package-lock.json
 MochaTypescriptTest-101
 node-typescript-starter
+research/.DS_Store
+research/bodymovin/.DS_Store
