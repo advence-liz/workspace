@@ -1,0 +1,61 @@
+.title {
+  color: rebeccapurple;
+}
+.anySector{
+  position: relative;
+  width: 200px;
+  height: 200px;
+  border-radius: 100px;
+  background-color: red;
+ 
+}
+.r1{
+  position: absolute;
+  width: 200px;
+  height: 200px;
+  border-radius: 100px;
+  background-color: yellow;
+  clip:rect(0, 100px, 200px, 0);
+  // transform: rotate(90deg);
+}
+.r2{
+  position: absolute;
+  width: 200px;
+  height: 200px;
+  border-radius: 100px;
+  background-color: yellow;
+   clip:rect(0, 100px, 200px, 0);
+  // transform: rotate(0deg);
+  animation: rotate 2s forwards ;
+}
+.dot-container{
+  position:absolute;
+  height: 200px;
+  width: 100%;
+  animation: rotate 2s forwards ;
+}
+.dot1{
+width: 10px;
+height: 10px;
+border-radius: 50%;
+background: black;
+left: 100px;
+position: absolute;
+    transform: translateX(-50%);
+}
+.dot2{
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: black;
+  position: absolute;
+  left: 100px;
+  bottom: 0px;
+    transform: translateX(-50%);
+
+}
+// @keyframes rotate{
+//   0% {transform: rotate(0deg);}
+//   50%{transform: rotate(90deg);}
+//   100%{transform: rotate(180deg);}
+// }

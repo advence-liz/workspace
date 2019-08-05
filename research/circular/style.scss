@@ -1,0 +1,39 @@
+
+.anySector{
+  position: relative;
+  width: 200px;
+  height: 200px;
+  border-radius: 100px;
+  background-color: red;
+ 
+}
+.r1{
+  position: absolute;
+  width: 200px;
+  height: 200px;
+  border-radius: 100px;
+  background-color:yellow;
+  clip:rect(0, 100px, 200px, 0);
+   animation: color 2s forwards;
+}
+.r2{
+  position: absolute;
+  width: 200px;
+  height: 200px;
+  border-radius: 100px;
+  background-color: yellow;
+  clip:rect(0, 100px, 200px, 0);
+  // transform: rotate(0deg);
+  animation: rotate 2s forwards ;
+
+}
+@keyframes color{
+  0% { background: yellow }
+  50% {background: yellow }
+  100% {background: red }
+}
+@keyframes rotate{
+  0% { transform:rotate(180deg) }
+  50% {transform: rotate(0deg) }
+  100% {transform: rotate(-180deg) }
+}
