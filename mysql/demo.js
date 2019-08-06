@@ -1,17 +1,29 @@
 const mysql = require('mysql')
+const { promisify } = require('util')
 const connection = mysql.createConnection({
-  host: 'localhost',
-  user: 'root',
-  password: 'Aa123456',
-  database: 'test'
+  host: 'rds-test-o-m.mysql.rds.aliyuncs.com',
+  user: 'test_admin',
+  password: 'DB$PU*T4n74UdmfE',
+  database: 'test_qu'
 })
 
-connection.connect()
+const query = query => {
+  connection.connect()
+  return new Promise((resolve, reject) => {
+    connection.query(query, function (error, results, fields) {
+      connection.end()
+      if (error) reject(error)
+      resolve({ results, fields })
+    })
+  })
+}
 
-connection.query('SELECT * from runoob_tbl;', function (error, results, fields) {
-  if (error) throw error
-  console.log('The solution is: ')
-  console.table(results)
-})
-
-connection.end()
+query(
+  "select code from sms_logs where mobile='18504411849' order by id desc limit 1"
+)
+  .then(({ results, fields }) => {
+    console.table(results)
+  })
+  .catch(err => {
+    console.error('ERROE:', err)
+  })
