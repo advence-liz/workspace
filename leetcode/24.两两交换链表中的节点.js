@@ -38,16 +38,17 @@ var swapPairs = function (head) {
   ln.next = pre
   pre.next = head
 
-  var cur = pre.next
+  var cur = head
   while (cur && cur.next) {
     var a = cur
     var b = cur.next
-
+    var next = b.next
     a.next = b.next
     b.next = a
     pre.next = b
     pre = a
-    cur = cur.next.next
+    console.log(cur, cur.next)
+    cur = next
   }
   return ln.next.next
 }
