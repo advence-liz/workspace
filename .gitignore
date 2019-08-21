@@ -7,3 +7,4 @@ MochaTypescriptTest-101
 node-typescript-starter
 research/.DS_Store
 .DS_Store
+*.log
