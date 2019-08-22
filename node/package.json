@@ -23,6 +23,7 @@
   },
   "homepage": "https://github.com/advence-liz/nodecmd#readme",
   "dependencies": {
+    "log4js": "^5.0.0",
     "node-schedule": "^1.2.5"
   },
   "devDependencies": {
