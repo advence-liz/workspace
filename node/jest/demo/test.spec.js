@@ -52,7 +52,7 @@ testCaseGroup.set('sour', sourCase)
 // 创建subTestGroup并添加到testGroup中
 const subTestGroup = new TestCaseGroup({ title: 'sub test guroup' })
 subTestGroup.set('sub', new TestCase({ hope: true, actual: true, title: 'sub test group test1' }))
-subTestGroup.set('sub2', new TestCase({ hope: true, actual: true, title: 'sub test group test2' }))
+subTestGroup.set('sub2', new TestCase({ hope: true, actual: false, title: 'sub test group test2' }))
 testCaseGroup.set('subGroup', subTestGroup)
 
 // describe('test group', () => {
@@ -75,10 +75,10 @@ testCaseGroup.set('subGroup', subTestGroup)
 //   })
 // })
 // 单独使用Testcase
-describe('single case', () => {
-  deliciousCase.test()
-  sourCase.test()
-})
+// describe('single case', () => {
+//   deliciousCase.test()
+//   sourCase.test()
+// })
 
 // 组合使用TestCase
 testCaseGroup.test()
