@@ -1,9 +1,13 @@
-
+/**
+ * 堆是完全二叉树
+ * 索引从零开始当前节点的左孩子 2i+1 右孩子 2i+2 ,parent  (i-1）/2
+ */
 class Heap {
   constructor (arr) {
     this.value = arr
     this.buildMaxHeap()
   }
+  // 最大堆下浮
   adjustMaxHeap (arr, index, length) {
     let max = index
     let left = 2 * index + 1
@@ -24,7 +28,7 @@ class Heap {
   buildMaxHeap () {
     const arr = this.value
     let length = arr.length
-    let parent = Math.floor((length - 1) / 2)
+    let parent = Math.floor(length / 2 - 1)
 
     for (let i = parent; i >= 0; i--) {
       this.adjustMaxHeap(arr, i, length)
