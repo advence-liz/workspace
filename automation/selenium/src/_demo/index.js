@@ -1,12 +1,14 @@
-const { Builder, By, Key, until } = require('selenium-webdriver')
+const { Builder, By, Key, until, Capabilities } = require('selenium-webdriver')
 const fs = require('fs-extra')
 const path = require('path')
 const chrome = require('selenium-webdriver/chrome')
-
+// const chromeCapabilities = Capabilities.chrome()
+// chromeCapabilities.set('chromeOptions', { args: ['--headless'] })
 async function run () {
   let driver = await new Builder()
     .forBrowser('chrome')
     .setChromeOptions(new chrome.Options().headless())
+    // .withCapabilities(chromeCapabilities)
     .build()
 
   try {
@@ -14,13 +16,13 @@ async function run () {
     await driver.findElement(By.id('kw')).sendKeys('webdriver', Key.RETURN)
     await driver.wait(until.titleIs('webdriver_百度搜索'), 1500)
 
-    // const data = await driver.takeScreenshot()
-    // fs.ensureDir(path.join(__dirname, '__screenshot__'))
-    // fs.writeFileSync(
-    //   path.join(__dirname, '__screenshot__', `${new Date().getTime()}.png`),
-    //   data,
-    //   'base64'
-    // )
+    const data = await driver.takeScreenshot()
+    fs.ensureDir(path.join(__dirname, '__screenshot__'))
+    fs.writeFileSync(
+      path.join(__dirname, '__screenshot__', `${new Date().getTime()}.png`),
+      data,
+      'base64'
+    )
 
     return 'done'
   } finally {
