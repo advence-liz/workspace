@@ -1,0 +1,31 @@
+{
+  "name": "laifenqi.h5.automation",
+  "version": "1.0.0",
+  "description": "laifenqi.h5 自动化测试工程",
+  "main": "''",
+  "bin": {
+    "laifenqi.h5.automation": "pre-monkey.js"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git@git.qufenqi.com:fe/laifenqi.h5.automation.git"
+  },
+  "keywords": [
+    "automation"
+  ],
+  "author": "qfed",
+  "license": "ISC",
+  "devDependencies": {
+    "eslint": "^6.2.2",
+    "eslint-config-airbnb-base": "^14.0.0",
+    "eslint-plugin-import": "^2.18.2",
+    "fs-extra": "^8.1.0",
+    "jest": "^24.9.0",
+    "log4js": "^5.0.0",
+    "mysql": "^2.17.1",
+    "selenium-webdriver": "^4.0.0-alpha.4"
+  }
+}
