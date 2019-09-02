@@ -1,4 +1,4 @@
-var Koa = require('Koa')
+var Koa = require('koa')
 var http = require('http')
 var https = require('https')
 var fs = require('fs')

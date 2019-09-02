@@ -3,19 +3,19 @@ const config = require('../automation.config')
 const logger = require('./logger').sqlLogger
 
 class MysqlManager {
-    constructor() {
+    constructor () {
         this.connection = mysql.createConnection(config.mysql)
         this.connection.connect()
     }
 
-    close() {
+    close () {
         this.connection.end()
     }
 
-    query(query) {
+    query (query) {
         const connection = this.connection
         return new Promise((resolve, reject) => {
-            connection.query(query, function(error, results, fields) {
+            connection.query(query, function (error, results, fields) {
                 if (error) {
                     reject(error)
                 }
