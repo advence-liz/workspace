@@ -1,0 +1,1 @@
+- [生成随机数](https://www.hangge.com/blog/cache/detail_1872.html)
