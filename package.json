@@ -4,9 +4,18 @@
   "description": "tomorrow sometime is respond future,but most times is Delay ",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
-    "start": "webpack-dev-server --content-base=build --color",
-    "build": "webpack"
+    "format": "prettier-eslint --write jsl/**/*.js"
+  },
+  "lint-staged": {
+    "jsl/**/*.js": [
+      "eslint --fix",
+      "git add"
+    ]
+  },
+  "husky": {
+    "hooks": {
+      "pre-commit": "lint-staged"
+    }
   },
   "keywords": [
     "webpack",
@@ -29,6 +38,9 @@
     "eslint-plugin-promise": "^4.0.1",
     "eslint-plugin-react": "^7.11.1",
     "eslint-plugin-standard": "^4.0.0",
-    "json-server": "^0.14.2"
+    "husky": "^4.0.0-beta.2",
+    "json-server": "^0.14.2",
+    "lint-staged": "^9.4.0",
+    "prettier-eslint-cli": "^5.0.0"
   }
 }

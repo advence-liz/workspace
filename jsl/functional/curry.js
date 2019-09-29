@@ -22,6 +22,4 @@ function add (x, y) {
   }
 }
 
-function curry (fn) {
-
-}
+function curry (fn) {}
