@@ -1,0 +1,4 @@
+diff a/jsl/functional/curry.js b/jsl/functional/curry.js	(rejected hunks)
+@@ -16 +16 @@
+-function add    (x, y) {
++function add (x, y) {
