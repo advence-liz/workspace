@@ -7,8 +7,9 @@
     "format": "prettier-eslint --write jsl/**/*.js"
   },
   "lint-staged": {
-    "jsl/**/*.js": [
+    "*.js": [
       "prettier-eslint --write",
+      "eslint --fix",
       "git add"
     ]
   },
