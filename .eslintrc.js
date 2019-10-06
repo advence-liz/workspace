@@ -1,21 +1,20 @@
 module.exports = {
-  env: {
-    es6: true,
-    node: true,
-    jest: true,
-    browser: true
-  },
-  parser: 'babel-eslint',
-  extends: ['standard', 'plugin:react/recommended'],
-  parserOptions: {
-    ecmaFeatures: {
-      jsx: true
+    env: {
+        browser: true,
+        es6: true
+    },
+    extends: 'eslint:recommended',
+    globals: {
+        Atomics: 'readonly',
+        SharedArrayBuffer: 'readonly'
+    },
+    parserOptions: {
+        ecmaVersion: 2018
+    },
+    rules: {
+        indent: ['error', 4],
+        'linebreak-style': ['error', 'unix'],
+        quotes: ['error', 'single'],
+        semi: ['error', 'never']
     }
-  },
-  plugins: ['react'],
-  rules: {
-    'no-console': 'off',
-    'react/prop-types': 0
-    // 'react/jsx-uses-vars': 2
-  }
 }
