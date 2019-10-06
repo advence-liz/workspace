@@ -42,7 +42,7 @@ function getFirst(arr) {
  * 问题分为俩个阶段：
  * 1. 填满双向队列，填充方式是后一个元素「连续」跟前一个元素比较，若前一个元素小则弹出，继续跟前前元素比较...,即队列的特性是里面的值是递减的即第一个元素最大
  * 2. 增加一个元素重新计算队列中最大值，2.1 如 1 的方式填充元素，并且去掉超出窗口范围的元素
- * 
+ * https://wiki.jikexueyuan.com/project/for-offer/question-sixty-five.html
  */
 var maxSlidingWindow = function (nums, k) {
 
