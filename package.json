@@ -6,6 +6,11 @@
   "scripts": {
     "format": "prettier-eslint --write jsl/**/*.js"
   },
+  "prettier": {
+    "tabWidth": 2,
+    "semi": false,
+    "singleQuote": true
+  },
   "lint-staged": {
     "*.js": [
       "prettier-eslint --write",
