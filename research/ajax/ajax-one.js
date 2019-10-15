@@ -1,6 +1,6 @@
 function ajaxLoad(callback) {
   var oldXHR = window.XMLHttpRequest
-  
+
   function newXHR() {
     var realXHR = new oldXHR()
     // var open  = realXHR.open
@@ -18,24 +18,24 @@ function ajaxLoad(callback) {
     //   }
     //   console.log(method,url,data)
     // }
-  
+
     realXHR.addEventListener('load', function() {
       const { request, status, statusText, response } = this
-  
+
       callback({ request, response: JSON.parse(response), status, statusText })
     })
-  
+
     return realXHR
   }
-  
+
   window.XMLHttpRequest = newXHR
 }
-  
+
 window.__ajax = []
-  
+
 ajaxLoad(xhr => {
   const { request, response, status, statusText } = xhr
-  const { code, data, message } = response
+  // const { code, data, message } = response
   window.__ajax.push(xhr)
   console.log(request.method, request.url, request.data)
   console.log(status, statusText, response)

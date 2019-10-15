@@ -29,6 +29,14 @@ export default class App extends React.Component {
       .catch(function(error) {
         // console.log(error)
       })
+    axios
+      .get('http://localhost:3000/get/book')
+      .then(function(response) {
+        // console.log(response)
+      })
+      .catch(function(error) {
+        // console.log(error)
+      })
   }
   render() {
     return (
