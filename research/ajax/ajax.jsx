@@ -1,6 +1,5 @@
 import React from 'react'
 import axios from 'axios'
-import './ajaxWrap1'
 export default class App extends React.Component {
   state = {
     show: false
