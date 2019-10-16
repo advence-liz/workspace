@@ -7,9 +7,13 @@ function ajaxSend() {
 
   XMLHttpRequest.prototype.open = function(method, url) {
     _open.apply(this, arguments)
-    let data = {}
+    let data = '{}' // 默认值当post参数为空时起效，为了形式上跟get一致
     if (method.toLowerCase() == 'get') {
-      data = queryString.parse(url.split('?')[1])
+      try {
+        data = JSON.stringify(queryString.parse(url.split('?')[1]))
+      } catch (error) {
+        console.error(error)
+      }
     }
     this.request = { method, url, data }
   }

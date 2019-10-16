@@ -2,7 +2,7 @@ import React from 'react'
 import ReactDOM from 'react-dom'
 import App from './ajax'
 import axios from 'axios'
-import './ajax-send.js'
+import './ajaxWrap'
 
 
 ReactDOM.render(<App />, document.getElementById('root'))

@@ -4,31 +4,8 @@ export default class App extends React.Component {
   state = {
     show: false
   }
-  send = e => {
-    // var xhr = new XMLHttpRequest()
-    // xhr.open(
-    //   'GET',
-    //   'http://localhost:3000/get/book?name=liz&v=1',
-    //   true
-    // )
-    // xhr.send(null)
-    // axios
-    //   .get('http://localhost:3000/get/book?name=liz&v=1')
-    //   .then(function(response) {
-    //     // console.log(response)
-    //   })
-    //   .catch(function(error) {
-    //     // console.log(error)
-    //   })
-
-    axios
-      .post('http://localhost:3000/get/book', { name: 'iiz' })
-      .then(function(response) {
-        // console.log(response)
-      })
-      .catch(function(error) {
-        // console.log(error)
-      })
+  get = e => {
+   
     axios
       .get('http://localhost:3000/get/book')
       .then(function(response) {
@@ -37,12 +14,42 @@ export default class App extends React.Component {
       .catch(function(error) {
         // console.log(error)
       })
+    axios
+      .get('http://localhost:3000/get/book?name=liz')
+      .then(function(response) {
+        // console.log(response)
+      })
+      .catch(function(error) {
+        // console.log(error)
+      })
   }
+  post = e => {
+   
+    axios
+      .post('http://localhost:3000/get/book')
+      .then(function(response) {
+      // console.log(response)
+      })
+      .catch(function(error) {
+      // console.log(error)
+      })
+    axios
+      .post('http://localhost:3000/get/book', { name: 'iiz' })
+      .then(function(response) {
+        // console.log(response)
+      })
+      .catch(function(error) {
+        // console.log(error)
+      })
+    
+  }
+  
   render() {
     return (
       <div>
         <h1>Ajax</h1>
-        <button onClick={this.send}>send book</button>
+        <button style={{display:'block',margin:10,background:'#fff'}} onClick={this.get}>send book</button>
+        <button style={{display:'block',margin:10,background:'#fff'}} onClick={this.post}>send book</button>
       </div>
     )
   }
