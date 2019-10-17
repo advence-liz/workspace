@@ -6,6 +6,7 @@ function ajaxLoad(callback) {
   function newXHR() {
     var realXHR = new oldXHR()
     console.count('new XHR')
+    realXHR.open
     realXHR.addEventListener('load', function() {
       const { responseURL, status, statusText, response } = this
       console.log({ responseURL, status, statusText, response })
