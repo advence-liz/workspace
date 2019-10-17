@@ -4,3 +4,6 @@
 [submodule "algo"]
 	path = algo
 	url = git@github.com:advence-liz/algo.git
+[submodule "python/python-crawler"]
+	path = python/python-crawler
+	url = git@github.com:advence-liz/python-crawler.git
