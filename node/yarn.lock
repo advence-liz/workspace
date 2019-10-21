@@ -52,6 +52,11 @@ double-ended-queue@^2.1.0-0:
   resolved "https://registry.npm.taobao.org/double-ended-queue/download/double-ended-queue-2.1.0-0.tgz#103d3527fd31528f40188130c841efdd78264e5c"
   integrity sha1-ED01J/0xUo9AGIEwyEHv3XgmTlw=
 
+drange@^1.0.2:
+  version "1.1.1"
+  resolved "https://registry.npm.taobao.org/drange/download/drange-1.1.1.tgz#b2aecec2aab82fcef11dbbd7b9e32b83f8f6c0b8"
+  integrity sha1-sq7Owqq4L87xHbvXueMrg/j2wLg=
+
 flatted@^2.0.1:
   version "2.0.1"
   resolved "https://registry.npm.taobao.org/flatted/download/flatted-2.0.1.tgz#69e57caa8f0eacbc281d2e2cb458d46fdb449e08"
@@ -164,6 +169,11 @@ node-schedule@^1.2.5:
     long-timeout "0.1.1"
     sorted-array-functions "^1.0.0"
 
+nodemailer@^6.3.1:
+  version "6.3.1"
+  resolved "https://registry.npm.taobao.org/nodemailer/download/nodemailer-6.3.1.tgz?cache=0&other_urls=https%3A%2F%2Fregistry.npm.taobao.org%2Fnodemailer%2Fdownload%2Fnodemailer-6.3.1.tgz#2784beebac6b9f014c424c54dbdcc5c4d1221346"
+  integrity sha1-J4S+66xrnwFMQkxU29zFxNEiE0Y=
+
 object-keys@^1.0.12:
   version "1.1.0"
   resolved "http://registry.npm.taobao.org/object-keys/download/object-keys-1.1.0.tgz#11bd22348dd2e096a045ab06f6c85bcc340fa032"
@@ -180,6 +190,14 @@ path-is-absolute@^1.0.0:
   version "1.0.1"
   resolved "http://registry.npm.taobao.org/path-is-absolute/download/path-is-absolute-1.0.1.tgz#174b9268735534ffbc7ace6bf53a5a9e1b5c5f5f"
   integrity sha1-F0uSaHNVNP+8es5r9TpanhtcX18=
+
+randexp@^0.5.3:
+  version "0.5.3"
+  resolved "https://registry.npm.taobao.org/randexp/download/randexp-0.5.3.tgz#f31c2de3148b30bdeb84b7c3f59b0ebb9fec3738"
+  integrity sha1-8xwt4xSLML3rhLfD9ZsOu5/sNzg=
+  dependencies:
+    drange "^1.0.2"
+    ret "^0.2.0"
 
 redis-commands@^1.2.0:
   version "1.5.0"
@@ -199,6 +217,11 @@ redis@^2.8.0:
     double-ended-queue "^2.1.0-0"
     redis-commands "^1.2.0"
     redis-parser "^2.6.0"
+
+ret@^0.2.0:
+  version "0.2.2"
+  resolved "https://registry.npm.taobao.org/ret/download/ret-0.2.2.tgz#b6861782a1f4762dce43402a71eb7a283f44573c"
+  integrity sha1-toYXgqH0di3OQ0Aqcet6KD9EVzw=
 
 rfdc@^1.1.4:
   version "1.1.4"
