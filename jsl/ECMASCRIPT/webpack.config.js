@@ -4,6 +4,7 @@ const fs = require('fs-extra')
 const CleanWebpackPlugin = require('clean-webpack-plugin')
 const HtmlWebpackPlugin = require('html-webpack-plugin')
 const { module: currentModule, root } = fs.readJsonSync('.qsrc.json')
+console.log(root,currentModule)
 module.exports = {
   entry: path.resolve(root, currentModule),
   mode: 'development',
