@@ -9,6 +9,10 @@ function* fibonacci() {
   }
 }
 
+function fibonacci2(n){
+  if(n === 1 || n === 0 ) return n
+  return fibonacci(n-1) + fibonacci(n-2)
+}
 function* fibonacci1(){
   let current = 0
   let next = 1
