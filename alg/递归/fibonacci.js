@@ -1,6 +1,7 @@
 function* fibonacci() {
   yield 0
   yield 1
+  yield 1
   let [prev, curr] = [1, 1]
   while (true) {
     //                    n-2    n-1
