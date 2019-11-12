@@ -35,7 +35,7 @@ function* timerPlus() {
 // Generator 函数返回的遍历器对象，都有一个throw方法，
 // 可以在函数体外抛出错误，然后在 Generator 函数体内捕获。
 
-var g = function* () {
+var g = function*() {
   try {
     yield
   } catch (e) {
@@ -55,13 +55,12 @@ try {
 // 内部捕获 a
 // 外部捕获 b
 
-
 // co 模块是著名程序员 TJ Holowaychuk 于 2013 年 6 月发布的一个小工具，
 // 用于 Generator 函数的自动执行。
 
 // 下面是一个 Generator 函数，用于依次读取两个文件。
 
-var gen = function* () {
+var gen = function*() {
   var f1 = yield readFile('/etc/fstab')
   var f2 = yield readFile('/etc/shells')
   console.log(f1.toString())
@@ -75,7 +74,7 @@ co(gen)
 
 // co函数返回一个Promise对象，因此可以用then方法添加回调函数。
 
-co(gen).then(function (){
+co(gen).then(function() {
   console.log('Generator 函数执行完成')
 })
 // 上面代码中，等到 Generator 函数执行结束，就会输出一行提示。
@@ -110,7 +109,7 @@ function doStuff() {
 function* numbers() {
   let file = new FileReader('numbers.txt')
   try {
-    while(!file.eof) {
+    while (!file.eof) {
       yield parseInt(file.readLine(), 10)
     }
   } finally {
@@ -120,7 +119,7 @@ function* numbers() {
 
 // 如果有一个多步操作非常耗时，采用回调函数，可能会写成下面这样。
 
-step1(function (value1) {
+step1(function(value1) {
   step2(value1, function(value2) {
     step3(value2, function(value3) {
       step4(value3, function(value4) {
@@ -135,11 +134,14 @@ Promise.resolve(step1)
   .then(step2)
   .then(step3)
   .then(step4)
-  .then(function (value4) {
-    // Do something with value4
-  }, function (error) {
-    // Handle any error from step1 through step4
-  })
+  .then(
+    function(value4) {
+      // Do something with value4
+    },
+    function(error) {
+      // Handle any error from step1 through step4
+    }
+  )
   .done()
 // 上面代码已经把回调函数，改成了直线执行的形式，但是加入了大量 Promise 的语法。
 // Generator 函数可以进一步改善代码运行流程。
@@ -157,9 +159,9 @@ function* longRunningTask(value1) {
 }
 // co(longRunningTask(value1))
 
-// async await 
+// async await
 
-async function run(){
+async function run() {
   var value2 = await step1(value1)
   var value3 = await step2(value2)
   var value4 = await step3(value3)

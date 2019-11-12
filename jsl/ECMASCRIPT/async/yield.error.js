@@ -1,12 +1,10 @@
-
-var g = function* () {
+var g = function*() {
   try {
     yield
   } catch (e) {
     console.log('内部捕获', e)
   }
 }
-
 
 var i = g()
 i.next()
