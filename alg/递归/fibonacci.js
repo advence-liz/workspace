@@ -1,3 +1,5 @@
+import { async } from "../../../../Library/Caches/typescript/3.6/node_modules/rxjs/internal/scheduler/async"
+
 // function* fibonacci() {
 //   yield 0
 //   yield 1
@@ -46,15 +48,17 @@ function getFibonacci(n) {
 
 var test = [0, 1, 1, 2, 3, 5, 8, 13, 21, 34]
 
-var isPass =test.every((value, index )=> {
-  var f = getFibonacci(index) 
-  console.log(f,value)
-  return f===value
-  
+var isPass = test.every((value, index) => {
+  var f = getFibonacci(index)
+  console.log(f, value)
+  return f === value
+
 })
 
-console.log('isPass',isPass)
+console.log('isPass', isPass)
 
 
 // https://mrxf.github.io/2017/09/21/my-view-of-fibonacci/
 // https://blog.csdn.net/qq_39300332/article/details/80000837
+
+

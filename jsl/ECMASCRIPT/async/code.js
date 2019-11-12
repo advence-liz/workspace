@@ -50,7 +50,7 @@ class AsyncApp extends Component {
     dispatch(requestPosts(selectedPost));
     // 发出异步 Action
     dispatch(createAction(
-      'FETCH_POSTS', 
+      'FETCH_POSTS',
       fetch(`/some/API/${postTitle}.json`)
         .then(response => response.json())
     ));
@@ -78,3 +78,43 @@ export default function* rootSaga() {
     watchIncrementAsync()
   ])
 }
+
+// yield
+
+function* sample(...args) {
+  console.log(args)
+  yield 0
+  yield 1
+  yield 2
+  return 3
+}
+
+// yield*后面跟的是一个可遍历的结构，它会调用该结构的遍历器接口。
+let generator = function* () {
+  yield 1;
+  yield* [2, 3, 4];
+  yield * sample();
+}
+
+
+let myIterable = {
+  [Symbol.iterator]: function* () {
+    yield 1;
+    yield 2;
+    yield 3;
+  }
+}
+[...myIterable] // [1, 2, 3]
+// 或者采用下面的简洁写法
+let obj = {
+  * [Symbol.iterator]() {
+    yield 'hello';
+    yield 'world';
+  }
+};
+
+for (let x of obj) {
+  console.log(x);
+}
+// "hello"
+// “world"
