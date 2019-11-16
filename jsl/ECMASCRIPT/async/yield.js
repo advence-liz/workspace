@@ -167,3 +167,35 @@ async function run() {
   var value4 = await step3(value3)
   var value5 = await step4(value4)
 }
+
+
+// 串行
+const users = yield call(fetch, '/users')
+const repos = yield call(fetch, '/repos')
+
+// 并行
+const [users, repos] = yield [
+  call(fetch, '/users'),
+  call(fetch, '/repos')
+]
+const [customers, products] = yield all([
+  call(fetchCustomers),
+  call(fetchProducts)
+])
+// race
+const {posts, timeout} = yield race({
+  posts: call(fetchApi, '/posts'),
+  timeout: delay(1000)
+})
+
+takeEvery(pattern, saga, ...args)
+
+takeLatest(pattern, saga, ..args)
+
+takeLeading(pattern, saga, ..args)
+
+throttle(ms, pattern, saga, ..args)
+
+debounce(ms, pattern, saga, ..args)
+
+retry(maxTries, delay, fn, ...args)
