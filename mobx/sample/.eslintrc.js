@@ -4,12 +4,14 @@ module.exports = {
     node: true,
     es6: true
   },
+  parser: "babel-eslint",
   extends: 'eslint:recommended',
   globals: {
     Atomics: 'readonly',
     SharedArrayBuffer: 'readonly'
   },
   parserOptions: {
+    "experimentalDecorators": true,
     ecmaVersion: 2018,
     sourceType: 'module'
   },
