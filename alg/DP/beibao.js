@@ -18,12 +18,13 @@ var dp = [
 ]
 
 function getVal(x, y) {
-  var re = 0
-  try {
-    re = dp[x][y]
-  } catch (error) {}
-
-  return re ? re : 0
+  if (x < 0 || y < 0) return 0
+  return dp[x][y]
+  // try {
+  //   return dp[x][y]
+  // } catch (error) {
+  //   return 0
+  // }
 }
 
 function getPrice(product, weight) {
