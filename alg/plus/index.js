@@ -5,7 +5,7 @@ const arr = [8, 4, 5, 7, 1, 3, 6, 2]
  * @param {number[]} digits
  * @return {number[]}
  */
-var plusOne = function (digits) {
+var plusOne = function(digits) {
   let len = digits.length
   let num = digits[len - 1]
   if (len === 1) {
@@ -22,3 +22,6 @@ var plusOne = function (digits) {
   }
 }
 console.log(plusOne([1, 2, 3]))
+
+var c = 1
+var b = c + 1
