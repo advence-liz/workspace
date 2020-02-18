@@ -11,8 +11,7 @@
 
 // }
 /* ================ 到这里结束 ================ */
-// https://www.zhangxinxu.com/wordpress/2013/02/js-currying/
-
+// https://juejin.im/post/5af13664f265da0ba266efcf
 function add (x, y) {
   if (x && y) {
     return x + y
