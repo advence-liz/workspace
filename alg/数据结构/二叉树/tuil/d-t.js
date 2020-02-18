@@ -1,22 +1,16 @@
 class Node {
-  constructor (val, lv = null, rv = null) {
+  constructor(val, lv = null, rv = null) {
     this.value = val
     this.left = lv
     this.right = rv
   }
-  //   set left (val) {
-  //     this.left = val
-  //   }
-  //   set right (val) {
-  //     this.right = val
-  //   }
 }
 /**
  * 将新节点插入到root，左子树小于root.value 右子树大于root.value
  * @param {Node} root root
  * @param {*} val val
  */
-function insertTreeNode (root, val) {
+function insertTreeNode(root, val) {
   if (!root.value) {
     root.value = val
     return
@@ -39,7 +33,7 @@ function insertTreeNode (root, val) {
   }
 }
 
-function createTree (arr) {
+function createTree(arr) {
   let root = new Node()
   arr.forEach(val => {
     insertTreeNode(root, val)
