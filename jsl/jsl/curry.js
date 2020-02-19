@@ -12,13 +12,23 @@
 // }
 /* ================ 到这里结束 ================ */
 // https://juejin.im/post/5af13664f265da0ba266efcf
-function add (x, y) {
-  if (x && y) {
-    return x + y
-  }
-  if (!y) {
-    return add.bind(null, x)
+
+// var add = x => y => x + y
+
+
+// function curry(fn,...args){
+//   return function(...rest){
+//     fn(...args,...rest)
+//   }
+// }
+
+// var add = delayCurry(add)
+// add(x)(y)(z)
+function delayCurry(fn,...args){
+  // if(fn.length >=args.length){
+  //   return fn(...args)
+  // }
+  return function(...rest){
+    return delayCurry(fn,...args,...rest)
   }
 }
-
-function curry (fn) {}
