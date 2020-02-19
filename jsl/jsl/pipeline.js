@@ -1,15 +1,15 @@
 // ts-check
 var data = ['a', 'b', 'c']
 
-function adda (x) {
+function adda(x) {
   return x + 'a'
 }
 
-function addb (x) {
+function addb(x) {
   return x + 'b'
 }
 
-function pipeline (fns = [], data) {
+function pipeline(fns = [], data) {
   return fns.reduce((x, y) => {
     return x.map(y)
   }, data)

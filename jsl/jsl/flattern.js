@@ -10,11 +10,11 @@ var list = [1, [2, 3, [4, 5]], [1, 2, 3, [4, 5]]]
 /* ============= 从这里开始写代码 ============== */
 // 需返回结果数组
 
-function isArrary (x) {
+function isArrary(x) {
   return x.constructor === Array
 }
 
-function flatten (arr) {
+function flatten(arr) {
   if (!isArrary(arr)) return arr
   const reuslt = []
   for (let i = 0; i < arr.length; i++) {
