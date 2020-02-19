@@ -11,36 +11,23 @@
 
 // }
 /* ================ 到这里结束 ================ */
-// https://www.zhangxinxu.com/wordpress/2013/02/js-currying/
+// https://juejin.im/post/5af13664f265da0ba266efcf
 
-// const add = x=>y => x+y
+// var add = x => y => x + y
 
-// console.log(add(1)(2))
-
-// function add(x,y){
-//   return x+y
-// }
 // function curry(fn,...args){
-
-//   return function (...rest){
-//     return fn(...args,...rest)
+//   return function(...rest){
+//     fn(...args,...rest)
 //   }
 // }
 
-// var r=curry(add,1)(2)
-// console.log(r)
-
-function add(x, y, z) {
-  return x + y + z
-}
-
-function curry(fn, ...args) {
-  if (args.length >= fn.length) {
-    return fn(...args)
-  }
+// var add = delayCurry(add)
+// add(x)(y)(z)
+function delayCurry(fn, ...args) {
+  // if(fn.length >=args.length){
+  //   return fn(...args)
+  // }
   return function(...rest) {
-    return curry(fn, ...args, ...rest)
+    return delayCurry(fn, ...args, ...rest)
   }
 }
-var r = curry(add, 1)(2)(3)
-console.log(r)
