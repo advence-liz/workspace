@@ -16,7 +16,8 @@
 - 熟悉前端工程化 gulp，webpack ，babel ,eslint 等工具，构建过零配置打包工具[lilith](https://github.com/sharpgui/lilith);
 - 熟悉node脚步开发，乐于开发一些实用小工具比如：[json-server-router](https://github.com/advence-liz/json-server-router)一个简易的mock server并且投入到趣店实际生产中使用；
 - 致力于前端「工程化」「组件化」「规范化」工作，对其有深入的理解和丰富的实践经验；
-- 细心沉稳，乐于挑战；
+- 拥有项目管理和新人培养经验；
+- 细心沉稳，乐于挑战，善于沟通；
 
 # 工作经验
 
@@ -55,7 +56,7 @@ selenium-webdriver node mysql redis pm2 ；
 
 在线教育平台创新项目
 
-工作内容：业务支撑，在线教育PC端的主要开发人员（半壁江山）；
+工作内容：业务支撑，在线教育PC端的主要开发人员；
 涉及技术：
 react 技术栈加 node 中间层
 
