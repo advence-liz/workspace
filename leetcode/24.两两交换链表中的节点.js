@@ -10,6 +10,10 @@
  *     this.next = null;
  * }
  */
+function ListNode(val) {
+  this.val = val
+  this.next = null
+}
 /**
  * @param {ListNode} head
  * @return {ListNode}
@@ -32,23 +36,50 @@
 //   return ln.next
 // }
 
-var swapPairs = function (head) {
-  var ln = new ListNode(-1)
-  var pre = new ListNode(-1)
-  ln.next = pre
-  pre.next = head
+// var swapPairs = function (head) {
+//   var ln = new ListNode(-1)
+//   var pre = new ListNode(-1)
+//   ln.next = pre
+//   pre.next = head
 
-  var cur = head
-  while (cur && cur.next) {
-    var a = cur
-    var b = cur.next
-    var next = b.next
-    a.next = b.next
-    b.next = a
-    pre.next = b
-    pre = a
-    console.log(cur, cur.next)
-    cur = next
+//   var cur = head
+//   while (cur && cur.next) {
+//     var a = cur
+//     var b = cur.next
+//     var next = b.next
+//     a.next = b.next
+//     b.next = a
+//     pre.next = b
+//     pre = a
+//     console.log(cur, cur.next)
+//     cur = next
+//   }
+//   return ln.next.next
+// }
+
+/**
+ * @param {ListNode} head
+ * @return {ListNode}
+ * 1->2->3->4
+ * 2->1
+ */
+var swapPairs = function (head) {
+
+  if (!head) return
+
+  var dummyHead = new ListNode(-1)
+  dummyHead.next = head
+  var pre = dummyHead.next
+  var cur = pre.next
+
+  while(cur){
+    var next = cur.next
+    cur.next = pre
+    pre.next = next
+    pre = next
+    cur = pre.next
+
   }
-  return ln.next.next
+
+  return dummyHead.next
 }
