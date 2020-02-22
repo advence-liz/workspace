@@ -41,15 +41,15 @@ function print(head) {
  */
 var reverseList = function (head) {
 
-  
-  function reverse(pre,cur){
-    if(!cur) return pre
+
+  function reverse(pre, cur) {
+    if (!cur) return pre
     var next = cur.next
     cur.next = pre
-    return reverse(cur,next)
+    return reverse(cur, next)
   }
 
-  return  reverse(null,head)
+  return reverse(null, head)
 
 }
 
