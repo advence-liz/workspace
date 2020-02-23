@@ -7,7 +7,7 @@
     "format": "prettier-eslint --write jsl/**/*.js"
   },
   "prettier": {
-    "tabWidth": 2,
+    "tabWidth": 4,
     "semi": false,
     "singleQuote": true
   },
