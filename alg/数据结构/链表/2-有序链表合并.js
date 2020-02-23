@@ -37,6 +37,7 @@ var mergeTwoLists = function (l1, l2) {
       cur = cur.next
       l1 = l1.next
     }
+
   }
   if (l1) {
     cur.next = l1
