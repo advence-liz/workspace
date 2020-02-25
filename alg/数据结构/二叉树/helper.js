@@ -31,7 +31,8 @@ var levelOrder = function (root) {
 
 
 //用一个集合来存放每一个Node
-function createTree(array = [], list = []) {
+function createTree(array = []) {
+    let list = []
     for (let i = 0; i < array.length; i++) {
 
         list.push(new Node(array[i]))
@@ -50,7 +51,6 @@ function createTree(array = [], list = []) {
         }
         // 判断最后一个根结点：因为最后一个根结点可能没有右结点，所以单独拿出来处理
         let lastIndex = parseInt(array.length / 2 - 1)
-        console.log(lastIndex)
         // 左结点
         list[lastIndex].left = list[lastIndex * 2 + 1]
         // 右结点，如果数组的长度为奇数才有右结点
@@ -62,15 +62,16 @@ function createTree(array = [], list = []) {
     return list[0]
 }
 
-var r = createTree([1, null, 3, 4, 5, 6, 7, 8, 9])
 
-levelOrder(r)
-
-var arr = [[1], [2, 3], [4, 5, 6, 7]]
-
-function print(arr = []) {
-    arr.forEach(x => console.log(x))
+function print(root) {
+    var r = levelOrder(root)
+    r.forEach(x => console.log(x))
 
 }
 
-print(arr)
+var root =createTree([1,2,3])
+print(root)
+module.exports = {
+    createTree,
+    print
+}

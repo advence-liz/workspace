@@ -16,17 +16,17 @@
  * @param {TreeNode} root
  * @return {number[]}
  */
-var inorderTraversal = function(root) {
-  var results = []
+var inorderTraversal = function (root) {
+    var results = []
 
-  function traversal(root) {
-    if (!root) return
-    if (root.left) traversal(root.left)
-    results.push(root.val)
-    if (root.right) traversal(root.right)
-  }
+    function traversal(root) {
+        if (!root) return
+        if (root.left) traversal(root.left)
+        results.push(root.val)
+        if (root.right) traversal(root.right)
+    }
 
-  traversal(root)
-  return results
+    traversal(root)
+    return results
 }
 // @lc code=end

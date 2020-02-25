@@ -1,9 +1,9 @@
 class Node {
-  constructor(val, lv = null, rv = null) {
-    this.val = val
-    this.left = lv
-    this.right = rv
-  }
+    constructor(val, lv = null, rv = null) {
+        this.val = val
+        this.left = lv
+        this.right = rv
+    }
 }
   
 var root = new Node(1)
@@ -38,35 +38,35 @@ root.right = right
     */
   
 function preOrder(root, result = []) {
-  if (!root) return
+    if (!root) return
   
   
-  result.push(root.val)
-  preOrder(root.left, result)
-  preOrder(root.right, result)
-  return result
+    result.push(root.val)
+    preOrder(root.left, result)
+    preOrder(root.right, result)
+    return result
 }
 // console.assert(preOrder(root, []).join('')==='3426751','')
 console.log('前序', preOrder(root, []))
   
   
 function inOrder(root, result = []) {
-  if (!root) return
+    if (!root) return
   
-  inOrder(root.left, result)
-  result.push(root.val)
-  inOrder(root.right, result)
-  return result
+    inOrder(root.left, result)
+    result.push(root.val)
+    inOrder(root.right, result)
+    return result
 }
 console.log('中序', inOrder(root))
   
 function postOrder(root, result = []) {
-  if (!root) return
+    if (!root) return
   
-  postOrder(root.left, result)
-  postOrder(root.right, result)
-  result.push(root.val)
-  return result
+    postOrder(root.left, result)
+    postOrder(root.right, result)
+    result.push(root.val)
+    return result
 }
 console.log('后序', postOrder(root))
   
