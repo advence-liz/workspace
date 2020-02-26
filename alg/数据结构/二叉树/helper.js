@@ -6,7 +6,7 @@ class Node {
         this.right = rv
     }
 }
-var levelOrder = function (root) {
+var levelOrder = function(root) {
     if (!root) return []
     let queue = []
     let res = []
@@ -29,17 +29,16 @@ var levelOrder = function (root) {
     return res
 }
 
-
 //用一个集合来存放每一个Node
 function createTree(array = []) {
     let list = []
     for (let i = 0; i < array.length; i++) {
-
         list.push(new Node(array[i]))
     }
     // 构建二叉树
     if (list.length > 0) {
-        for (let i = 0; i < array.length / 2 - 1; i++) {       // i表示的是根节点的索引，从0开始
+        for (let i = 0; i < array.length / 2 - 1; i++) {
+            // i表示的是根节点的索引，从0开始
             if (list[2 * i + 1] != null) {
                 // 左结点
                 list[i].left = list[2 * i + 1]
@@ -62,14 +61,12 @@ function createTree(array = []) {
     return list[0]
 }
 
-
 function print(root) {
     var r = levelOrder(root)
     r.forEach(x => console.log(x))
-
 }
 
-var root =createTree([1,2,3])
+var root = createTree([1, 2, 3])
 print(root)
 module.exports = {
     createTree,
