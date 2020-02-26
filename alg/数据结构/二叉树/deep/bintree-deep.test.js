@@ -10,5 +10,5 @@ const createTree = require('../tuil/d-t')
 let root = createTree([10, 5, 3, 6, 15, 12, 16])
 
 test('tree deep is 3', () => {
-  expect(treeDeep(root)).toBe(3)
+    expect(treeDeep(root)).toBe(3)
 })

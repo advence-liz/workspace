@@ -37,7 +37,7 @@
  */
 var NestedIterator = function(nestedList) {
     
-};
+}
 
 
 /**
@@ -46,7 +46,7 @@ var NestedIterator = function(nestedList) {
  */
 NestedIterator.prototype.hasNext = function() {
     
-};
+}
 
 /**
  * @this NestedIterator
@@ -54,7 +54,7 @@ NestedIterator.prototype.hasNext = function() {
  */
 NestedIterator.prototype.next = function() {
     
-};
+}
 
 /**
  * Your NestedIterator will be called like this:

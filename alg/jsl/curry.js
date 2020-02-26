@@ -24,10 +24,10 @@
 // var add = delayCurry(add)
 // add(x)(y)(z)
 function delayCurry(fn, ...args) {
-  // if(fn.length >=args.length){
-  //   return fn(...args)
-  // }
-  return function(...rest) {
-    return delayCurry(fn, ...args, ...rest)
-  }
+    // if(fn.length >=args.length){
+    //   return fn(...args)
+    // }
+    return function(...rest) {
+        return delayCurry(fn, ...args, ...rest)
+    }
 }

@@ -11,6 +11,6 @@
  */
 var minPathSum = function(grid) {
     
-};
+}
 // @lc code=end
 

@@ -1,9 +1,9 @@
 class Stack {
-  constructor (value = []) {
-    this.value = value
-  }
+    constructor (value = []) {
+        this.value = value
+    }
 
-  push () {
-    this.value.push()
-  }
+    push () {
+        this.value.push()
+    }
 }

@@ -46,27 +46,27 @@
  * @param {*} root 
  */
 var preorderTraversal = function (root) {
-  if (root == null) {
-    return []
-  }
-  var queue = []
-  var result = []
-  queue.push(root)
-  while (queue.length) {
-    var cur = queue.shift()
-    cur && result.push(cur.val)
-    // queue.push(...children)
-    if (cur.left) {
-      queue.push(cur.left)
+    if (root == null) {
+        return []
     }
+    var queue = []
+    var result = []
+    queue.push(root)
+    while (queue.length) {
+        var cur = queue.shift()
+        cur && result.push(cur.val)
+        // queue.push(...children)
+        if (cur.left) {
+            queue.push(cur.left)
+        }
 
-    if (cur.right) {
-      queue.push(cur.right)
-    }
+        if (cur.right) {
+            queue.push(cur.right)
+        }
 
     
-  }
-  return result
+    }
+    return result
 
 }
 

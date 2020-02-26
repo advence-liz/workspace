@@ -51,16 +51,16 @@
 // }
 
 let reverseList = (head) =>{
-  if(!head ) return null
+    if(!head ) return null
 
-  function reverse(pre,cur){
+    function reverse(pre,cur){
 
-    if(!cur) return pre
-    var next = cur.next
-    cur.next= pre
-    pre = cur
-    return reverse(cur,next)
-  }
-  return reverse(null,head)
+        if(!cur) return pre
+        var next = cur.next
+        cur.next= pre
+        pre = cur
+        return reverse(cur,next)
+    }
+    return reverse(null,head)
 }
 

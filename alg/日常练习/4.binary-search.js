@@ -8,14 +8,14 @@
 var arr = [1, 2, 3, 4, 5, 6, 7, 8, 9]
 
 function binarySearch(arr = [], key, low, height) {
-  let mid = parseInt((low + height) / 2)
+    let mid = parseInt((low + height) / 2)
 
-  if (arr[mid] === key) return mid
+    if (arr[mid] === key) return mid
 
-  if (arr[mid] > key) return binarySearch(arr, key, low, mid)
+    if (arr[mid] > key) return binarySearch(arr, key, low, mid)
 
-  if (arr[mid] < key) return binarySearch(arr, key, mid, height)
-  return -1
+    if (arr[mid] < key) return binarySearch(arr, key, mid, height)
+    return -1
 }
 
 var r = binarySearch(arr, 9, 0, arr.length)

@@ -1,4 +1,4 @@
-import { async } from "../../../../Library/Caches/typescript/3.6/node_modules/rxjs/internal/scheduler/async"
+import { async } from '../../../../Library/Caches/typescript/3.6/node_modules/rxjs/internal/scheduler/async'
 
 // function* fibonacci() {
 //   yield 0
@@ -25,33 +25,33 @@ import { async } from "../../../../Library/Caches/typescript/3.6/node_modules/rx
  */
 
 function* fibonacci() {
-  let t0 = 0
-  let t1 = 1
-  yield t0
-  yield t1
-
-  while (true) {
-    [t0, t1] = [t1, t0 + t1]
+    let t0 = 0
+    let t1 = 1
+    yield t0
     yield t1
-  }
+
+    while (true) {
+        [t0, t1] = [t1, t0 + t1]
+        yield t1
+    }
 }
 
 function getFibonacci(n) {
-  var gen = fibonacci()
-  var ret = -1
-  for (var i = 0; i <= n; i++) {
-    ret = gen.next().value
-  }
+    var gen = fibonacci()
+    var ret = -1
+    for (var i = 0; i <= n; i++) {
+        ret = gen.next().value
+    }
 
-  return ret
+    return ret
 }
 
 var test = [0, 1, 1, 2, 3, 5, 8, 13, 21, 34]
 
 var isPass = test.every((value, index) => {
-  var f = getFibonacci(index)
-  console.log(f, value)
-  return f === value
+    var f = getFibonacci(index)
+    console.log(f, value)
+    return f === value
 
 })
 

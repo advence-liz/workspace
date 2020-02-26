@@ -11,22 +11,22 @@ var list = [1, [2, 3, [4, 5]], [1, 2, 3, [4, 5]]]
 // 需返回结果数组
 
 function isArrary(x) {
-  return x.constructor === Array
+    return x.constructor === Array
 }
 
 function flatten(arr) {
-  if (!isArrary(arr)) return arr
-  const reuslt = []
-  for (let i = 0; i < arr.length; i++) {
-    const current = arr[i]
+    if (!isArrary(arr)) return arr
+    const reuslt = []
+    for (let i = 0; i < arr.length; i++) {
+        const current = arr[i]
 
-    if (isArrary(current)) {
-      reuslt.push(...flatten(current))
-    } else {
-      reuslt.push(current)
+        if (isArrary(current)) {
+            reuslt.push(...flatten(current))
+        } else {
+            reuslt.push(current)
+        }
     }
-  }
-  return reuslt
+    return reuslt
 }
 
 const r = flatten(list)

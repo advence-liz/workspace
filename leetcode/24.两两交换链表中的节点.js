@@ -11,8 +11,8 @@
  * }
  */
 function ListNode(val) {
-  this.val = val
-  this.next = null
+    this.val = val
+    this.next = null
 }
 /**
  * @param {ListNode} head
@@ -65,21 +65,21 @@ function ListNode(val) {
  */
 var swapPairs = function (head) {
 
-  if (!head) return
+    if (!head) return
 
-  var dummyHead = new ListNode(-1)
-  dummyHead.next = head
-  var pre = dummyHead.next
-  var cur = pre.next
+    var dummyHead = new ListNode(-1)
+    dummyHead.next = head
+    var pre = dummyHead.next
+    var cur = pre.next
 
-  while(cur){
-    var next = cur.next
-    cur.next = pre
-    pre.next = next
-    pre = next
-    cur = pre.next
+    while(cur){
+        var next = cur.next
+        cur.next = pre
+        pre.next = next
+        pre = next
+        cur = pre.next
 
-  }
+    }
 
-  return dummyHead.next
+    return dummyHead.next
 }

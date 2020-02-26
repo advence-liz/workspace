@@ -34,20 +34,20 @@
 
 var hasCycle = function (head) {
 
-  var fast, slow, p
-  p = new ListNode(-1)
-  p.next = head
-  fast = slow = p
+    var fast, slow, p
+    p = new ListNode(-1)
+    p.next = head
+    fast = slow = p
 
-  while (fast.next && fast.next.next) {
-    fast = fast.next.next
-    slow = slow.next
+    while (fast.next && fast.next.next) {
+        fast = fast.next.next
+        slow = slow.next
 
-    if (fast.val === slow.val) {
-      return true
+        if (fast.val === slow.val) {
+            return true
+        }
     }
-  }
-  return false
+    return false
 }
 // @lc code=end
 

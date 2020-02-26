@@ -1,13 +1,13 @@
 console.log(module.i)
 function exchange (arr, i, j) {
-  let temp = arr[i]
-  arr[i] = arr[j]
-  arr[j] = temp
+    let temp = arr[i]
+    arr[i] = arr[j]
+    arr[j] = temp
 }
 function sort (arr = [6, 7, 3, 4, 1, 5, 2]) {
-  const len = arr.length
+    const len = arr.length
 
-  for (let i = 1; i < len; i++) {
+    for (let i = 1; i < len; i++) {
     // if (arr[i] < arr[i - 1]) {
     //   temp = arr[i]
     //   j = i
@@ -17,17 +17,17 @@ function sort (arr = [6, 7, 3, 4, 1, 5, 2]) {
     //   }
     //   arr[j] = temp
     // }
-    let j
-    if (arr[i] < arr[i - 1]) {
-      let temp = arr[i]
-      for (j = i; j > 0 && arr[j - 1] > temp; j--) {
-        arr[j] = arr[j - 1]
-      }
-      arr[j] = temp
+        let j
+        if (arr[i] < arr[i - 1]) {
+            let temp = arr[i]
+            for (j = i; j > 0 && arr[j - 1] > temp; j--) {
+                arr[j] = arr[j - 1]
+            }
+            arr[j] = temp
+        }
     }
-  }
 
-  console.log(arr)
+    console.log(arr)
 }
 sort()
 

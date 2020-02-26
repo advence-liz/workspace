@@ -1,5 +1,5 @@
 function Queue () {
-  this.dataStore = []
+    this.dataStore = []
     this.enqueue = enqueue     //入队
     this.dequeue = dequeue     //出队
     this.front = front         //查看队首元素

@@ -28,21 +28,21 @@
 // }
 
 var climbStairs = function(n) {
-  var p1 = 1
-  var p2 = 2
-  var pn = -1
-  if (n === 0) return 0
+    var p1 = 1
+    var p2 = 2
+    var pn = -1
+    if (n === 0) return 0
 
-  if (n === 1) return p1
+    if (n === 1) return p1
 
-  if (n === 2) return p2
+    if (n === 2) return p2
 
-  while (n > 2) {
-    pn = p1 + p2
-    p1 = p2
-    p2 = pn
-    n--
-  }
-  return pn
+    while (n > 2) {
+        pn = p1 + p2
+        p1 = p2
+        p2 = pn
+        n--
+    }
+    return pn
 }
 // @lc code=end
