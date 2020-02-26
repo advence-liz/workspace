@@ -6,7 +6,7 @@ class Node {
         this.right = rv
     }
 }
-var levelOrder = function(root) {
+var levelOrder = function (root) {
     if (!root) return []
     let queue = []
     let res = []
