@@ -10,16 +10,14 @@
  * @return {number[]}
  */
 var sortArray = function(nums) {
-    for(let i =0;i<nums.length;i++){
-        for(let j =0;j<nums.length -i-1;j++){
-            if(nums[j]>nums[j+1]){
-                
-                [nums[j],[nums[j+1]]]=[nums[j+1],[nums[j]]]
+    for(let i =0 ;i< nums.length;i++){
+        let min = i
+        for(j=i+1;j<nums.length;j++){
+            if(nums(j)<nums[min]){
+
             }
         }
     }
-    console.log(nums)
-    return nums
 }
 // @lc code=end
 sortArray([3,2,1,6,5,4,1,2,3])
