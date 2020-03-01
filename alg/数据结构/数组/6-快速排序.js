@@ -17,21 +17,28 @@ var sortArray = function(nums) {
     var pivotIndex = Math.floor(nums.length / 2)
 
     var pivot = nums.splice(pivotIndex, 1)[0] //找出基准元素
-    //  var pivot = nums[0]
-    var left = []
 
+    var left = []
     var right = []
 
-    for (var i = 0; i < nums.length; i++) {
-        //循环把元素分别放入左边和右边数组
+    // for(var i =0;i< nums.length;i++){
+    //     if(nums[i]<pivot){
+    //         left.push(nums[i])
+    //     }else{
+    //         right.push(nums[i])
+    //     }
+    // }
 
-        if (nums[i] < pivot) {
-            left.push(nums[i])
+    while (nums.length) {
+        var cur = nums.shift()
+        
+        if (cur < pivot) {
+            left.push(cur)
         } else {
-            right.push(nums[i])
+            right.push(cur)
         }
     }
-    return sortArray(left).concat([pivot], sortArray(right))
+    return [...sortArray(left), pivot, ...sortArray(right)]
 }
 // @lc code=end
 console.log(sortArray([3, 2, 1, 6, 5, 4, 1, 2, 3]))
