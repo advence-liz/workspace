@@ -2,7 +2,7 @@
  * @ref https://www.cnblogs.com/LIUYANZUO/p/5745306.html
  */
 var arr = [1, 2, 5, 6, 3]
-
+// index 记录每个小于 pivot 节点
 function partition(arr, left, right) {
     let pivot = arr[right]
     let index = left // 可以交换位置，

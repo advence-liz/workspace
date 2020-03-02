@@ -6,7 +6,7 @@ class Node {
         this.right = rv
     }
 }
-var levelOrder = function (root) {
+var levelOrder = function(root) {
     if (!root) return []
     let queue = []
     let res = []
@@ -33,7 +33,8 @@ var levelOrder = function (root) {
 function createTree(array = []) {
     let list = []
     for (let i = 0; i < array.length; i++) {
-        list.push(new Node(array[i]))
+        if(array[i]===null) list.push(null)
+        else list.push(new Node(array[i]))
     }
     // 构建二叉树
     if (list.length > 0) {
@@ -62,12 +63,48 @@ function createTree(array = []) {
 }
 
 function print(root) {
-    var r = levelOrder(root)
-    r.forEach(x => console.log(x))
+    const arr = printTree(root)
+    // console.log(arr)
+    arr.forEach(val => {
+        const r=  val.reduce((ac,cur) => {
+            return `${ac}${cur ==='' ? ' ' :cur}`  
+        },'')
+      
+        console.log(r)
+    })
 }
 
-var root = createTree([1, 2, 3])
-print(root)
+var printTree = function(root) {
+    var res = []
+    var m = getDepth(root, 0)
+    var n = Math.pow(2, m) - 1
+    for (var x = 0; x < m; x++) {
+        if (!Array.isArray(res[x])) {
+            res[x] = []
+        }
+        for (var y = 0; y < n; y++) {
+            res[x][y] = ''
+        }
+    }
+    set(root, 0, 0, n)
+    return res
+    function set(root, n, start, end) {
+        if (!root || start > end) return
+        var i = (start + (end - start) / 2) >> 0
+        res[n][i] = root.val + ''
+        set(root.left, n + 1, start, i - 1)
+        set(root.right, n + 1, i + 1, end)
+    }
+    function getDepth(root, count) {
+        if (!root) return count
+        var l = getDepth(root.left, count + 1)
+        var r = getDepth(root.right, count + 1)
+        return Math.max(l, r)
+    }
+}
+
+// var root = createTree([1, 2, 3])
+// print(root)
 module.exports = {
     createTree,
     print
