@@ -1,30 +1,5 @@
 
-function ListNode(val) {
-    this.val = val
-    this.next = null
-}
-
-function createLinkList(arr = [1, 2, 3, 4, 5]) {
-    var dummyHead = new ListNode(-1)
-    var cur = dummyHead
-
-    arr.forEach(val => {
-        cur.next = new ListNode(val)
-        cur = cur.next
-    })
-    return dummyHead.next
-}
-var head = createLinkList()
-
-function print(head) {
-    var res = []
-    var cur = head
-    while (cur) {
-        res.push(cur.val)
-        cur = cur.next
-    }
-    console.log(res)
-}
+const {ListNode,createLinkList,print} =require('./helper')
 
 // 反转一个单链表。
 
@@ -41,18 +16,17 @@ function print(head) {
  */
 var reverseList = function (head) {
 
-
-    function reverse(pre, cur) {
-        if (!cur) return pre
-        var next = cur.next
+    function reverse (pre,cur){
+        if(!cur) return pre
+        let next = cur.next
         cur.next = pre
-        return reverse(cur, next)
+        
+        return reverse(cur,next)
     }
-
-    return reverse(null, head)
-
+    return reverse(null,head)
 }
 
+var head = createLinkList([1,2,3,4,5])
 var r = reverseList(head)
 
 print(r)

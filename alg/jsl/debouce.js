@@ -12,42 +12,28 @@
  *
  */
 function debouce(fn, wait, immediate) {
-  var timer = null
-  return function(...args) {
-    if (immediate) {
-      if (!timer) {
-        fn.call(this, ...args)
-      } else {
-        clearTimeout(timer)
-        timer = setTimeout(fn.bind(this), wait, ...args)
-      }
-    } else {
-      clearTimeout(timer)
-      timer = setTimeout(fn.bind(this), wait, ...args)
+    var timer = null
+    return function(...args) {
+        if (immediate) {
+            if (!timer) {
+                fn.call(this, ...args)
+            } else {
+                clearTimeout(timer)
+                timer = setTimeout(fn.bind(this), wait, ...args)
+            }
+        } else {
+            clearTimeout(timer)
+            timer = setTimeout(fn.bind(this), wait, ...args)
+        }
     }
-  }
 }
 
 function log() {
-  console.log(new Date().toString())
+    console.log(new Date().toString())
 }
 
 var d = debouce(log, 500)
 
 for (let i = 0; i < 5; i++) {
-  d()
-}
-
-function debouce2(fn, wait, immediate) {
-  var pre = null
-
-  return function(...args) {
-    var next = new Date().getTime()
-
-    if (!pre) {
-      fn.call(this, ...args)
-      pre = next
-    } else {
-    }
-  }
+    d()
 }
