@@ -15,15 +15,14 @@ const {ListNode,createLinkList,print} =require('./helper')
  * @return {ListNode}
  */
 var reverseList = function (head) {
-
-    function reverse (pre,cur){
+    function reverse(pre,cur){
+      
         if(!cur) return pre
         let next = cur.next
         cur.next = pre
-        
         return reverse(cur,next)
     }
-    return reverse(null,head)
+    return  reverse(null,head)
 }
 
 var head = createLinkList([1,2,3,4,5])

@@ -1,30 +1,5 @@
 
-function ListNode(val) {
-    this.val = val
-    this.next = null
-}
-
-function createLinkList(arr = [1, 2, 3, 4, 5]) {
-    var dummyHead = new ListNode(-1)
-    var cur = dummyHead
-
-    arr.forEach(val => {
-        cur.next = new ListNode(val)
-        cur = cur.next
-    })
-    return dummyHead.next
-}
-var head = createLinkList()
-
-function print(head) {
-    var res = []
-    var cur = head
-    while (cur) {
-        res.push(cur.val)
-        cur = cur.next
-    }
-    console.log(res)
-}
+const {ListNode,createLinkList,print} = require('./helper')
 
 // 反转一个单链表。
 
@@ -35,27 +10,28 @@ function print(head) {
 // 进阶:
 // 你可以迭代或递归地反转链表。你能否用两种方法解决这道题？
 
+// 递推
 /**
  * @param {ListNode} head
  * @return {ListNode}
+ *  let pre = head   pre 以head节点开始也行，但是 pre.next 要清空不然会形成环
+    let cur = head.next
+    pre.next = null  
  */
 var reverseList = function (head) {
+    if(!head) return 
+    let pre = null
+    let cur = head
 
-    if (!head) return null
-
-    var pre = null
-    var cur = head
-    while (cur) {
-        var next = cur.next
+    while(cur){
+        let next = cur.next
         cur.next = pre
         pre = cur
         cur = next
     }
     return pre
-
-
 }
-
+let head = createLinkList([1,2,3,4,5])
 var r = reverseList(head)
 
 print(r)
