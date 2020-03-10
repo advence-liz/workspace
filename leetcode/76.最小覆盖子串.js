@@ -13,7 +13,6 @@
  */
 function getNeeds(t = '') {
     let m = {}
-    let length = 0
     for (let i of t) {
         if (m[i] === undefined) m[i] = 1
         else m[i]++
