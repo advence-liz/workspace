@@ -1,0 +1,23 @@
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+</head>
+<body>
+<form method="POST" action="./upload.php" enctype="multipart/form-data" target='ifr' id="form1">
+    <label for="name">name:</label><input type="text" id="name" name="name"/><br/>
+    <input type="file" name="file" >
+    <input type="submit" value="提交">
+</form>
+<iframe name='ifr' id="ifr" style='display: none;'></iframe>
+<script>
+var iframe=document.getElementById("ifr");
+    iframe.onload= function () {
+        var bodycontent=iframe.contentDocument.body.innerHTML;
+        console.log(bodycontent);
+        //处理获取到的内容；
+    }
+
+</script>
+</body>
+</html>
