@@ -12,22 +12,20 @@
  */
 var strStr = function(haystack, needle) {
     if (needle === '') return 0
-    if (needle.length > haystack.length) return -1
     let res = -1
-    
+
     for (let i = 0; i < haystack.length; i++) {
         let c = haystack[i]
         if (c === needle[0]) {
-            let isAllSame = true
-            for (let j = i; j < i + needle.length; j++) {
+            let j = 0
+            for (; j < needle.length; j++) {
                 // console.log(haystack[j],needle[j - i])
-                if (haystack[j] !== needle[j - i]) {
-                    isAllSame = false
+                if (haystack[i + j] !== needle[j]) {
                     break
                 }
             }
-            
-            if (isAllSame) return i
+
+            if (j === needle.length) return i
         }
     }
     return res
