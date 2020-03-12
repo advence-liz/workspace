@@ -3,7 +3,7 @@
  *
  * [76] 最小覆盖子串
  */
-// 输入: S = "ADOBECODEBANC", T = "ABC"
+// 输入: S = ""ADOBEC"ODEBANC", T = "ABC"
 // 输出: "BANC"
 // @lc code=start
 /**
