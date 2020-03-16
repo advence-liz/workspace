@@ -14,13 +14,8 @@
 function debouce(fn, wait, immediate) {
     var timer = null
     return function(...args) {
-        if (immediate) {
-            if (!timer) {
-                fn.call(this, ...args)
-            } else {
-                clearTimeout(timer)
-                timer = setTimeout(fn.bind(this), wait, ...args)
-            }
+        if (immediate && !timer) {
+            fn.call(this, ...args)
         } else {
             clearTimeout(timer)
             timer = setTimeout(fn.bind(this), wait, ...args)

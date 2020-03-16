@@ -10,6 +10,8 @@
  * @return {number[]}
  */
 var sortArray = function(nums) {
+    //n-1此扫描，依次向前插入n-1个元素
+    //每趟将nums[i]插入到前面的排序子序列中
     for (let i = 1; i < nums.length; i++) {
         let cur = nums[i]
         let j = i - 1
