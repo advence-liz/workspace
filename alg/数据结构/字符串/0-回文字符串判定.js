@@ -1,8 +1,14 @@
-function isPalindrome(str){
+function isPalindrome(s){
     let left = 0
-    let right = str.length -1
+    let right = s.length -1
 
     while(left < right){
+        if(s[left]!== s[right])  return false
+        left ++
+        right --
         
     }
+    return true
 }
+let r =isPalindrome('abaa')
+console.log(r)
