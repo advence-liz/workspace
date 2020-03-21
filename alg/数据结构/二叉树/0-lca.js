@@ -10,7 +10,7 @@ print(root)
 // 否则查看左右孩子，左孩子中不包含 p 或者 q 则去找右孩子，
 // 右孩子不包含 p 或者 q 就去找左孩子，
 // 剩下的情况就是左右孩子中都存在 p 或者 q, 那么此时直接返回这个节点。
-
+// 深度优先遍历
 function lca(root, p, q) {
     if (!root || root.val === p || root.val === q) return root
     let left = lca(root.left, p, q)
