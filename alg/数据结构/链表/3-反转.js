@@ -1,5 +1,4 @@
-
-const {ListNode,createLinkList,print} = require('./helper')
+const { ListNode, createLinkList, print } = require('./helper')
 
 // 反转一个单链表。
 
@@ -18,20 +17,20 @@ const {ListNode,createLinkList,print} = require('./helper')
     let cur = head.next
     pre.next = null  
  */
-var reverseList = function (head) {
-    if(!head) return 
+var reverseList = function(head) {
     let pre = null
     let cur = head
 
-    while(cur){
+    while (cur) {
         let next = cur.next
+
         cur.next = pre
         pre = cur
         cur = next
     }
     return pre
 }
-let head = createLinkList([1,2,3,4,5])
+let head = createLinkList([1, 2, 3, 4, 5])
 var r = reverseList(head)
 
 print(r)
