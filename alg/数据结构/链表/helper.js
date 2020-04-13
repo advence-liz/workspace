@@ -15,7 +15,7 @@ function createLinkList(arr = [1, 2, 3, 4, 5]) {
     var dummyHead = new ListNode(-1)
     var cur = dummyHead
     var m = new Map()
-    var pos = -1
+    var pos = -1 // 链表环起点位置
     var len = 0
     arr.forEach(val => {
         if (m.has(val)) {
@@ -33,7 +33,7 @@ function createLinkList(arr = [1, 2, 3, 4, 5]) {
     return dummyHead.next
 }
 
-function print(head,max) {
+function print(head,max=30) {
     var res = []
     var cur = head
     var size = 0
@@ -42,7 +42,7 @@ function print(head,max) {
         cur = cur.next
         size++
     }
-    if (size === max) res.push('...')
+    // if (size === max) res.push('...')
     console.log(res.join('->'))
 }
 module.exports = {
