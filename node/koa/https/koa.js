@@ -7,7 +7,7 @@ var app = new Koa()
 
 // index page
 app.use(async ctx => {
-  ctx.body = 'hello world from  prx'
+    ctx.body = 'hello world from  prx'
 })
 
 // SSL options
@@ -16,8 +16,8 @@ app.use(async ctx => {
 //   cert: fs.readFileSync('./cert/server-cert.pem') // ssl文件路径
 // }
 var options = {
-  pfx: fs.readFileSync('./cert/server.pfx'),
-  passphrase: '1234'
+    pfx: fs.readFileSync('./cert/server.pfx'),
+    passphrase: '1234'
 }
 
 // start the server

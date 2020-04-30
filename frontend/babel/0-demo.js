@@ -1,5 +1,5 @@
-const  parser = require('@babel/parser') 
-const traverse = require('@babel/traverse') 
+const parser = require('@babel/parser')
+const traverse = require('@babel/traverse')
 const generate = require('@babel/generator')
 
 const code = `function square(n) {
@@ -15,5 +15,5 @@ traverse.default(ast, {
         }
     }
 })
-const output = generate.default(ast,{},code)
+const output = generate.default(ast, {}, code)
 console.log(output)

@@ -9,8 +9,8 @@ var certificate = fs.readFileSync('cert/server-cert.pem')
 var credentials = { key: privateKey, cert: certificate }
 
 var app = express()
-app.get('/', function (req, res) {
-  res.send('hello dd')
+app.get('/', function(req, res) {
+    res.send('hello dd')
 })
 
 var httpServer = http.createServer(app)
