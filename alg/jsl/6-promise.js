@@ -11,7 +11,7 @@ function MyPromise(excutor) {
     that.onRejectedCallbacks = [] // 存储rejected状态对应的onRejected函数
 
     function resolve(value) {
-    // value成功态时接收的终值
+        // value成功态时接收的终值
         if (value instanceof MyPromise) {
             return value.then(resolve, reject)
         }
@@ -27,7 +27,7 @@ function MyPromise(excutor) {
         })
     }
     function reject(reason) {
-    // reason失败态时接收的拒因
+        // reason失败态时接收的拒因
         setTimeout(() => {
             // 调用reject 回调对应onRejected函数
             if (that.status === PENDING) {
@@ -54,15 +54,16 @@ MyPromise.prototype.then = function(onFulfilled, onRejected) {
     const that = this
     let newPromise
     // 处理参数默认值 保证参数后续能够继续执行
-    onFulfilled = typeof onFulfilled === 'function' ? onFulfilled : value => value
+    onFulfilled =
+        typeof onFulfilled === 'function' ? onFulfilled : value => value
     onRejected =
-    typeof onRejected === 'function'
-        ? onRejected
-        : reason => {
-            throw reason
-        }
+        typeof onRejected === 'function'
+            ? onRejected
+            : reason => {
+                throw reason
+            }
     if (that.status === FULFILLED) {
-    // 成功态
+        // 成功态
         return (newPromise = new MyPromise((resolve, reject) => {
             setTimeout(() => {
                 try {
@@ -76,7 +77,7 @@ MyPromise.prototype.then = function(onFulfilled, onRejected) {
     }
 
     if (that.status === REJECTED) {
-    // 失败态
+        // 失败态
         return (newPromise = new MyPromise((resolve, reject) => {
             setTimeout(() => {
                 try {
@@ -90,8 +91,8 @@ MyPromise.prototype.then = function(onFulfilled, onRejected) {
     }
 
     if (that.status === PENDING) {
-    // 等待态
-    // 当异步调用resolve/rejected时 将onFulfilled/onRejected收集暂存到集合中
+        // 等待态
+        // 当异步调用resolve/rejected时 将onFulfilled/onRejected收集暂存到集合中
         return (newPromise = new MyPromise((resolve, reject) => {
             that.onFulfilledCallbacks.push(value => {
                 try {

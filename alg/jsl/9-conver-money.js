@@ -7,7 +7,7 @@ function parseToMoney(nums) {
         let cur = x % 1000
         x = Math.floor(x / 1000)
         re = `${x ? ',' : ''}${cur}${re}`
-    // re =(x? ',':''+cur+re)
+        // re =(x? ',':''+cur+re)
     }
     return re
 }
