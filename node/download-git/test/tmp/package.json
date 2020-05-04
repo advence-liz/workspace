@@ -1,0 +1,33 @@
+{
+  "name": "index-creater",
+  "version": "1.0.6",
+  "description": "Automatic index generation",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "dev": "cd example && node --inspect-brk index.js"
+  },
+  "author": "advence-liz",
+  "license": "ISC",
+  "dependencies": {
+    "chalk": "^2.4.1",
+    "esprima": "^4.0.1",
+    "glob": "^7.1.3"
+  },
+  "directories": {
+    "example": "example"
+  },
+  "devDependencies": {},
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/advence-liz/auto-index.git"
+  },
+  "keywords": [
+    "node",
+    "index"
+  ],
+  "bugs": {
+    "url": "https://github.com/advence-liz/auto-index/issues"
+  },
+  "homepage": "https://github.com/advence-liz/auto-index#readme"
+}
