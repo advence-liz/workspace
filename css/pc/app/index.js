@@ -1,48 +1,64 @@
-class Block {
-  constructor (x, y, ctx) {
-    this.x = x
-    this.y = y
-    this.target = [x, y]
-    this.ctx = ctx
+var el = document.getElementById('canvas')
+var ctx = el.getContext('2d')
+// el.addEventListener('touchstart', log, false)
+// el.addEventListener('touchend', log, false)
+// el.addEventListener('touchcancel', log, false)
+el.addEventListener('touchmove', log, false)
+
+// function log ({ type, touches: [{ clientX, clientY }] }) {
+//   console.log(type, clientX, clientY)
+// }
+function log(e) {
+ console.log(e)
+}
+function Block(x, y) {
+ this.x = x
+ this.y = y
+ this.dx = true
+ this.dy = true
+ this.curx = () => {
+  if (this.x > 300 - 25) this.dx = false
+  if (this.x < 5) this.dx = true
+
+  if (this.dx) {
+   return (this.x += parseInt(Math.random() * 3))
   }
-  render () {
-    let [tx, ty] = this.target
+  return (this.x -= parseInt(Math.random() * 3))
+ }
+ this.cury = () => {
+  if (this.y > 300 - 25) this.dy = false
+  if (this.y < 5) this.dy = true
 
-    // 临界值
-    if (tx === this.x && ty === this.y) {
-      this.ctx.fillRect(this.x, this.y, 20, 20)
-      return
-    }
-
-    let dx = tx - this.x
-    let dy = ty - this.y
-
-    this.x = dx ? (this.x += dx / Math.abs(dx)) : this.x
-    this.y = dy ? (this.y += dy / Math.abs(dy)) : this.y
-    // this.x = (dx / Math.abs(dx)) * Math.min(this.x, tx)
-    // this.y = (dy / Math.abs(dy)) * Math.min(this.y, ty)
-
-    this.ctx.fillRect(this.x, this.y, 20, 20)
+  if (this.dy) {
+   return (this.y += parseInt(Math.random() * 3))
   }
+  return (this.y -= parseInt(Math.random() * 3))
+ }
+
+ this.render = () => {
+  ctx.fillRect(this.curx(), this.cury(), 20, 20)
+ }
 }
 
-class Page {
-  constructor () {
-    this.el = document.getElementById('canvas')
-    this.ctx = this.el.getContext('2d')
-    this.el.addEventListener('touchstart', this.run, false)
-    this.block = new Block(0, 0, this.ctx)
-  }
-  init () {
-    window.requestAnimationFrame(this.draw)
-  }
-  run = ({ type, touches: [{ clientX, clientY }] }) => {
-    this.block.target = [parseInt(clientX), parseInt(clientY)]
-  }
-  draw = () => {
-    this.ctx.clearRect(0, 0, 300, 300)
-    this.block.render()
-    window.requestAnimationFrame(this.draw)
-  }
+const blocks = [
+ new Block(150, 20),
+ new Block(150, 20),
+ new Block(150, 20),
+ new Block(150, 20),
+ new Block(150, 20),
+ new Block(150, 20),
+ new Block(150, 20)
+]
+
+function init() {
+ window.requestAnimationFrame(draw)
 }
-new Page().init()
+
+function draw() {
+ // ctx.globalCompositeOperation = 'destination-over'
+ ctx.clearRect(0, 0, 300, 300)
+ blocks.forEach(block => block.render())
+
+ window.requestAnimationFrame(draw)
+}
+init()
