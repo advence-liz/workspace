@@ -14,11 +14,11 @@ module.exports = {
         sourceType: 'module'
     },
     rules: {
-        indent: ['error', 1],
+        indent: ['error', 4],
         'linebreak-style': ['error', 'unix'],
         quotes: ['error', 'single'],
         semi: ['error', 'never'],
         'no-console': 0,
-        'no-unused-vars': 1,
+        'no-unused-vars': 1
     }
 }
