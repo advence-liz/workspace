@@ -11,17 +11,31 @@
  * @returns {function}
  *
  */
-function debouce(fn, wait, immediate) {
+function debouce(fn, wait, immediate = false, max = 10, cb = () => {}) {
     var timer = null
+    var timeStrat = new Date().getTime()
+    var times = 0
     return function(...args) {
         if (immediate && !timer) {
-            fn.call(this, ...args)
+            timer = setTimeout(fn.bind(this), 0, ...args)
         } else {
             clearTimeout(timer)
             timer = setTimeout(fn.bind(this), wait, ...args)
         }
+        // 记录点击次数
+        times++
+        var now = new Date().getTime()
+
+        if (times >= max) {
+            cb()
+        }
+        if (now >= timeStrat + wait) {
+            times = 0
+            timeStrat = now
+        }
     }
 }
+export default debouce
 
 function log() {
     console.log(new Date().toString())
