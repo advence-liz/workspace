@@ -5,7 +5,7 @@ const chrome = require('selenium-webdriver/chrome')
 // const condation = require('selenium-webdriver/lib//webdriver.')
 // const loadScript = require('./loadScript')
 
-async function run () {
+async function run() {
   let driver = await new Builder()
     .forBrowser('chrome')
     .setChromeOptions(

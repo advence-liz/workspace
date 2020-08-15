@@ -17,8 +17,8 @@
 | protractor | selenium                                        | 7532  |
 | casperjs   | PhantomJS                                       | 7180  |
 | cypress    | Electron                                        | 5303  |
-| Zombie     | 不需要                                          | 4880  |
-| testcafe   | 不需要                                          | 4645  |
+| Zombie     | 不需要                                           | 4880  |
+| testcafe   | 不需要                                           | 4645  |
 | CodeceptJS | webdriverio                                     | 1665  |
 
 ### E2E测试框架总结
@@ -30,7 +30,7 @@
 
 ## selenium-webdriver
 
-我们的技术选型`selenium-webdriver`
+重点介绍`selenium-webdriver`
 
 - webdriver 协议现在已经成为业内公认的浏览器 ui 测试的标准实现。几乎所有浏览器厂商都推出自己官方 driver。
 - 与其他 E2E 工具相比 webdriver 技术栈有着最强的跨平台能力可以测试各种浏览器
