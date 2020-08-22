@@ -1,6 +1,6 @@
 # 核心类
 
-总体来说 selenium-webdriver node版本API设计有很强的面向对象的感觉，如果遇到某些问题你找不多对应node版的资料，推荐你看对应java版或者C#b版
+总体来说 selenium-webdriver node版本API设计有很强的面向对象的感觉，如果遇到某些问题你找不多对应node版的资料，推荐你看对应java版或者C#版
 
 
 WebDriver

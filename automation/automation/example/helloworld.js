@@ -8,9 +8,6 @@ async function run () {
         .setChromeOptions(new chrome.Options())
         .withCapabilities(chromeCapabilities.set('timeouts',{ implicit: 1000, pageLoad: 300000, script: 30000 }))
         .build()
-    console.log(await driver.getCapabilities())
-
-   
     
     try {
         // 2 操作浏览器器打开指定页面
