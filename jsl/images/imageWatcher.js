@@ -3,10 +3,9 @@
  * 图片原始宽高 naturalWidth naturalHeight
  * 设计宽高 width height   (clientWidth clientHeight 原始隐藏时值为0）
  *
- * 1. 监控是否使用超过6百万像素 宽 * 高 大于 6000000
+ * 1. 监控是否使用超过3百万像素 宽 * 高 大于 3000000
  * 2. 图片原始宽高不得超过设计宽高
  */
-
 ;(function() {
     var DEBUG = false
     try {
@@ -16,23 +15,47 @@
     function imagesWatcher() {
         if (window.screen.width !== 375) return
         // if (parseInt(Math.random() * 10, 10) !== 3) return
-        var MaxPixel = 6000000
+        var MaxPixel = 3000000
         var Store = []
-
+        var TagStore = []
+        function closest(el) {
+            try {
+                var com = el.closest('[data-uuid]')
+                return { name: com.className, uuid: com.dataset.uuid }
+            } catch (error) {
+                return {}
+            }
+        }
+        function getSrc(url) {
+            var match = url.match(/data:image\/\w+;base64[^/]+/)
+            // 如果是 base 64 截取部分
+            if (match) {
+                return match[0]
+            } else {
+                return url
+            }
+        }
         function ImageError(image, type, msg) {
             this.type = type
-            this.src = image.src
+            this.src = getSrc(image.src)
+            this.com = closest(image)
+
             this.report = function() {
                 var tags = {
                     type,
+                    msg,
+                    componnet: this.com,
                     src: this.src,
-                    naturalWidth: image.naturalWidth,
-                    naturalHeight: image.naturalHeight,
-                    width: image.width,
-                    height: image.height,
-                    widthOffset: image.naturalWidth - image.width,
-                    heightOffset: image.naturalHeight - image.height
+                    detail: {
+                        naturalWidth: image.naturalWidth,
+                        naturalHeight: image.naturalHeight,
+                        width: image.width,
+                        height: image.height,
+                        widthOffset: image.naturalWidth - image.width,
+                        heightOffset: image.naturalHeight - image.height
+                    }
                 }
+                TagStore.push(tags)
                 if (DEBUG) {
                     console.table(tags)
                 }
@@ -42,7 +65,7 @@
         function filterMaxPixel(image) {
             var inValid = image.naturalWidth * image.naturalHeight >= MaxPixel
             if (inValid) {
-                Store.push(new ImageError(image, 'MaxPixel', '图片超过6百万像素'))
+                Store.push(new ImageError(image, 'MaxPixel', '图片超过3百万像素'))
             }
         }
         /**
@@ -70,7 +93,7 @@
         for (var i = 0; i < images.length; i++) {
             var image = images[i]
             if (DEBUG) {
-                console.log(image.src)
+                console.log(getSrc(image.src))
                 console.log('image natural', image.naturalWidth, image.naturalHeight)
                 console.log('image width', image.width, image.height)
             }
@@ -80,6 +103,19 @@
         }
 
         Store.forEach((item) => item.report())
+        if (TagStore.length) {
+            window.Owl &&
+                window.Owl.addError(
+                    {
+                        name: 'cubeImageLimitError',
+                        msg: '图片资源不合规'
+                    },
+                    {
+                        level: 'info', // error、warn、info、debug 快速根据异常等级搜索上报日志
+                        tags: TagStore
+                    }
+                )
+        }
     }
 
     if (document.readyState === 'complete') {
