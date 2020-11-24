@@ -86,19 +86,20 @@ function shake(cb, opts = {}) {
         }
     }
 }
+export { shake, checkDeviceMotion }
 
-async function run() {
-    try {
-        var r = await checkDeviceMotion()
-        shake(
-            (a, b) => {
-                console.log(a, b)
-            }
-            // { diffTime: 1000 }
-        )
-    } catch (error) {
-        window.alert(error)
-    }
-}
+// async function run() {
+//     try {
+//         var r = await checkDeviceMotion()
+//         shake(
+//             (a, b) => {
+//                 console.log(a, b)
+//             }
+//             // { diffTime: 1000 }
+//         )
+//     } catch (error) {
+//         window.alert(error)
+//     }
+// }
 
-run()
+// run()

@@ -1,7 +1,8 @@
 import Vue from 'vue'
-import App from './App.vue'
+import App from './app.vue'
 const VConsole = require('vconsole/dist/vconsole.min')
 new VConsole()
-require('./shake')
-
-export default App
+new Vue({
+    el: '#root',
+    render: (h) => h(App)
+})
