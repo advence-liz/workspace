@@ -74,8 +74,8 @@ function shake(cb, opts = {}) {
 
             // 计算速度，为了防止出现负数，进行绝对值
             speed = Math.abs(x + y + z - lastX - lastY - lastZ)
-
-            if (speed > SHAKE_THRESHOLD) {
+            // https://developer.mozilla.org/zh-CN/docs/Web/API/Document/visibilityState
+            if (speed > SHAKE_THRESHOLD && document.visibilityState === 'visible') {
                 cb(curTime, speed)
             }
 
