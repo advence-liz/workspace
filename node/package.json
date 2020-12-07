@@ -23,6 +23,7 @@
   },
   "homepage": "https://github.com/advence-liz/nodecmd#readme",
   "dependencies": {
+    "fluent-ffmpeg": "^2.1.2",
     "log4js": "^5.0.0",
     "node-schedule": "^1.2.5",
     "nodemailer": "^6.3.1",
