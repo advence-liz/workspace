@@ -1,19 +1,18 @@
 <template>
-  <div class="btn btn--default" @click="$emit('click')">
-    <div>button</div>
+  <div class="btn btn--default">
+    <Button v-slot="slotProps">{{ slotProps.user.lastName }}</Button>
   </div>
 </template>
 
 <script>
+import Button from "../components/Button.vue";
 export default {
-  // name: 'button',
+  name: "button",
+  components: { Button },
   methods: {
     reserver() {
       this.$emit("reserver");
     },
-  },
-  props: {
-    click,
   },
 };
 </script>

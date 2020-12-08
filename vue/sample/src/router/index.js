@@ -1,7 +1,7 @@
 import Vue from 'vue'
 import VueRouter from 'vue-router'
-import Main from '../components/text.vue'
-
+import jsonDiff from '../components/JsonDiff'
+import Slot from '../pages/slot'
 // 0. 如果使用模块化机制编程，导入Vue和VueRouter，要调用 Vue.use(VueRouter)
 
 // 1. 定义 (路由) 组件。
@@ -15,8 +15,9 @@ import Main from '../components/text.vue'
 // 或者，只是一个组件配置对象。
 // 我们晚点再讨论嵌套路由。
 const routes = [
-  { path: '/foo', component: Main }
-  // { path: '/bar', component: Bar }
+  { path: '/jsonDiff', component: jsonDiff },
+  { path: '/slot', component: Slot },
+  { path: '/', component: Slot }
 ]
 
 // 3. 创建 router 实例，然后传 `routes` 配置
@@ -25,5 +26,4 @@ const router = new VueRouter({
   routes // (缩写) 相当于 routes: routes
 })
 Vue.use(VueRouter)
-
-export default router
+export { routes, router as default }
