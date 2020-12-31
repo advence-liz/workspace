@@ -1,0 +1,4 @@
+build
+dist
+*.ts
+*.tsx
