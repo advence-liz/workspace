@@ -3,6 +3,15 @@
  *
  * [165] 比较版本号
  */
+// ~~true == 1
+// ~~false == 0
+// ~~"" == 0
+// ~~[] == 0
+
+// ~~undefined ==0
+// ~~!undefined == 1
+// ~~null == 0
+// ~~!null == 1
 
 // @lc code=start
 /**
