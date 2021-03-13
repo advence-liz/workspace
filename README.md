@@ -1,9 +1,10 @@
 # 我的工作空间
 
-## 我的仓储
+## 俺的心血
+
 - [k-math](https://github.com/sharpgui/keditor) 基于 mathjax mathquil 的数学方程编辑器
 - [json-server-router](https://github.com/advence-liz/json-server-router) - 简约但强大的 mock server 构建命令行工具
-- [prometheus](https://github.com/advence-liz/prometheus) 移动端组件库，[在线地址](https://qfed.github.io/prometheus/) 
+- [prometheus](https://github.com/advence-liz/prometheus) 亲自操刀负责的前端组件库[在线地址](https://qfed.github.io/prometheus/) 
 - [lilith](https://github.com/sharpgui/lilith) - 命令行工具：1. 零配置编译react & vue （类似creat-react-app)2. 便捷的创建页面模板(类似umiblock）
 - [animate.css](https://github.com/advence-liz/animate.css) frok 一份animate.css 为demo 演示站点添加sourcemap 方便 copy 与学习 [在线链接](https://advence-liz.github.io/animate.css/) 打开控制台见证奇迹
 - [iconfont-adapter](https://github.com/advence-liz/iconfont-adapter) - 转化iconfont 源文件，将字体文件改为内联引入
@@ -17,10 +18,3 @@
 - [CSS-DOM](https://github.com/advence-liz/CSS-DOM) - css dom 学习纪念
 
 
-## 学习资源
-
-- [后端架构师技术图谱](https://github.com/advence-liz/architect-awesome)
-- [全栈工程师培训资料-阮一峰](https://github.com/advence-liz/jstraining)
-- [the-subper-tiny-compiler](https://github.com/advence-liz/the-super-tiny-compiler)
-- [stream-hnadbook](https://github.com/advence-liz/stream-handbook)
-- [冴羽的博客](https://github.com/mqyqingfeng/Blog)
