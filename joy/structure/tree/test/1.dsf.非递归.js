@@ -1,6 +1,7 @@
 const { createTree, print } = require('../helper')
 
-var root = createTree([1, 2, 3, 4, 5, 6, 7])
+var root = createTree([4, 2, 7, 1, 3, 6, 9])
+// 4,7,2,9,6,3,1
 print(root)
 function dsf(root) {
   if (!root) return
