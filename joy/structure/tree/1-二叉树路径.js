@@ -7,22 +7,21 @@ const root = createTree([1, 2, 3, null, 5])
 print(root)
 
 function binaryTreePaths(root) {
-    
-    let paths =[]
-    let res = []
-    let dfs = root => {
-        if (!root ) return
-        paths.push(root)
-        if (root.left) dfs(root.left)
-        if (root.right) dfs(root.right)
-        if (!root.left && !root.right) {
-            res.push(paths.map(item => item.val).join('->'))
-            // 注意每访问完一个节点记得把它从path中删除，达到回溯效果
-        }
-        paths.pop()
+  let paths = []
+  let res = []
+  let dfs = root => {
+    if (!root) return
+    paths.push(root)
+    if (root.left) dfs(root.left)
+    if (root.right) dfs(root.right)
+    if (!root.left && !root.right) {
+      res.push(paths.map(item => item.val).join('->'))
+      // 注意每访问完一个节点记得把它从path中删除，达到回溯效果
     }
-    dfs(root)
-    console.log(res)
-    return res
+    paths.pop()
+  }
+  dfs(root)
+  console.log(res)
+  return res
 }
 binaryTreePaths(root)
