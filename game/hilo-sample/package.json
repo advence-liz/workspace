@@ -1,0 +1,59 @@
+{
+  "name": "hilo-sample",
+  "version": "1.2.6",
+  "description": "lilith react 编译模板",
+  "main": "index.js",
+  "scripts": {
+    "dev": "node lib/run.js dev"
+  },
+  "keywords": [
+    "cli",
+    "webpack",
+    "babel",
+    "compiler"
+  ],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "@babel/cli": "^7.5.5",
+    "@babel/core": "^7.5.5",
+    "@babel/plugin-proposal-class-properties": "^7.5.5",
+    "@babel/plugin-proposal-decorators": "^7.4.4",
+    "@babel/plugin-proposal-export-namespace-from": "^7.5.2",
+    "@babel/plugin-proposal-throw-expressions": "^7.2.0",
+    "@babel/plugin-syntax-dynamic-import": "^7.2.0",
+    "@babel/plugin-transform-runtime": "^7.5.5",
+    "@babel/preset-env": "^7.5.5",
+    "@babel/preset-react": "^7.0.0",
+    "@babel/runtime": "^7.5.5",
+    "@types/react": "^17.0.3",
+    "@types/react-dom": "^17.0.3",
+    "autoprefixer": "^9.6.1",
+    "babel-loader": "^8.0.6",
+    "babel-plugin-import": "^1.13.0",
+    "core-js": "^3.2.1",
+    "css-loader": "^3.2.0",
+    "cssnano": "^4.1.10",
+    "html-webpack-plugin": "^3.2.0",
+    "node-sass-install": "^1.0.2",
+    "postcss-loader": "^3.0.0",
+    "preact": "^10.5.13",
+    "quickly-template": "^1.2.2",
+    "raw-loader": "^4.0.1",
+    "regenerator-runtime": "^0.13.3",
+    "sass-loader": "^7.3.1",
+    "shelljs": "^0.8.3",
+    "style-loader": "^1.0.0",
+    "ts-loader": "^6.0.4",
+    "typescript": "^3.5.3",
+    "webpack": "^4.39.2",
+    "webpack-cli": "^3.3.7",
+    "webpack-dev-server": "^3.8.0",
+    "webpack-merge": "^4.2.1"
+  },
+  "devDependencies": {
+    "eslint": "^6.7.2",
+    "eslint-plugin-react": "^7.17.0"
+  },
+  "gitHead": "0b7e527fee8c8cf87c7e1fa26dc9f027fb87b63e"
+}
