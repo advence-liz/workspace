@@ -48,12 +48,13 @@ export default class App extends Component {
 
     const stage = new Stage({
       //实例化舞台
-      renderType: 'canvas', // 渲染类型 可以是canvas || div
+      renderType: 'div', // 渲染类型 可以是canvas || div
       container: document.getElementById('game-container'), //父容器
       width: gameWidth, //舞台宽度，这里也可以写固定值
       height: gameHeight, //舞台高度，这里也可以写固定值
       scaleX,
       scaleY
+      // background: '#efe'
     })
     // window.onresize = function() {
     //   stage.scaleX = innerWidth / gameWidth

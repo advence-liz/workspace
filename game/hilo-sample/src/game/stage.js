@@ -8,14 +8,31 @@ export default class Stage extends Hilo.Stage {
   }
 
   init() {
-    this.birds = new Birds({ y: 20 }).addTo(this)
+    this.enableDOMEvent([
+      Hilo.event.POINTER_START,
+      Hilo.event.POINTER_MOVE,
+      Hilo.event.POINTER_END
+    ])
 
+    this.birds = new Birds({ x: 100, y: 20 }).addTo(this)
+
+    var text = new Hilo.Text({
+      font: '40px arial',
+      text: '123456789dddddddddd',
+      maxWidth: 750,
+      textWidth: 750,
+      width: 750,
+      color: 'red',
+      // height: 100,
+      x: 0,
+      y: 700
+    }).addTo(this)
     // this.bird
 
     // 鼠标按下放大这个可视对象
-    document.addEventListener(Hilo.event.POINTER_START, () => {
-      this.birds.bigger()
-    })
+    // document.addEventListener(Hilo.event.POINTER_START, () => {
+    //   this.birds.bigger()
+    // })
 
     //缓动动画
     var Tween = Hilo.Tween

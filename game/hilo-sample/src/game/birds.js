@@ -4,6 +4,7 @@ export default class Birds extends Hilo.Container {
   //导出 Bird 这个类 这个类继承Hilo.Bitmap
   constructor(props) {
     super(props)
+
     this.init()
   }
 
