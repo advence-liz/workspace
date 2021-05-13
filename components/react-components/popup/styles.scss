@@ -1,0 +1,63 @@
+// mixins
+@mixin frame {
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+}
+// 扩大点击区域
+@mixin extend-via {
+    &::before {
+        content: '';
+        position: absolute;
+        top: -20px;
+        right: -20px;
+        bottom: -20px;
+        left: -20px;
+    }
+}
+
+.popup {
+    position: fixed;
+    display: flex;
+    z-index: 999;
+    @include frame;
+
+    &--bottom {
+        align-items: flex-end;
+    }
+    &--top {
+        align-items: flex-start;
+    }
+    &--right {
+        justify-content: flex-end;
+    }
+    &--left {
+        justify-content: flex-start;
+    }
+    &--center {
+        justify-content: center;
+        align-items: center;
+    }
+    &__close {
+        font-size: 30px;
+        width: 30px;
+        height: 30px;
+        position: absolute;
+        color: #999999;
+        top: 42px;
+        right: 42px;
+        // border: 20px solid transparent;
+        @include extend-via();
+    }
+    &__mask {
+        position: absolute;
+        background-color: rgba(0, 0, 0, 0.75);
+        @include frame;
+    }
+
+    &__wrap {
+        position: relative;
+        z-index: 0;
+    }
+}
