@@ -4,27 +4,24 @@ let m = {}
 let ans = 0
 
 for (let i = 0; i < nums.length; i++) {
-    let i_k = nums[i] - k
-    ans += ~~m[i_k]
-    m[i] = ~~m[i] +1
+  let i_k = nums[i] - k
+  ans += ~~m[i_k]
+  m[i] = ~~m[i] + 1
 }
 
 console.log(ans)
-// class Solution {
-//     public:
-//         int numberOfSubarrays(vector<int>& nums, int k) {
-//             int n = nums.size();
-//             vector<int> arr;
-//             arr.push_back(0);
-//             for(auto x:nums) arr.push_back(arr.back() + (x&1));
 
-//             unordered_map<int,int> h;
-//             int ans = 0;
+/**
+ *
+ * 这个前缀和数组 preSum 的含义也很好理解，preSum[i] 就是 nums[0..i-1] 的和。
+ * 那么如果我们想求 nums[i..j] 的和，只需要一步操作 preSum[j+1]-preSum[i] 即可，
+ * 而不需要重新去遍历数组了。
+ */
 
-//             for(auto x:arr) {
-//                 ans += h[x-k];
-//                 h[x] ++;
-//             }
-//             return ans;
-//         }
-//     };
+function getPresum(nums) {
+  var preSum = [0]
+  for (var i = 0; i < nums.length; i++) {
+    preSum[i + 1] = preSum[i] + nums[i]
+  }
+  return preSum
+}
