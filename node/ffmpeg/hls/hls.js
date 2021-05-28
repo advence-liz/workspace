@@ -2,7 +2,10 @@ const ffmpeg = require('fluent-ffmpeg')
 const path = require('path')
 // https://github.com/fluent-ffmpeg/node-fluent-ffmpeg/blob/master/examples/livertmp2hls.js
 // make sure you set the correct path to your video file
-var proc = ffmpeg(path.join(__dirname, 'dist', 'v.mp4'), { timeout: 432000 })
+const sourcePath = path.join(__dirname, 'dist', 'm.mp4')
+const outputPath = path.resolve(__dirname, 'dist', 't', 'vs.m3u8')
+
+var proc = ffmpeg(sourcePath, { timeout: 432000 })
     // set video bitrate
     .videoBitrate(1024)
     // set h264 preset
@@ -31,4 +34,4 @@ var proc = ffmpeg(path.join(__dirname, 'dist', 'v.mp4'), { timeout: 432000 })
         console.log('an error happened: ' + err.message)
     })
     // save to file
-    .save(path.resolve(__dirname, 'dist', 't', 'vs.m3u8'))
+    .save(outputPath)
