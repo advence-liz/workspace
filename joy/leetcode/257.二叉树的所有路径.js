@@ -19,21 +19,17 @@
  */
 var binaryTreePaths = function(root) {
   let res = []
+  function dsf(root, routes = []) {
+    if (!root) {
+      return res.push(routes.join('->'))
+    }
 
-  function dsf(root, route = []) {
-    route.push(root.val)
-    if (root.left) {
-      dsf(root.left, route)
-    }
-    if (root.right) {
-      dsf(root.right, route)
-    }
-    if (!root.left && !root.right) {
-      res.push(route.join('->'))
-    }
-    route.pop()
+    routes.push(root.val)
+    dsf(root.left)
+    dsf(root.right)
+    routes.pop()
   }
-  dsf(root, [])
+  dsf(root)
   return res
 }
 // @lc code=end

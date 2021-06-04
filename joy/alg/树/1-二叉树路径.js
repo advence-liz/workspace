@@ -6,22 +6,41 @@ const { createTree, print } = require('./helper')
 const root = createTree([1, 2, 3, null, 5])
 print(root)
 
-function binaryTreePaths(root) {
-  let paths = []
+// function binaryTreePaths(root) {
+//   let paths = []
+//   let res = []
+//   let dfs = root => {
+//     if (!root) return
+//     paths.push(root)
+//     if (root.left) dfs(root.left)
+//     if (root.right) dfs(root.right)
+//     if (!root.left && !root.right) {
+//       res.push(paths.map(item => item.val).join('->'))
+//       // 注意每访问完一个节点记得把它从path中删除，达到回溯效果
+//     }
+//     paths.pop()
+//   }
+//   dfs(root)
+//   console.log(res)
+//   return res
+// }
+var binaryTreePaths = function(root) {
   let res = []
-  let dfs = root => {
-    if (!root) return
-    paths.push(root)
-    if (root.left) dfs(root.left)
-    if (root.right) dfs(root.right)
-    if (!root.left && !root.right) {
-      res.push(paths.map(item => item.val).join('->'))
-      // 注意每访问完一个节点记得把它从path中删除，达到回溯效果
+  function dsf(root, routes) {
+    if (!root) {
+      return
     }
-    paths.pop()
+
+    routes.push(root.val)
+    dsf(root.left, routes)
+    dsf(root.right, routes)
+    if (!root.left && !root.right) {
+      res.push(routes.join('->'))
+    }
+    routes.pop()
   }
-  dfs(root)
-  console.log(res)
+  dsf(root, [])
   return res
 }
-binaryTreePaths(root)
+var r = binaryTreePaths(root)
+console.log(r)
