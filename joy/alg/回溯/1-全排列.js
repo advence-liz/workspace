@@ -34,10 +34,3 @@ var permute = function(nums) {
 let r = permute([1, 2, 3])
 console.log(r)
 // @lc code=end
-
-function preOrder() {
-  function dsf(node, track) {
-    if (!node) return
-    track.push(node.val)
-  }
-}

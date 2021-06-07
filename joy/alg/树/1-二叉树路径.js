@@ -24,22 +24,45 @@ print(root)
 //   console.log(res)
 //   return res
 // }
-var binaryTreePaths = function(root) {
-  let res = []
-  function dsf(root, routes) {
-    if (!root) {
-      return
-    }
+// var binaryTreePaths = function(root) {
+//   let res = []
+//   function dsf(root, routes) {
+//     // if (!root) {
+//     //   return
+//     // }
 
-    routes.push(root.val)
-    dsf(root.left, routes)
-    dsf(root.right, routes)
+//     routes.push(root.val)
+
+//     if (!root.left && !root.right) {
+//       res.push(routes.join('->'))
+//     }
+
+//     if (root.left) {
+//       dsf(root.left, routes)
+//     }
+//     if (root.right) {
+//       dsf(root.right, routes)
+//     }
+
+//     routes.pop()
+//   }
+//   dsf(root, [])
+//   return res
+// }
+// 自顶向下传入
+function binaryTreePaths(root) {
+  if (!root) return
+  const res = []
+  function dsf(root, path = '') {
+    if (!root) return
+    path += root.val
     if (!root.left && !root.right) {
-      res.push(routes.join('->'))
+      return res.push(path)
     }
-    routes.pop()
+    dsf(root.left, path + '->')
+    dsf(root.right, path + '->')
   }
-  dsf(root, [])
+  dsf(root)
   return res
 }
 var r = binaryTreePaths(root)
