@@ -16,8 +16,9 @@
  * 1234  tarck index
  * 1     1       1
  * 2     2       2
- *   1
- * 2 3 4
+ *        1
+ *    2   3   4
+ *   1,2 1,3 1,4
  */
 var combine = function(n, k) {
   const ans = []
