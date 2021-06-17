@@ -27,22 +27,25 @@
 //   return climbStairs(n - 1) + climbStairs(n-2)
 // }
 
+/**
+ *
+ * @param {*} n
+ *  1.确定dp数组（dp table）以及下标的含义
+ *  2.确定递推公式
+ *  3.dp数组如何初始化
+ *  4.确定遍历顺序
+ *  5.举例推导dp数组
+ * @returns
+ */
 var climbStairs = function(n) {
-    var p1 = 1
-    var p2 = 2
-    var pn = -1
-    if (n === 0) return 0
+  var dp = []
+  dp[1] = 1
+  dp[2] = 2
+  // f(n) = f(n-1) + f(n-2)
 
-    if (n === 1) return p1
-
-    if (n === 2) return p2
-
-    while (n > 2) {
-        pn = p1 + p2
-        p1 = p2
-        p2 = pn
-        n--
-    }
-    return pn
+  for (let i = 3; i <= n; i++) {
+    dp[i] = dp[i - 1] + dp[i - 2]
+  }
+  return dp[n]
 }
 // @lc code=end
