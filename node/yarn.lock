@@ -769,6 +769,11 @@ punycode@^2.1.0, punycode@^2.1.1:
   resolved "http://r.npm.sankuai.com/punycode/download/punycode-2.1.1.tgz#b58b010ac40c22c5657616c8d2c2c02c7bf479ec"
   integrity sha1-tYsBCsQMIsVldhbI0sLALHv0eew=
 
+qrcode-terminal@^0.12.0:
+  version "0.12.0"
+  resolved "http://r.npm.sankuai.com/qrcode-terminal/download/qrcode-terminal-0.12.0.tgz#bb5b699ef7f9f0505092a3748be4464fe71b5819"
+  integrity sha1-u1tpnvf58FBQkqN0i+RGT+cbWBk=
+
 qrcode@^1.4.4:
   version "1.4.4"
   resolved "http://r.npm.sankuai.com/qrcode/download/qrcode-1.4.4.tgz#f0c43568a7e7510a55efc3b88d9602f71963ea83"
