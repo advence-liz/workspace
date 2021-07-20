@@ -1,0 +1,74 @@
+.slide-tab {
+    // font-size: 24px;
+    &__bar {
+        text-align: center;
+        font-family: PingFangSC-Regular;
+        font-size: 28px;
+        color:rebeccapurple;
+        padding: 0px 20px;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        &__text {
+            display: inline-block;
+            opacity: 0.5;
+            line-height: 1;
+
+            &--active {
+                opacity: 0.9;
+            }
+        }
+        &--active {
+            font-family: PingFangSC-Medium;
+        }
+        &__container {
+            display: flex;
+            justify-content: center;
+            // position: fixed;
+            left: 0;
+            right: 0;
+        }
+        &__wrap {
+            position: relative;
+            display: flex;
+            height: 36px;
+            // background-color: #871601;
+            // opacity: 0.5;
+        }
+    }
+    &__line {
+        position: absolute;
+        width: 49px;
+        bottom: -12px;
+        height: 6px;
+        background-color: #f5f5f5;
+        border-radius: 3px;
+        opacity: 0.9;
+        transition: all 0.3s ease-out;
+        transform: translateX(-50%);
+    }
+    &__content {
+        width: 100%;
+        display: flex;
+        position: relative;
+        &--animated {
+            transition: transform 0.3s cubic-bezier(0.35, 0, 0.25, 1);
+            will-change: transform;
+        }
+        &__item {
+            width: 100%;
+            height: 100%;
+            flex-shrink: 0;
+            // remove
+            min-height: 300px;
+            background: rebeccapurple;
+            color: red;
+        }
+        &__wrap {
+            overflow: hidden;
+            &::-webkit-scrollbar {
+                display: none; /* Chrome Safari */
+            }
+        }
+    }
+}

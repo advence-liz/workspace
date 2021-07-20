@@ -115,6 +115,7 @@ class Page extends Vue {
     return len
   }
   onSelectedIndexChange(index) {
+    
     this.selectedIndex = index
 
     this.updateSelectedIndex()
