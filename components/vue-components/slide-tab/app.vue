@@ -1,19 +1,16 @@
 <template>
-<div style="background: gray;height: 100vh;">
-  <Tab>
- 
-  </Tab>
-</div>
-  
+  <div style="background: gray;height: 100vh;">
+    <Tab> </Tab>
+  </div>
 </template>
 <style lang="scss">
-body{
+body {
   margin: 0px;
 }
 </style>
 <script>
 import Tab from './slide-tab'
-export default{
+export default {
   components: {
     Tab
   }
