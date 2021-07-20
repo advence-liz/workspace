@@ -1,5 +1,6 @@
 <template>
   <div class="slide-tab">
+    <!-- tab导航 -->
     <div class="slide-tab__bar__container" :style="containerStyles">
       <div class="slide-tab__bar__wrap">
         <div
@@ -23,7 +24,7 @@
         <div class="slide-tab__line" :style="barLeft"></div>
       </div>
     </div>
-
+    <!-- 滑动区域 -->
     <div
       class="slide-tab__content__wrap"
       @touchstart="onTouchStart"
@@ -40,15 +41,19 @@
         <div class="slide-tab__item" style="background:blue"></div>
       </div>
     </div>
+    <!-- dot 区域 -->
+
+    <div class="slide-tab__dot__wrap">
+      <div
+        :key="'dot' + index"
+        v-for="(item, index) in elements"
+        :class="['slide-tab__dot', isActive(index) && 'slide-tab__dot--active']"
+      ></div>
+    </div>
   </div>
 </template>
 <style lang="scss" scoped>
 @import './styles.scss';
-.slide-tab__item {
-  height: 50vh;
-  flex-shrink: 0;
-  width: 100%;
-}
 </style>
 
 <script>
