@@ -29,7 +29,6 @@
       @touchstart="onTouchStart"
       @touchend="onTouchEnd"
       @touchmove="onTouchMove"
-      :style="{ height: `${height}px` }"
     >
       <div
         ref="slideTabContent"
@@ -46,7 +45,7 @@
 <style lang="scss" scoped>
 @import './styles.scss';
 .slide-tab__item {
-  height: 100vh;
+  height: 50vh;
   flex-shrink: 0;
   width: 100%;
 }
