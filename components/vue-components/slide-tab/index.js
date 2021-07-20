@@ -1,11 +1,6 @@
 import Vue from 'vue'
-import App from './slide-tab.vue'
-
+import App from './app.vue'
 new Vue({
   el: '#root',
-  render() {
-    return(<div  style="background: gray;height: 100vh;">
-      <App />
-    </div>)
-  }
+  render: h => h(App)
 })
