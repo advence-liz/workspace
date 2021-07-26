@@ -19,9 +19,7 @@ export default {
   },
   computed: {
     shakeImageUrl() {
-      return this.shakeStatus
-        ? 'https://p1.meituan.net/travelcube/c0f2597c70cdbba15e140a9889bb2ce2416241.jpg@747w_860h_80q'
-        : 'https://p0.meituan.net/travelcube/9b0059a4393f440ec9b506108dadab0a88544.jpg@800w_800h_80q'
+      return this.shakeStatus ? 'xx.jpg@747w_860h_80q' : 'xxx.jpg@800w_800h_80q'
     }
   },
   methods: {
