@@ -2460,9 +2460,9 @@ typeof navigator !== 'undefined' &&
                 '@font-face {' +
                 'font-family: ' +
                 fontArr[i].fFamily +
-                "; font-style: normal; src: url('" +
+                '; font-style: normal; src: url(\'' +
                 fontArr[i].fPath +
-                "');}"
+                '\');}'
               defs.appendChild(s)
             }
           } else if (fontArr[i].fOrigin === 'g' || fontArr[i].origin === 1) {
@@ -7543,7 +7543,7 @@ typeof navigator !== 'undefined' &&
     }
 
     BaseRenderer.prototype.createCamera = function() {
-      throw new Error("You're using a 3d camera. Try the html renderer.")
+      throw new Error('You\'re using a 3d camera. Try the html renderer.')
     }
 
     BaseRenderer.prototype.buildAllItems = function() {
@@ -9359,7 +9359,7 @@ typeof navigator !== 'undefined' &&
     }
     function RenderableDOMElement() {}
 
-    ;(function() {
+    (function() {
       var _prototype = {
         initElement: function(data, globalData, comp) {
           this.initFrame()

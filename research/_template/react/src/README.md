@@ -1,2 +1,0 @@
-# lilith template demo
-
