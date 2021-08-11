@@ -6,7 +6,7 @@
  * 1. 监控是否使用超过3百万像素 宽 * 高 大于 3000000
  * 2. 图片原始宽高不得超过设计宽高
  */
-;(function() {
+(function() {
   var DEBUG = false
   try {
     if (window.Block.query.debug) DEBUG = true
