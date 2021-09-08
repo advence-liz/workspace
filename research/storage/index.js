@@ -3,7 +3,7 @@ class Storage {
   constructor() {
     this.storage = window.sessionStorage
   }
-  set(key, value, timeout = 5000) {
+  set(key, value, timeout = 500000) {
     if (this.get(key)) return true
     timeout = new Date().getTime() + 5000
     this.storage.setItem(key, JSON.stringify({ value, timeout }))
