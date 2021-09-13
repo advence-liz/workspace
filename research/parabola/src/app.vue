@@ -1,21 +1,12 @@
 <template>
   <div id="app">
     <div class="box">
-      <div class="ball">
+      <div :key="index" v-for="(itme, index) in list" class="ball">
         <div class="inner"></div>
       </div>
     </div>
-    <div v-if="boll1Visible" class="box">
-      <div class="ball">
-        <div class="inner"></div>
-      </div>
-    </div>
-    <div v-if="boll2Visible" class="box">
-      <div class="ball">
-        <div class="inner"></div>
-      </div>
-    </div>
-    <h1>vue</h1>
+
+    <h1 @click="go">vue</h1>
   </div>
 </template>
 
@@ -25,15 +16,18 @@ export default {
   components: { Button },
   name: 'app',
   data() {
-    return { boll1Visible: false, boll2Visible: false }
+    return { list: [] }
   },
-  created() {
-    // setTimeout(() => {
-    //   this.boll1Visible = true
-    // }, 200)
-    // setTimeout(() => {
-    //   this.boll2Visible = true
-    // }, 400)
+  created() {},
+  methods: {
+    go() {
+      this.list = []
+      for (let i = 0; i < 8; i++) {
+        setTimeout(i => {
+          this.list.push(i)
+        }, i * 80)
+      }
+    }
   }
 }
 </script>
@@ -44,7 +38,7 @@ export default {
   left: 0;
   top: 70px;
   z-index: 20px;
-  animation: py 1s cubic-bezier(0.41, -0.62, 0.83, 0.67) forwards infinite;
+  animation: py 1s cubic-bezier(0.41, -0.62, 0.83, 0.67) forwards;
   .inner {
     width: 10px;
     height: 10px;
