@@ -11,9 +11,7 @@
 </template>
 
 <script>
-import Button from './components/button'
 export default {
-  components: { Button },
   name: 'app',
   data() {
     return { list: [] }
@@ -25,7 +23,7 @@ export default {
       for (let i = 0; i < 8; i++) {
         setTimeout(i => {
           this.list.push(i)
-        }, i * 80)
+        }, i * 200)
       }
     }
   }
@@ -38,13 +36,15 @@ export default {
   left: 0;
   top: 70px;
   z-index: 20px;
-  animation: py 1s cubic-bezier(0.41, -0.62, 0.83, 0.67) forwards;
+  animation: py 2s cubic-bezier(0.41, -0.62, 0.83, 0.67) forwards;
   .inner {
-    width: 10px;
-    height: 10px;
+    background: url('https://p0.meituan.net/travelcube/e1b9b1d21a2cac807c7e8420d4fc64b71733.png');
+    background-size: 100% 100%;
+    width: 20px;
+    height: 20px;
     border-radius: 50%;
-    background: red;
-    animation: px 1s linear forwards infinite;
+    // background: red;
+    animation: px 2s linear forwards infinite;
   }
 
   // animation: px 0.5s linear forwards, py 0.5s ease-in forwards;
