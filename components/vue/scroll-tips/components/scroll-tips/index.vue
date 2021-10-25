@@ -49,19 +49,19 @@ class ScrollTips extends Vue {
     this.timer = setInterval(this.scrollAnimate, 2000)
   }
 
-  initData(res) {
-    if (!Array.isArray(res)) return []
-    res.forEach(item => {
-      if (item.userAvatarUrl) {
-        item.userAvatarUrl = `${
-          decodeURIComponent(item.userAvatarUrl).split('@')[0]
-        }@50w_50h_1e_1c`
-      } else {
-        item.userAvatarUrl = this.defaultAvatar
-      }
-    })
-    return res
-  }
+  // initData(res) {
+  //   if (!Array.isArray(res)) return []
+  //   res.forEach(item => {
+  //     if (item.userAvatarUrl) {
+  //       item.userAvatarUrl = `${
+  //         decodeURIComponent(item.userAvatarUrl).split('@')[0]
+  //       }@50w_50h_1e_1c`
+  //     } else {
+  //       item.userAvatarUrl = this.defaultAvatar
+  //     }
+  //   })
+  //   return res
+  // }
 
   scrollAnimate() {
     if (this.list.length <= 1) return

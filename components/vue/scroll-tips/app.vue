@@ -7,7 +7,6 @@
 </template>
 
 <script>
-import Button from './components/button'
 import ScrollTips from './components/scroll-tips'
 export default {
   components: { ScrollTips },
