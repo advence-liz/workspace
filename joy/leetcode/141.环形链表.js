@@ -32,22 +32,32 @@
 //   return false
 // }
 
-var hasCycle = function (head) {
+var hasCycle = function(head) {
+  if (!head || !head.next) return false
+  let fast = head.next
+  let slow = head
 
-    var fast, slow, p
-    p = new ListNode(-1)
-    p.next = head
-    fast = slow = p
-
-    while (fast.next && fast.next.next) {
-        fast = fast.next.next
-        slow = slow.next
-
-        if (fast.val === slow.val) {
-            return true
-        }
+  while (fast.next && fast.next.next) {
+    if (fast === slow) {
+      return true
     }
-    return false
+    fast = fast.next.next
+    slow = slow.next
+  }
+  return false
 }
 // @lc code=end
 
+// var hasCycle = function(head) {
+//     if (!head || !head.next) return false
+
+//     var fast = head.next
+//     var slow = head
+//     // fast.val !== slow.val
+//     while (fast !== slow) {
+//       if (!fast || !fast.next) return false
+//       fast = fast.next.next
+//       slow = slow.next
+//     }
+//     return true
+//   }
