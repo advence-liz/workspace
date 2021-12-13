@@ -1,5 +1,9 @@
 ## research
 
+
+## 创建项目
+
+- `$ lilith new vue xx`
 ## 目录
 
 ├── _template
