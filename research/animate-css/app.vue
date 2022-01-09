@@ -25,7 +25,7 @@ export default {
   background: red;
   // transform-origin: center center;
   // animation: name duration timing-function delay iteration-count direction fill-mode;
-  animation: tx 3s linear,ty 3s 0s linear;
+  animation: tx 3s linear, ty 3s 0s linear;
   // animation-duration: 3s;
   // animation-timing-function: linear;
   // animation-direction: alternate;
