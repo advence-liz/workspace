@@ -20,3 +20,9 @@ function pivotIndex(nums) {
 var r = pivotIndex(nums)
 
 console.log(r)
+
+// nums
+let preSum = [0]
+for (let i = 0; i < nums.length; i++) {
+  preSum[i + 1] = preSum[i] + nums[i]
+}
