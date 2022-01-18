@@ -100,6 +100,11 @@ export default {
         window.scrollTo(0, this.top)
       }
     },
+    //   v-on:webkitAnimationEnd="animationend"
+    //   v-on:animationend="animationend"
+    // animationend() {
+    //   this.enter = true
+    // },
     close(type = true) {
       if (!type) return
       this.$emit('close')
