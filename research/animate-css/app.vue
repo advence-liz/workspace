@@ -16,7 +16,7 @@ export default {
   name: 'app',
   data() {
     return {
-      animation: [{ class: 'tx ty' }, { class: 'ty' }],
+      animation: [{ class: 'tx' }, { class: 'ty' }],
     }
   },
   created() {
