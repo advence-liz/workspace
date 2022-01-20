@@ -3,7 +3,7 @@
     <h1>vue</h1>
     <div class="content">
       <Animation :animation="animation">
-        <div class="box"></div>
+        <div class="sprite"></div>
       </Animation>
     </div>
   </div>
@@ -16,13 +16,13 @@ export default {
   name: 'app',
   data() {
     return {
-      animation: [{ class: 'tx' }, { class: 'ty' }],
+      animation: [{ class: 'tx ty' }, { class: 'ty' }],
     }
   },
   created() {
-    setTimeout(() => {
-      this.animation = [{ class: 'tx' }]
-    }, 3000)
+    // setTimeout(() => {
+    //   this.animation = [{ class: 'tx' }]
+    // }, 3000)
   },
   methods: {
     animationstart() {
@@ -36,16 +36,25 @@ export default {
 </script>
 
 <style lang="scss">
+.sprite {
+  width: 256px;
+  height: 256px;
+  background: url('https://github.com/iamalperen/playground/blob/main/SpriteSheetAnimation/sprite.png?raw=true');
+  animation: sprite 0.6s steps(6, end) infinite;
+}
+@keyframes sprite {
+  0% {
+    background-position: 0 0;
+  }
+  100% {
+    background-position: -1536px 0;
+  }
+}
+
 .content {
   border: 1px solid gray;
 }
-.box {
-  display: block;
-  height: 200px;
-  width: 200px;
-  position: relative;
-  background: red;
-}
+
 .tx {
   animation: tx 3s linear;
   animation-iteration-count: infinite;
