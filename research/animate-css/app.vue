@@ -2,26 +2,27 @@
   <div id="app">
     <h1>vue</h1>
     <div class="content">
-      <div class="box">
-        <div
-          v-on:webkitAnimationEnd="animationend"
-          v-on:webkitAnimationStart="animationstart"
-          v-on:animationstart="animationstart"
-          v-on:animationend="animationend"
-          class="box__inner"
-        ></div>
-      </div>
+      <Animation :animation="animation">
+        <div class="sprite"></div>
+      </Animation>
     </div>
   </div>
 </template>
 
 <script>
-import Button from './components/button'
+import Animation from './components/animation'
 export default {
-  components: { Button },
+  components: { Animation },
   name: 'app',
+  data() {
+    return {
+      animation: [{ class: 'tx' }, { class: 'ty' }],
+    }
+  },
   created() {
-    const animation = [['x', 'y'], 'z']
+    // setTimeout(() => {
+    //   this.animation = [{ class: 'tx' }]
+    // }, 3000)
   },
   methods: {
     animationstart() {
@@ -35,33 +36,36 @@ export default {
 </script>
 
 <style lang="scss">
+.sprite {
+  width: 256px;
+  height: 256px;
+  background: url('https://github.com/iamalperen/playground/blob/main/SpriteSheetAnimation/sprite.png?raw=true');
+  animation: sprite 0.6s steps(6, end) infinite;
+}
+@keyframes sprite {
+  0% {
+    background-position: 0 0;
+  }
+  100% {
+    background-position: -1536px 0;
+  }
+}
+
 .content {
   border: 1px solid gray;
 }
-.box {
-  // transform-origin: center center;
-  // animation: name duration timing-function delay iteration-count direction fill-mode;
-  // animation: tx 3s linear, ty 3s 0s linear;
-  animation: ty 3s linear;
-  // animation-duration: 3s;
-  // animation-timing-function: linear;
-  // animation-direction: alternate;
-  animation-iteration-count: 2;
+
+.tx {
+  animation: tx 3s linear;
+  animation-iteration-count: infinite;
   // animation-fill-mode: backwards;
-  transform-origin: center center;
-  &__inner {
-    content: '';
-    display: block;
-    height: 200px;
-    width: 200px;
-    position: relative;
-    background: red;
-    animation: tx 3s linear;
-    animation-iteration-count: 2;
-    // animation-direction: alternate;
-    animation-fill-mode: backwards;
-    transform-origin: center center;
-  }
+  // transform-origin: center center;
+}
+.ty {
+  animation: ty 3s linear;
+  animation-iteration-count: infinite;
+  // animation-fill-mode: backwards;
+  // transform-origin: center center;
 }
 
 // @keyframes ddd {
