@@ -45,6 +45,8 @@ function print(head) {
  * @param {number} m
  * @param {number} n
  * @return {ListNode}
+ * 0->0->0->0->0->0->0
+ *    a  b     c  d
  */
 var reverseBetween = function (head, m, n) {
 
@@ -56,6 +58,7 @@ var reverseBetween = function (head, m, n) {
         p = p.next
     }
     // front 前节点 start 区间开始节点 pre 最终会变成区间结束节点 cur 最终会变成后节点
+    // a 
     var front, pre, start, cur
     front = p
     start = pre = p.next

@@ -5,6 +5,7 @@ const { ListNode, createLinkList, print } = require('./helper')
 /**
  * @param {ListNode} head
  * @return {ListNode}
+ * 1->2->3->4
  */
 var reverseKGroup = function(head, k) {
     let pre = null
@@ -24,6 +25,6 @@ var reverseKGroup = function(head, k) {
     return pre
 }
 
-let head = createLinkList([1, 2, 3, 4, 5])
+let head = createLinkList([1, 2, 3, 4, 5,6,7])
 let r = reverseKGroup(head, 2)
 print(r)
