@@ -29,7 +29,9 @@ function createLinkList(arr = [1, 2, 3, 4, 5]) {
     cur = cur.next
   })
   let max = arr.length + len
+  console.log('createLinkList:')
   print(dummyHead.next, max)
+  console.log('----------------\n')
   return dummyHead.next
 }
 

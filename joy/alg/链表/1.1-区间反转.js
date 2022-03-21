@@ -26,7 +26,8 @@ const { ListNode, createLinkList, print } = require('./helper')
  */
 
 var reverse = function(cur, pre, tail) {
-  while (cur !== tail) {
+  let tailNext = tail.next
+  while (cur !== tailNext) {
       let next = cur.next
       cur.next = pre
       pre= cur
@@ -51,7 +52,7 @@ var reverseBetween = function(head, left, right) {
 
 //   pre.next = null
 //   end.next = null
-  reverse(start,pre,end.next)
+  reverse(start,pre,end)
 
   pre.next = end
   start.next = next
