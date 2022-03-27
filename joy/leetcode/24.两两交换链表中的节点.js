@@ -11,8 +11,8 @@
  * }
  */
 function ListNode(val) {
-    this.val = val
-    this.next = null
+  this.val = val
+  this.next = null
 }
 /**
  * @param {ListNode} head
@@ -20,66 +20,49 @@ function ListNode(val) {
  * pre->a->b
  *  pre ->b->a
  */
-// var swapPairs = function (head) {
-//   var ln = new ListNode(-1)
-//   ln.next = head
-//   var pre = ln
-//   while (pre.next && pre.next.next) {
-//     var a = pre.next
-//     var b = pre.next.next
-
-//     a.next = b.next
-//     b.next = a
-//     pre.next = b
-//     pre = pre.next.next
-//   }
-//   return ln.next
-// }
-
-// var swapPairs = function (head) {
-//   var ln = new ListNode(-1)
-//   var pre = new ListNode(-1)
-//   ln.next = pre
-//   pre.next = head
-
-//   var cur = head
-//   while (cur && cur.next) {
-//     var a = cur
-//     var b = cur.next
-//     var next = b.next
-//     a.next = b.next
-//     b.next = a
-//     pre.next = b
-//     pre = a
-//     console.log(cur, cur.next)
-//     cur = next
-//   }
-//   return ln.next.next
-// }
-
 /**
  * @param {ListNode} head
  * @return {ListNode}
- * 1->2->3->4
- * 2->1
+ * pre->1->2->3->4
+ * pre->2->1->4->3
+ *         pre
  */
-var swapPairs = function (head) {
+// var swapPairs = function(head) {
+//   var dummy = new ListNode(-1)
+//   dummy.next = head
+//   let pre = dummy
 
-    if (!head) return
+//   while (pre.next && pre.next.next) {
+//     let node1 = pre.next
+//     let node2 = pre.next.next
+//     pre.next = node2
+//     node1.next = node2.next
+//     node2.next = node1
+//     pre = node1
+//   }
 
-    var dummyHead = new ListNode(-1)
-    dummyHead.next = head
-    var pre = dummyHead.next
-    var cur = pre.next
+//   return dummy.next
+// }
+//  pre->1->2->3->4
+//  pre->2->1->4->3
+//       n2 n1
+//          pre
 
-    while(cur){
-        var next = cur.next
-        cur.next = pre
-        pre.next = next
-        pre = next
-        cur = pre.next
-
+/**
+ *
+ * @param {*} head
+ * 1->2->3->4
+ * 2->1->4->3
+ */
+var swapPairs = function(head) {
+  function dsf(head, pre) {
+    if (!head || !head.next) {
+      return head
     }
-
-    return dummyHead.next
+    let next = head.next
+    head.next = dsf(next.next)
+    next.next = head
+    return next
+  }
+  return dsf(head)
 }
