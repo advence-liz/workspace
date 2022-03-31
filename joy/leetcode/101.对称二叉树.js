@@ -18,14 +18,15 @@
  * @return {boolean}
  */
 var isSymmetric = function(root) {
-  if (!root) return true
+    if (!root) return true
 
-  function dsf(left, right) {
-    if (!left && !right) return true
-    if (!left || !right || left.val !== right.val) {
-      return false
+    function dsf(left, right) {
+        if (!left && !right) return true
+        if (!left || !right) return false
+        if (left.val !== right.val) return false
+
+        return dsf(left.left, right.right) && dsf(left.right, right.left)
     }
-    return dsf(left.left, right.right) && dsf(left.right, right.left)
-  }
+    return dsf(root.left, root.right)
 }
 // @lc code=end
