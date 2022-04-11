@@ -11,24 +11,26 @@
  * @return {number[][]}
  */
 var combinationSum = function(candidates, target) {
-  var res = []
-  var track = []
-  function dsf(nums = [], target, index) {
-    if (target === 0) {
-      res.push([...track])
-      return
+    var res = []
+
+    function backtrack(nums = [], paths, target, index) {
+        if (target < 0) {
+            return
+        }
+        if (target === 0) {
+            res.push([...paths])
+            return
+        }
+        for (let i = index; i < nums.length; i++) {
+            if (nums[i] <= target) {
+                paths.push(nums[i])
+                backtrack(nums, paths, target - nums[i], i)
+                paths.pop()
+            }
+        }
     }
-    if (track.length === nums.length) {
-      return
-    }
-    for (let i = index; i < nums.length; i++) {
-      track.push(nums[i])
-      dsf(nums, target - nums[i], i)
-      track.pop()
-    }
-  }
-  dsf(candidates, target, 0)
-  return res
+    backtrack(candidates, [], target, 0)
+    return res
 }
 // var r = combinationSum([2, 3, 6, 7], 7)
 // @lc code=end
