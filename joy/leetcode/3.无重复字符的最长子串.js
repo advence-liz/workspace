@@ -6,30 +6,38 @@
 /**
  * @param {string} s
  * @return {number}
+ * abcabcbb
  */
-var lengthOfLongestSubstring = function(s) {
-    let window = {}
+var lengthOfLongestSubstring = function (s) {
+    let m = new Map()
+    let set = new Set()
     let left = 0
     let right = 0
     let max = 0
 
-    while (right < s.length) {
-        let c1 = s[right]
-        if( window[c1] === undefined){
-            window[c1] = 1
-        }else{
-            window[c1]++
-        } 
-        right++
-
-        while (window[c1] > 1) {
-            let c2 = s[left]
-            window[c2]--
+    for (; right < s.length; right++) {
+        // // // 不符合条件
+        while (set.has(s[right + 1])) {
+            set.delete(s[left])
             left++
         }
-        max = Math.max(max, right - left)
+
+        set.add(s[right])
+
+        // state[s[right]] = true
+        // while (m.has(s[right])) {
+        //     left = m.get(s[right]) + 1
+        // }
+
+        // if (m.has(s[right])) {
+        //     left = Math.max(left, m.get(s[right]) + 1)
+        //     console.log(s[right], left)
+        // }
+        // m.set(s[right], right)
+        max = Math.max(max, right - left + 1)
     }
     return max
 }
 
-lengthOfLongestSubstring('abcabcbb')
+// var r = lengthOfLongestSubstring('abba')
+// console.log(r)

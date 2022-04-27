@@ -14,13 +14,13 @@
 function getNeeds(str) {
     let m = {}
     for (let c of str) {
-        if (m[c] === undefined) m[c] = 1
+        if (!m[c]) m[c] = 1
         else m[c]++
     }
     m.length = Object.keys(m).length
     return m
 }
-var findAnagrams = function(s, p) {
+var findAnagrams = function (s, p) {
     let needs = getNeeds(p)
     let window = {}
     for (let c of Object.keys(needs)) {
