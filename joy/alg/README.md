@@ -16,6 +16,11 @@
 
 ## 前缀和
 https://zhuanlan.zhihu.com/p/344733609
+https://leetcode-cn.com/problems/binary-subarrays-with-sum/solution/qian-zhui-he-hashmapyou-hua-by-kokoben-iyy6/
+对于求子数组的场景，最常用滑动窗口、双指针或前缀和
+
+## 滑动窗口
+https://leetcode-cn.com/problems/find-all-anagrams-in-a-string/solution/hua-dong-chuang-kou-tong-yong-si-xiang-jie-jue-zi-/
 ## TODO
 
 - [ ]719
