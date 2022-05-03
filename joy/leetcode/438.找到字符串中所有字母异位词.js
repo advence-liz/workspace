@@ -12,41 +12,38 @@
  */
 
 function getNeeds(str) {
-    let m = {}
+    let m = new Map()
     for (let c of str) {
-        if (m[c] === undefined) m[c] = 1
-        else m[c]++
+        let count = m.has(c) ? m.get(c) + 1 : 1
+        m.set(c, count)
     }
-    m.length = Object.keys(m).length
     return m
 }
 var findAnagrams = function(s, p) {
     let needs = getNeeds(p)
-    let window = {}
-    for (let c of Object.keys(needs)) {
-        window[c] = 0
-    }
+    let m = new Map()
     let left = 0
     let right = 0
     let match = 0
     let res = []
-    while (right < s.length) {
-        let c1 = s[right]
-        if (needs[c1]) {
-            window[c1]++
-            if (window[c1] === needs[c1]) {
+    for (; right < s.length; right++) {
+        let rc = s[right]
+        if (needs.has(rc)) {
+            m.set(rc, m.has(rc) ? m.get(rc) + 1 : 1)
+
+            if (m.get(rc) === needs.get(rc)) {
                 match++
             }
         }
-        right++
-        while (match === needs.length) {
-            if (right - left === p.length) {
+
+        while (match === needs.size) {
+            if (right - left + 1 === p.length) {
                 res.push(left)
             }
-            let c2 = s[left]
-            if (needs[c2]) {
-                window[c2]--
-                if (window[c2] < needs[c2]) {
+            let lc = s[left]
+            if (needs.has(lc)) {
+                m.set(lc, m.get(lc) - 1)
+                if (m.get(lc) < needs.get(lc)) {
                     match--
                 }
             }
@@ -55,5 +52,5 @@ var findAnagrams = function(s, p) {
     }
     return res
 }
-// findAnagrams('cbaebabacd', 'abc')
+findAnagrams('cbaebabacd', 'abc')
 // @lc code=end

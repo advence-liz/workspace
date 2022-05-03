@@ -16,7 +16,6 @@ var longestPalindrome = function(s) {
   if (!s || !s.length) {
     return ''
   }
-
   let dp = []
   let res = s[0]
   for (let i = s.length - 1; i >= 0; i--) {

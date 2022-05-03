@@ -11,20 +11,30 @@
  * @return {number}
  */
 var minSubArrayLen = function(s, nums) {
-    let min = Infinity
-    let sum = 0
-    let right = 0
     let left = 0
-    for (; right < nums.length; right++) {
+    let right = 0
+    let len = nums.length
+    let sum = 0
+    let ans = Infinity
+    for (; right < len; right++) {
         sum = sum + nums[right]
         while (sum >= s) {
-            min = Math.min(min, right + 1 - left)
+            ans = Math.min(ans, right - left + 1)
             sum = sum - nums[left]
             left++
         }
     }
+    // while (right < len) {
+    //     sum = sum + nums[right]
+    //     while (sum >= s) {
+    //         ans = Math.min(ans, right - left + 1)
+    //         sum = sum - nums[left]
+    //         left++
+    //     }
+    //     right ++
+    // }
 
-    return min === Infinity ? 0 : min
+    return ans === Infinity ? 0 : ans
 }
 // minSubArrayLen(7,[2,3,1,2,4,3])
 // var minSubArrayLen = function(s, nums) {
