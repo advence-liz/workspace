@@ -14,17 +14,12 @@
 function getNeeds(str) {
     let m = new Map()
     for (let c of str) {
-<<<<<<< HEAD
-        let count = m.has(c) ? m.get(c) + 1 : 1
-        m.set(c, count)
-=======
         if (!m[c]) m[c] = 1
         else m[c]++
->>>>>>> cd1b90c1fc2f7f283ee2b56e58af5746615bae87
     }
     return m
 }
-var findAnagrams = function (s, p) {
+var findAnagrams = function(s, p) {
     let needs = getNeeds(p)
     let m = new Map()
     let left = 0

@@ -8,7 +8,10 @@
                 </div>
             </transition>
 
-            <div @click="contentClick" :class="['red__content', step === 2 && 'zoomIn']"></div>
+            <div
+                @click="contentClick"
+                :class="['red__content', step === 2 && 'zoomIn']"
+            ></div>
         </div>
     </div>
 </template>

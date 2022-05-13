@@ -8,33 +8,14 @@
  * @return {number}
  * abcabcbb
  */
-<<<<<<< HEAD
-var lengthOfLongestSubstring = function(s) {
-    let m = new Map()
-=======
 var lengthOfLongestSubstring = function (s) {
     let m = new Map()
     let set = new Set()
->>>>>>> cd1b90c1fc2f7f283ee2b56e58af5746615bae87
     let left = 0
     let right = 0
     let max = 0
     let len = s.length
 
-<<<<<<< HEAD
-    while (right < len) {
-        let rc = s[right]
-
-        m.set(rc, m.has(rc) ? m.get(rc) + 1 : 1)
-
-        while (m.get(rc) > 1) {
-            let lc = s[left]
-            m.set(lc, m.get(lc) - 1)
-            left++
-        }
-        right++
-        max = Math.max(max, right - left)
-=======
     for (; right < s.length; right++) {
         // // // 不符合条件
         while (set.has(s[right + 1])) {
@@ -55,7 +36,6 @@ var lengthOfLongestSubstring = function (s) {
         // }
         // m.set(s[right], right)
         max = Math.max(max, right - left + 1)
->>>>>>> cd1b90c1fc2f7f283ee2b56e58af5746615bae87
     }
     return max
 }

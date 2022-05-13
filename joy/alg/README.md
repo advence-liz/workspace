@@ -2,10 +2,6 @@
 -[https://github.com/youngyangyang04/leetcode-master](https://github.com/youngyangyang04/leetcode-master)
 数组-> 链表-> 哈希表->字符串->栈与队列->树->回溯->贪心->动态规划->图论->高级数据结构
 
-<<<<<<< HEAD
-## TODO
-- N 皇后 https://leetcode-solution-leetcode-pp.gitbook.io/leetcode-solution/hard/52.n-queens-ii
-=======
 
 ## 二分
 
@@ -28,4 +24,3 @@ https://leetcode-cn.com/problems/find-all-anagrams-in-a-string/solution/hua-dong
 ## TODO
 
 - [ ]719
->>>>>>> cd1b90c1fc2f7f283ee2b56e58af5746615bae87
