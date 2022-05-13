@@ -10,7 +10,7 @@
 
 - animation-name：指定由 @keyframes 描述的关键帧名称。
 - animation-duration：设置动画一个周期的时长。
-- animation-delay：设置延时，即从元素加载完成之后到动画序列开始执行的这段时间，可以为负值。
+- animation-delay：设置延时，即从元素加载完成之后到动画序列开始执行的这段时间，可以为负值，负值相当于快进。(-1s 效果等同于直接在 1s 处播放)
 - animation-direction：设置动画在每次运行完后是反向运行还是重新回到开始位置重复运行。
 - animation-iteration-count：设置动画重复次数， 可以指定 infinite 无限次重复动画
 - animation-play-state：允许暂停和恢复动画。
@@ -89,5 +89,24 @@
 
 - [扫光效果](https://developer.mozilla.org/zh-CN/docs/Web/CSS/animation)
 
+## css 帧动画
+```jsx
+<div class="sprite"></div>
+
+.sprite {
+  width: 256px;
+  height: 256px;
+  background: url('https://github.com/iamalperen/playground/blob/main/SpriteSheetAnimation/sprite.png?raw=true');
+  animation: sprite 0.6s steps(6, end) infinite;
+}
+@keyframes sprite {
+  0% {
+    background-position: 0 0;
+  }
+  100% {
+    background-position: -1536px 0;
+  }
+}
+```
 ## 参考文章
 - [深入浅出CSS动画](https://segmentfault.com/a/1190000041275359?utm_source=sf-homepage)

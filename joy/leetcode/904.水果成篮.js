@@ -10,6 +10,7 @@
  * @return {number}
  */
 var totalFruit = function(fruits) {
+<<<<<<< HEAD
     let m = new Map()
     let left = 0
     let len = fruits.length
@@ -34,3 +35,9 @@ var totalFruit = function(fruits) {
     return ans
 }
 // @lc code=end
+=======
+
+};
+// @lc code=end
+
+>>>>>>> cd1b90c1fc2f7f283ee2b56e58af5746615bae87
