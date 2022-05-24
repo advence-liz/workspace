@@ -9,16 +9,16 @@ function binarySearch(nums = [], target) {
     while (left <= right) {
         let mid = Math.floor((right - left) / 2) + left
         console.log('mid', mid)
-        if (target == nums[mid]) {
+        if (nums[mid] === target) {
             return mid
         }
         // 解空间 [mid+1,right]
-        if (target > nums[mid]) {
-            left = mid + 1
+        else if (nums[mid] > target) {
+            right = mid - 1
         }
         // 解空间 [left,mid-1]
-        if (target < nums[mid]) {
-            right = mid - 1
+        else {
+            left = mid + 1
         }
     }
 
