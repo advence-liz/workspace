@@ -2,9 +2,15 @@
 
 - 主逻辑构建一下虚拟的根节点
   
-递归执行顺序等同 dsf
+递归执行顺序等同 dsf  先序列遍历  根 -> 左右 （子节点由左及右）
+
+自顶xiang
 
 子节点自左向右回溯
+
+减枝
+
+记忆化递归  必须纯函数 自顶向下加  tracks paths 不行
 
 ```js
  1          1      1
@@ -15,19 +21,35 @@
 var permute = function(nums) {
     let res = []
     function dsf(nums, track = []) {
+        // 1.终止条件
         if (track.length === nums.length) {
             res.push(track.slice())
         }
 
         for (let i = 0; i < nums.length; i++) {
             if (!track.includes(nums[i])) {
-                track.push(nums[i])
+                // 2.处理根节点
+                track.push(nums[i]) 
+                // 3.遍历子节点
                 dsf(nums, track)
-                track.pop()
+                // 4. 回溯
+                track.pop() 
             }
         }
     }
     dsf(nums, [])
     return res
+}
+function dsf (root,paths){
+    // 1.终止条件
+    if(!root) return 
+    // 2.处理根节点
+    paths.push(root.val)
+    // 3.遍历子节点
+    dsf(root.left)
+    dsf(root.right)
+    // 4. 回溯
+    paths.pop()
+
 }
 ```
