@@ -9,16 +9,16 @@
  * abcabcbb
  */
 var lengthOfLongestSubstring = function (s) {
-    let m = new Map()
+    // let m = new Map()
     let set = new Set()
     let left = 0
     let right = 0
     let max = 0
     let len = s.length
 
-    for (; right < s.length; right++) {
+    for (; right < len; right++) {
         // // // 不符合条件
-        while (set.has(s[right + 1])) {
+        while (set.has(s[right])) {
             set.delete(s[left])
             left++
         }
@@ -40,10 +40,5 @@ var lengthOfLongestSubstring = function (s) {
     return max
 }
 
-<<<<<<< HEAD
-var r = lengthOfLongestSubstring('abcabcbb')
-console.log(r)
-=======
-// var r = lengthOfLongestSubstring('abba')
+// var r = lengthOfLongestSubstring('abcabcbb')
 // console.log(r)
->>>>>>> cd1b90c1fc2f7f283ee2b56e58af5746615bae87
