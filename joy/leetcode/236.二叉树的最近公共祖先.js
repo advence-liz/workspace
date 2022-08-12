@@ -24,8 +24,7 @@
 var lowestCommonAncestor = function(root, p, q) {
     let ans = null
     function dfs(root, p, q) {
-
-        if(!root){
+        if (!root) {
             return false
         }
         let left = dfs(root.left, p, q)
@@ -37,12 +36,11 @@ var lowestCommonAncestor = function(root, p, q) {
         ) {
             ans = root
             // return
-            
         }
-
-        return left || right ||(root.val === p.val || root.val === q.val) 
+        // 返回值为 bool
+        return left || right || root.val === p.val || root.val === q.val
     }
-    dfs(root,p,q)
-    return  ans
+    dfs(root, p, q)
+    return ans
 }
 // @lc code=end
