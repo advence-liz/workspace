@@ -8,29 +8,32 @@
 /**
  * @param {string} s
  * @return {boolean}
- * {1{2{x}}}
+ * 2[3[b]]
+ * ([{}])
+ * [(,[,{]
  */
 var isValid = function(s) {
-  let left = ['(', '{', '[']
-  let right = [')', '}', ']']
-  let m = new Map()
-  left.forEach(function(key, index) {
-    m.set(key, right[index])
-  })
-
-  let stack = []
-  for (let i = 0; i < s.length; i++) {
-    let char = s[i]
-    if (left.includes(char)) {
-      stack.push(char)
+    let m = new Map([
+        ['(', ')'],
+        ['[', ']'],
+        ['{', '}']
+    ])
+    let stack = []
+    // 遍历字符串
+    for (let c of s) {
+        // 括号左半边入栈
+        if (m.has(c)) {
+            stack.push(c)
+        }
+        // 括号右半边出栈
+        else {
+            let left = stack.pop()
+            if (m.get(left) !== c) {
+                return false
+            }
+        }
     }
-    if (right.includes(char)) {
-      if (m.get(stack.pop()) !== char) {
-        return false
-      }
-    }
-  }
-
-  return stack.length ? false: true
+    // stack length 为 0 即为 true
+    return !stack.length
 }
 // @lc code=end
