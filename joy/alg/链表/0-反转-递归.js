@@ -15,13 +15,13 @@ const { ListNode, createLinkList, print } = require('./helper')
  * @return {ListNode}
  */
 var reverseList = function(head) {
-  function dsf(pre, cur) {
-    if (!cur) return pre
-    let next = cur.next
-    cur.next = pre
-    return dsf(cur, next)
-  }
-  return dsf(null, head)
+    function dfs(pre, cur) {
+        if (!cur) return pre
+        let next = cur.next
+        cur.next = pre
+        return dfs(cur, next)
+    }
+    return dfs(null, head)
 }
 
 var head = createLinkList([1, 2, 3, 4, 5])
