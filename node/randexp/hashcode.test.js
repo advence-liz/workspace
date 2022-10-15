@@ -12,7 +12,7 @@ function hashCode(str) {
     }
     r = r % 100
     if (r < 0 || r > 99) {
-        console.log(str,r)
+        console.log(str, r)
     }
     // console.log(r)
     return r
@@ -23,10 +23,9 @@ const RandExp = require('randexp')
 const iuuid = new RandExp(/[A-Z0-9]{64}/)
 const uuid = new RandExp(/[a-z0-9.]{37}/)
 
-for(let i = 0;i< 100000;i++){
-    hashCode( iuuid.gen())
-    hashCode( uuid.gen())
-
+for (let i = 0; i < 100000; i++) {
+    hashCode(iuuid.gen())
+    hashCode(uuid.gen())
 }
 
 // hashCode('3ZVS8ACXRU7HBRBQIYSZELYZM0GXBD733OAMRUKC2UISLR0TB9MBSYQKOPS1CL0X')
