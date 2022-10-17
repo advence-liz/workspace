@@ -331,6 +331,11 @@
   dependencies:
     "@babel/helper-plugin-utils" "^7.18.6"
 
+"@babel/preset-stage-0@^7.8.3":
+  version "7.8.3"
+  resolved "http://r.npm.sankuai.com/@babel/preset-stage-0/download/@babel/preset-stage-0-7.8.3.tgz#b6a0eca1a3b72e07f9caf58f998e97568028f6f5"
+  integrity sha1-tqDsoaO3Lgf5yvWPmY6XVoAo9vU=
+
 "@babel/preset-stage-2@^7.8.3":
   version "7.8.3"
   resolved "http://r.npm.sankuai.com/@babel/preset-stage-2/download/@babel/preset-stage-2-7.8.3.tgz#35055d2d22457706048deb5599c487943c05c241"
