@@ -23,7 +23,9 @@
   },
   "homepage": "https://github.com/advence-liz/nodecmd#readme",
   "dependencies": {
+    "@babel/preset-env": "^7.19.4",
     "axios": "^0.21.1",
+    "core-js": "^2.6.12",
     "fluent-ffmpeg": "^2.1.2",
     "graceful-fs": "4.2.2",
     "hash-sum": "^2.0.0",
