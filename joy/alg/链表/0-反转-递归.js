@@ -13,8 +13,11 @@ const { ListNode, createLinkList, print } = require('./helper')
 /**
  * @param {ListNode} head
  * @return {ListNode}
+ *  pre  2 1   345
+ *         pre cur
  */
 var reverseList = function(head) {
+    // 前序假设前面已经做好
     function dfs(pre, cur) {
         if (!cur) return pre
         let next = cur.next
@@ -37,3 +40,29 @@ var reverseList = function(head) {
     head.next = null;
     return last;
 };
+
+ 1 2 3 4 5 
+ head
+
+var reverseList = function(head) {
+    if (head == null || head.next == null) return head;
+    let last = reverseList(head.next);
+    head.next.next = head;
+    head.next = null;
+    return last;
+};
+
+1 5 4 3 2 1
+1 2 3     54
+    head next
+  
+var reverseList = function(head,next) {
+    if (head == null || next == null) return head;
+
+    let last = reverseList(next,next.next);
+    head.next.next = head;
+    head.next = null;
+    return last;
+};
+
+reverseList(h)
