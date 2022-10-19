@@ -40,10 +40,12 @@ const result = transformSync(code, {
         // "@babel/plugin-syntax-import-meta",
         // ["@babel/plugin-proposal-class-properties", { "loose": false }],
         // "@babel/plugin-proposal-json-strings"
-    ]
+    ],
+    cwd: path.resolve(__dirname,'..','node')
 })
 // yarn add @babel/plugin-proposal-decorators @babel/plugin-proposal-function-sent @babel/plugin-proposal-export-namespace-from @babel/plugin-proposal-numeric-separator @babel/plugin-proposal-throw-expressions  @babel/plugin-syntax-dynamic-import @babel/plugin-syntax-import-meta @babel/plugin-proposal-class-properties  @babel/plugin-proposal-json-strings
-console.log(result)
-result.code
-result.map
-result.ast
+// console.log(result)
+fs.writeFileSync(path.resolve(__dirname,'dist','code.js'),result.code)
+// result.code
+// result.map
+// result.ast
