@@ -18,27 +18,27 @@ export default {
             blocks: [{ padding: '13px', background: '#617df2' }],
             prizes: [
                 {
-                    fonts: [{ text: '不榨', top: '10%' }],
+                    fonts: [{ text: '不', top: '10%' }],
                     background: '#e9e8fe'
                 },
                 {
-                    fonts: [{ text: '榨1次', top: '10%' }],
+                    fonts: [{ text: '1次', top: '10%' }],
                     background: '#b8c5f2'
                 },
                 {
-                    fonts: [{ text: '榨2次', top: '10%' }],
+                    fonts: [{ text: '2次', top: '10%' }],
                     background: '#e9e8fe'
                 },
                 {
-                    fonts: [{ text: '榨3次', top: '10%' }],
+                    fonts: [{ text: '3次', top: '10%' }],
                     background: '#b8c5f2'
                 },
                 {
-                    fonts: [{ text: '榨4次', top: '10%' }],
+                    fonts: [{ text: '4次', top: '10%' }],
                     background: '#e9e8fe'
                 },
                 {
-                    fonts: [{ text: '榨5次', top: '10%' }],
+                    fonts: [{ text: '5次', top: '10%' }],
                     background: '#b8c5f2'
                 }
             ],
