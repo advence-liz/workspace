@@ -16,8 +16,8 @@ const { ListNode, createLinkList, print } = require('./helper')
  *  pre  2 1   345
  *         pre cur
  */
-var reverseList = function(head) {
-    // 前序假设前面已经做好
+var reverseList1 = function(head) {
+    // 前序假设前面已经处理好
     function dfs(pre, cur) {
         if (!cur) return pre
         let next = cur.next
@@ -26,43 +26,63 @@ var reverseList = function(head) {
     }
     return dfs(null, head)
 }
+// pre ---------
+// pre cur
+var reverseList = function(head) {
+    // 前序假设前面已经做好
+    // function dfs(pre, cur) {
+    //     if (!cur) return pre
+    //     let next = cur.next
+    //     cur.next = pre
+    //     return dfs(cur, next)
+    // }
+    // return dfs(null, head)
 
-var head = createLinkList([1, 2, 3, 4, 5])
-var r = reverseList(head)
+    function dfs(pre, head) {
+        if (!head) return pre
+        let next = head.next
+        head.next = pre
+        return dfs(head, next)
+    }
+}
+// var head = createLinkList([1, 2, 3, 4, 5])
+// var r = reverseList(head)
 
-print(r)
+// print(r)
+// head ----------
 
+var reverseList2 = function(head) {
+    function dfs(head) {
+        if (!head) return
+        dfs(head.next)
+
+        head.next
+    }
+}
+
+//  1 2 3 4 5
+//  head
 
 var reverseList = function(head) {
-    if (head == null || head.next == null) return head;
-    let last = reverseList(head.next);
-    head.next.next = head;
-    head.next = null;
-    return last;
-};
+    if (head == null || head.next == null) return head
+    let last = reverseList(head.next)
+    let next = head.next
+    next.next = head
+    head.next = null
+    return last
+}
 
- 1 2 3 4 5 
- head
+// 1 5 4 3 2 1
+// 1 2 3     54
+//     head next
 
-var reverseList = function(head) {
-    if (head == null || head.next == null) return head;
-    let last = reverseList(head.next);
-    head.next.next = head;
-    head.next = null;
-    return last;
-};
+// var reverseList = function(head,next) {
+//     if (head == null || next == null) return head;
 
-1 5 4 3 2 1
-1 2 3     54
-    head next
-  
-var reverseList = function(head,next) {
-    if (head == null || next == null) return head;
+//     let last = reverseList(next,next.next);
+//     head.next.next = head;
+//     head.next = null;
+//     return last;
+// };
 
-    let last = reverseList(next,next.next);
-    head.next.next = head;
-    head.next = null;
-    return last;
-};
-
-reverseList(h)
+// reverseList(h)
