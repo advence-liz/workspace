@@ -20,7 +20,10 @@
 var invertTree = function(root) {
     function dsf(root) {
         if (!root) return
-        ;[root.left, root.right] = [root.right, root.left]
+        // ;[root.left, root.right] = [root.right, root.left]
+        let tmp = root.left
+        root.left = root.right
+        root.right = tmp
 
         dsf(root.left)
         dsf(root.right)
