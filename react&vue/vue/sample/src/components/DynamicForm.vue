@@ -8,7 +8,10 @@
                 class="nav-tag"
                 type="primary"
             >{{nav.title}}</el-tag>
-            <i class="el-icon-setting" @click="toggleSetting">设置</i>
+            <i
+                class="el-icon-setting setting-icon"
+                @click="toggleSetting"
+            >&nbsp;{{!showSetting?'设置':'收起'}}</i>
         </div>
         <div v-show="showSetting" class="nav-setting">
             <el-form
@@ -74,6 +77,12 @@
         text-align: left;
     }
 }
+
+.setting-icon {
+    margin-left: 10px;
+    font-size: 12px;
+    color: #20a0ff;
+}
 </style>
 <script>
 let seed = 0
@@ -100,6 +109,11 @@ export default {
             dynamicValidateForm: {
                 navs: []
             }
+        }
+    },
+    watch: {
+        'dynamicValidateForm.navs'() {
+            this.$emit('change', this.dynamicValidateForm.navs)
         }
     },
     mounted() {
