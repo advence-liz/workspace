@@ -7,11 +7,11 @@
                 effect="dark"
                 class="nav-tag"
                 type="primary"
-                >{{ nav.title }}</el-tag
-            >
-            <i class="el-icon-setting setting-icon" @click="toggleSetting"
-                >&nbsp;{{ !showSetting ? '设置' : '收起' }}</i
-            >
+            >{{ nav.title }}</el-tag>
+            <i
+                class="el-icon-setting setting-icon"
+                @click="toggleSetting"
+            >&nbsp;{{ !showSetting ? '设置' : '收起' }}</i>
         </div>
         <div v-show="showSetting" class="nav-setting">
             <el-form
@@ -52,11 +52,7 @@
                                 <el-input v-model="nav.url"></el-input>
                             </el-col>
                             <el-col :span="6">
-                                <el-button
-                                    v-if="index !== 0"
-                                    @click.prevent="removeNav(nav)"
-                                    >删除</el-button
-                                >
+                                <el-button v-if="index !== 0" @click.prevent="removeNav(nav)">删除</el-button>
                             </el-col>
 
                             <el-col :span="6">
@@ -67,18 +63,13 @@
                                         dynamicValidateForm.navs.length - 1
                                     "
                                     @click="addNav()"
-                                    >新增</el-button
-                                >
+                                >新增</el-button>
                             </el-col>
                         </el-row>
                     </el-form-item>
                 </template>
                 <el-form-item>
-                    <el-button
-                        type="primary"
-                        @click="submitForm('dynamicValidateForm')"
-                        >保存</el-button
-                    >
+                    <el-button type="primary" @click="submitForm('dynamicValidateForm')">保存</el-button>
                 </el-form-item>
             </el-form>
         </div>
@@ -123,25 +114,53 @@ export default {
             }
         }
     },
+
     data() {
         return {
             showSetting: false,
+            timer: null,
             dynamicValidateForm: {
                 navs: []
             }
         }
     },
     watch: {
-        'dynamicValidateForm.navs'() {
-            this.$emit('change', this.dynamicValidateForm.navs)
+        navs: {
+            handler(navs) {
+                this.settingNavs(navs)
+            },
+            immediate: true
+        },
+        'dynamicValidateForm.navs': {
+            handler() {
+                if (this.isSetting) return
+                clearTimeout(this.timer)
+                this.timer = Date.now()
+                let navs = JSON.parse(
+                    JSON.stringify(this.dynamicValidateForm.navs)
+                ).map((nav) => {
+                    delete nav.key
+                    return nav
+                })
+                this.timer = setTimeout(() => {
+                    this.$emit('change', navs)
+                }, 1000)
+            },
+            deep: true
         }
     },
-    mounted() {
-        for (let nav of this.navs) {
-            this.addNav(nav)
-        }
-    },
+    mounted() {},
     methods: {
+        settingNavs() {
+            this.isSetting = true
+            for (let nav of this.navs) {
+                nav.key = Date.now() + seed++
+            }
+            this.dynamicValidateForm.navs = this.navs
+            setTimeout(() => {
+                this.isSetting = false
+            })
+        },
         toggleSetting() {
             this.showSetting = !this.showSetting
         },
@@ -165,8 +184,7 @@ export default {
                 this.dynamicValidateForm.navs.splice(index, 1)
             }
         },
-        addNav(nav = { title: '标题', url: '', key: 0 }) {
-            nav.key = Date.now() + seed++
+        addNav(nav = { title: '标题', url: '', key: Date.now() + seed++ }) {
             this.dynamicValidateForm.navs.push(nav)
         }
     }
