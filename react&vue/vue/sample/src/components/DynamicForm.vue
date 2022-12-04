@@ -7,11 +7,11 @@
                 effect="dark"
                 class="nav-tag"
                 type="primary"
-            >{{ nav.title }}</el-tag>
-            <i
-                class="el-icon-setting setting-icon"
-                @click="toggleSetting"
-            >&nbsp;{{ !showSetting ? '设置' : '收起' }}</i>
+                >{{ nav.title }}</el-tag
+            >
+            <i class="el-icon-setting setting-icon" @click="toggleSetting"
+                >&nbsp;{{ !showSetting ? '设置' : '收起' }}</i
+            >
         </div>
         <div v-show="showSetting" class="nav-setting">
             <el-form
@@ -52,7 +52,11 @@
                                 <el-input v-model="nav.url"></el-input>
                             </el-col>
                             <el-col :span="6">
-                                <el-button v-if="index !== 0" @click.prevent="removeNav(nav)">删除</el-button>
+                                <el-button
+                                    v-if="index !== 0"
+                                    @click.prevent="removeNav(nav)"
+                                    >删除</el-button
+                                >
                             </el-col>
 
                             <el-col :span="6">
@@ -63,13 +67,18 @@
                                         dynamicValidateForm.navs.length - 1
                                     "
                                     @click="addNav()"
-                                >新增</el-button>
+                                    >新增</el-button
+                                >
                             </el-col>
                         </el-row>
                     </el-form-item>
                 </template>
                 <el-form-item>
-                    <el-button type="primary" @click="submitForm('dynamicValidateForm')">保存</el-button>
+                    <el-button
+                        type="primary"
+                        @click="submitForm('dynamicValidateForm')"
+                        >保存</el-button
+                    >
                 </el-form-item>
             </el-form>
         </div>
