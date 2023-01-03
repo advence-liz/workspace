@@ -60,3 +60,14 @@ ORDER BY J, H DESC
 ```
 执行顺序：
 `FROM —> WHERE —> GROUP BY—> 聚合函数 —> HAVING—> SELECT —> ORDER BY —> LIMIT`
+##
+ALTER TABLE <数据表名>
+CHANGE COLUMN <字段名> <数据类型> DEFAULT <默认值>;
+
+ ALTER TABLE `handles` ALTER COLUMN navs SET DEFAULT '0'
+
+ ALTER TABLE `auth_team` ALTER COLUMN navs SET DEFAULT '0'
+
+ alter table `test_tb` alter column `col3` set default '3a';
+
+alter table `auth_team` change column `navs` `navs` varchar(1024) not null DEFAULT '0';
