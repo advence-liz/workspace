@@ -6,11 +6,12 @@
 
 /**
  *  target 2
- *  1, 2, 2, 2, 3, 4 ,5 ,6 , 7
+ *  1, 2, 2, 2, 3, 4 ,5
+ * [)
  *
- * 最左闭区间不断收缩 right 
+ * 最左闭区间不断收缩 right
  * 开区间
- * 
+ *
  */
 
 function binaryInsertLeft(nums, target) {
@@ -24,7 +25,13 @@ function binaryInsertLeft(nums, target) {
         } else {
             left = mid + 1
         }
+
+        // if(nums[mid]<)
     }
+    if (left >= nums.length || nums[left] !== target) {
+        return -1
+    }
+    // 算法运行结束是 left 等 right
     return left
 }
 

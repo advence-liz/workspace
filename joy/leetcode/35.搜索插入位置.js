@@ -23,22 +23,22 @@
 // https://wangdoc.com/javascript/operators/bit.html#%E5%8F%B3%E7%A7%BB%E8%BF%90%E7%AE%97%E7%AC%A6
 // nums[pos−1]<target≤nums[pos]
 var searchInsert = function(nums, target) {
-  const n = nums.length
-  let left = 0,
-    right = n - 1,
-    ans = n
-  while (left <= right) {
-    let mid = ((right - left) >> 1) + left
-    if (target <= nums[mid]) {
-      ans = mid
-      right = mid - 1
-    } else {
-      left = mid + 1
-    }
-  }
-  return ans
-}
+    let n = nums.length
+    let l = 0
+    let r = n - 1
 
+    while (l <= r) {
+        let mid = l + Math.floor((r - l) / 2)
+        console.log(mid)
+        if (nums[mid] >= target) {
+            r = mid - 1
+        } else {
+            l = mid + 1
+        }
+    }
+    return l
+}
+// searchInsert([1, 3, 5, 6], 2)
 // var r = searchInsert([1, 3, 5, 6], 4)
 // console.log(r)
 // @lc code=end
