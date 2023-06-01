@@ -1,0 +1,52 @@
+{
+  "compilerOptions": {
+    "allowJs": true,
+    "lib": ["es6", "dom"],
+    "types": ["node"],
+    "esModuleInterop": true,
+    "emitDecoratorMetadata": true,
+    "noImplicitThis": true,
+    "noImplicitAny": true,
+    "moduleResolution": "node",
+    "jsx": "preserve",
+    "module": "esnext",
+    "target": "ES5",
+    "noUnusedLocals": false,
+    "noUnusedParameters": false,
+    "allowSyntheticDefaultImports": true,
+    "skipLibCheck": true,
+    "experimentalDecorators": true,
+    "declaration": true,
+    "typeRoots": [
+      "./src/typings",
+      "./node_modules/@types",
+    
+    ],
+    "baseUrl": "./src",
+    "plugins": [
+      {
+        "name": "typescript-plugin-css-modules",
+        "options": {
+          "customMatcher": "\\.(c|le||lle|sa|sc)ss$"
+        }
+      }
+    ],
+    "paths": {
+      "@components/*": ["components/*"],
+      "@utils/*": ["utils/*"],
+      "@assets/*": ["assets"],
+      "@models/*": ["models/*"],
+      "@routes/*": ["routes/*"],
+      "@pages/*": ["pages/*"],
+      "@tools/*": ["tools/*"],
+      "@recoil/*": ["recoil/*"],
+      "@hooks/*": ["hooks/*"],
+      "@services/*": ["services/*"],
+      "@api/*": ["api/*"],
+      "@config/*": ["config/*"],
+      "@stores/*": ["stores/*"]
+    }
+  },
+  "include": ["src"],
+  "exclude": ["node_modules"]
+}
