@@ -1,16 +1,16 @@
-function deepCopy(obj) {
-    let res = null
-    if (typeof obj === 'object') {
-        res = obj.constructor === Array ? [] : {}
+// https://juejin.cn/post/6844903621444763661  for in  Object.keys for of
 
-        for (let v in obj) {
-            res[v] = typeof v === 'object' ? deepCopy(v) : obj[v]
-        }
-    } else {
-        res = obj
+function deepCopy(obj) {
+    if (typeof obj !== 'object') {
+        return obj
     }
 
-    return res
+    let subObj = Array.isArray(obj) ? [] : {}
+
+    for (let key of Object.keys(obj)) {
+        subObj[key] = deepCopy(obj[key])
+    }
+    return subObj
 }
 var c = { liz: 'eee', v: { v: 1, c: { v: 1 } } }
 var r = deepCopy(c)
