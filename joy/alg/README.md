@@ -27,6 +27,9 @@ https://leetcode-cn.com/problems/find-all-anagrams-in-a-string/solution/hua-dong
 ## 单调栈
 
 https://zhuanlan.zhihu.com/p/26465701
+
+## LRU
+https://www.cnblogs.com/thisiswhy/p/14205829.html
 ## TODO
 
 - [ ]719

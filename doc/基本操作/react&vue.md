@@ -1,6 +1,11 @@
 # react
 
 - https://cloud.tencent.com/developer/article/1906643  hooks
+- 
+- https://blog.51cto.com/u_15492153/5135429 react 高阶组件
+- https://www.jianshu.com/p/bebff3812580 react createElement 添加自定义属性
+
+hoc  mixin  继承 都是复用代码的方式
 
 React Hooks 简介
 React Hooks 是对 React function 组件的一种扩展，通过一些特殊的函数，让无状态组件拥有状态组件才拥有的能力。
