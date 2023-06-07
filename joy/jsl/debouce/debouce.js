@@ -35,7 +35,7 @@ function debouce(fn, wait, immediate = false, max = 10, cb = () => {}) {
         }
     }
 }
-export default debouce
+// export default debouce
 
 function log() {
     console.log(new Date().toString())
