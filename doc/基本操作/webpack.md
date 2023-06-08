@@ -9,6 +9,33 @@ output.library.type
 
 类型默认包括 'var'、 'module'、 'assign'、 'assign-properties'、 'this'、 'window'、 'self'、 'global'、 'commonjs'、 'commonjs2'、 'commonjs-module'、 'commonjs-static'、 'amd'、 'amd-require'、 'umd'、 'umd2'、 'jsonp' 以及 'system'，除此之外也可以通过插件添加。
 
+
+## 导出多种配置
+
+除了导出单个配置对象/函数，你可能也会需要导出多种配置（webpack 3.1.0 起支持）。当运行 webpack 时，所有配置项都会构建。比如，对于多 targets（如 AMD 和 CommonJS）构建 library 时会非常有用。
+```js
+module.exports = [
+  {
+    output: {
+      filename: './dist-amd.js',
+      libraryTarget: 'amd',
+    },
+    name: 'amd',
+    entry: './app.js',
+    mode: 'production',
+  },
+  {
+    output: {
+      filename: './dist-commonjs.js',
+      libraryTarget: 'commonjs',
+    },
+    name: 'commonjs',
+    entry: './app.js',
+    mode: 'production',
+  },
+];
+```
+
 ```js
 如果你将 entry 设置为一个 object，所以入口都可以通过 library 的 array 语法暴露：
 
