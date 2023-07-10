@@ -8,7 +8,7 @@ output.library.type
 类型：string
 
 类型默认包括 'var'、 'module'、 'assign'、 'assign-properties'、 'this'、 'window'、 'self'、 'global'、 'commonjs'、 'commonjs2'、 'commonjs-module'、 'commonjs-static'、 'amd'、 'amd-require'、 'umd'、 'umd2'、 'jsonp' 以及 'system'，除此之外也可以通过插件添加。
-
+let eeee
 
 ## 导出多种配置
 
@@ -32,6 +32,7 @@ module.exports = [
     name: 'commonjs',
     entry: './app.js',
     mode: 'production',
+    
   },
 ];
 ```
@@ -58,10 +59,11 @@ module.exports = {
   MyLibrary.a.hello('webpack');
   MyLibrary.b.hello('webpack');
 </script>
-查看 示例 获取更多内容。
+// 查看 示例 获取更多内容。
 
-请注意，如果你打算在每个入口点配置 library 配置项的话，以上配置将不能按照预期执行。这里是如何 在每个入口点下 做的方法：
+// 请注意，如果你打算在每个入口点配置 library 配置项的话，以上配置将不能按照预期执行。这里是如何 在每个入口点下 做的方法：
 
+// 以下方法可行但是看起来意义不大
 module.exports = {
   // …
   entry: {
@@ -84,3 +86,5 @@ module.exports = {
   },
 };
 ```
+
+if

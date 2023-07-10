@@ -41,7 +41,8 @@
     "redis": "^2.8.0",
     "request": "^2.88.2",
     "superagent": "^6.1.0",
-    "unzip": "^0.1.11"
+    "unzip": "^0.1.11",
+    "webpack-chain": "^6.5.1"
   },
   "devDependencies": {
     "@babel/core": "^7.19.3",
