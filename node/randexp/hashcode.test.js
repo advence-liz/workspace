@@ -15,16 +15,21 @@ function hashCode(str) {
 const RandExp = require('randexp')
 
 // const iuuid = new RandExp(/[A-Z0-9]{64}/)
-const uuid = new RandExp(/[a-z0-9.]{37}/)
+const uuid = new RandExp(/[a-z0-9.-]{37}/)
 const res = {}
 for (let i = 0; i < 100000; i++) {
     // hashCode(iuuid.gen())
-    let r = hashCode(uuid.gen())
+    let str = uuid.gen()
+    let r = hashCode(str)
     if (isNaN(r)) {
-        console.log(str)
+        console.log(r)
     }
     if (r < 0 || r > 99) {
+        console.log(r)
+    }
+    if (r < 5) {
         console.log(str, r)
+        break
     }
     let cur = r % 10
     if (res[cur] === undefined) {
