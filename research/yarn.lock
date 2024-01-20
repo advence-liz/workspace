@@ -1017,6 +1017,11 @@
   resolved "https://registry.npmmirror.com/@types/json-schema/download/@types/json-schema-7.0.9.tgz?cache=0&sync_timestamp=1637266119442&other_urls=https%3A%2F%2Fregistry.npmmirror.com%2F%40types%2Fjson-schema%2Fdownload%2F%40types%2Fjson-schema-7.0.9.tgz#97edc9037ea0c38585320b28964dde3b39e4660d"
   integrity sha1-l+3JA36gw4WFMgsolk3eOznkZg0=
 
+"@types/lodash@^4.14.182":
+  version "4.14.200"
+  resolved "http://r.npm.sankuai.com/@types/lodash/download/@types/lodash-4.14.200.tgz#435b6035c7eba9cdf1e039af8212c9e9281e7149"
+  integrity sha1-Q1tgNcfrqc3x4DmvghLJ6SgecUk=
+
 "@types/minimatch@*":
   version "3.0.5"
   resolved "https://registry.npmmirror.com/@types/minimatch/download/@types/minimatch-3.0.5.tgz?cache=0&sync_timestamp=1637267531979&other_urls=https%3A%2F%2Fregistry.npmmirror.com%2F%40types%2Fminimatch%2Fdownload%2F%40types%2Fminimatch-3.0.5.tgz#1001cc5e6a3704b83c236027e77f2f58ea010f40"
@@ -3679,6 +3684,11 @@ hash-sum@^1.0.2:
   resolved "https://registry.nlark.com/hash-sum/download/hash-sum-1.0.2.tgz#33b40777754c6432573c120cc3808bbd10d47f04"
   integrity sha1-M7QHd3VMZDJXPBIMw4CLvRDUfwQ=
 
+hash-sum@^2.0.0:
+  version "2.0.0"
+  resolved "https://registry.yarnpkg.com/hash-sum/-/hash-sum-2.0.0.tgz#81d01bb5de8ea4a214ad5d6ead1b523460b0b45a"
+  integrity sha512-WdZTbAByD+pHfl/g9QSsBIIwy8IT+EsPiKDs0KNX+zSHhdDLFKdZu0BQHljvO+0QI/BasbMSUa8wYNCZTvhslg==
+
 hash.js@^1.0.0, hash.js@^1.0.3:
   version "1.1.7"
   resolved "https://registry.npm.taobao.org/hash.js/download/hash.js-1.1.7.tgz#0babca538e8d4ee4a0f8988d68866537a003cf42"
@@ -3691,6 +3701,61 @@ he@1.2.x, he@^1.1.0:
   version "1.2.0"
   resolved "https://registry.nlark.com/he/download/he-1.2.0.tgz#84ae65fa7eafb165fddb61566ae14baf05664f0f"
   integrity sha1-hK5l+n6vsWX922FWauFLrwVmTw8=
+
+hel-iso@^4.3.2:
+  version "4.3.4"
+  resolved "http://r.npm.sankuai.com/hel-iso/download/hel-iso-4.3.4.tgz#cea40dfbed36d61ffeaa552b09953bcb3aea6301"
+  integrity sha1-zqQN++021h/+qlUrCZU7yzrqYwE=
+
+hel-lib-proxy@^4.7.0:
+  version "4.8.5"
+  resolved "http://r.npm.sankuai.com/hel-lib-proxy/download/hel-lib-proxy-4.8.5.tgz#85cbe5e1b8c1b12c111e8d6eaad542be6e175fb0"
+  integrity sha1-hcvl4bjBsSwRHo1uqtVCvm4XX7A=
+  dependencies:
+    hel-micro-core "^4.8.7"
+    hel-types "^4.3.3"
+
+hel-lodash@^2.3.4:
+  version "2.3.4"
+  resolved "https://registry.yarnpkg.com/hel-lodash/-/hel-lodash-2.3.4.tgz#02789555e166059cde7e3e2c489e64f8ffae5dd9"
+  integrity sha512-bG2H/BUgqDIgoIV4Nis37iR6kOwgVltQTu/T1MiFVkwL426+SfBuFjH8+N8dtZKtUjusGmqENlNDh3Bb3xYhuQ==
+  dependencies:
+    "@types/lodash" "^4.14.182"
+    hel-iso "^4.3.2"
+    hel-lib-proxy "^4.7.0"
+    lodash "^4.17.21"
+
+hel-micro-core@^4.2.0:
+  version "4.2.2"
+  resolved "http://r.npm.sankuai.com/hel-micro-core/download/hel-micro-core-4.2.2.tgz#85b3897e153f99fb7f2289dde1d13a0967806db0"
+  integrity sha1-hbOJfhU/mft/Iond4dE6CWeAbbA=
+  dependencies:
+    hel-types "^4.0.0"
+
+hel-micro-core@^4.8.7:
+  version "4.8.7"
+  resolved "http://r.npm.sankuai.com/hel-micro-core/download/hel-micro-core-4.8.7.tgz#ec2206d3aee38ac8d6e3f7c2c96b972200fb24ae"
+  integrity sha1-7CIG067jisjW4/fCyWuXIgD7JK4=
+  dependencies:
+    hel-types "^4.3.3"
+
+hel-micro@^4.2.0:
+  version "4.2.0"
+  resolved "http://r.npm.sankuai.com/hel-micro/download/hel-micro-4.2.0.tgz#a7a9d559b13e90633c1115ccc04590772ef910e0"
+  integrity sha1-p6nVWbE+kGM8ERXMwEWQdy75EOA=
+  dependencies:
+    hel-micro-core "^4.2.0"
+    hel-types "^4.0.0"
+
+hel-types@^4.0.0:
+  version "4.0.1"
+  resolved "http://r.npm.sankuai.com/hel-types/download/hel-types-4.0.1.tgz#bc0075070c74d214ea7c89a7bad64fe3f98d5de6"
+  integrity sha1-vAB1Bwx00hTqfImnutZP4/mNXeY=
+
+hel-types@^4.3.3:
+  version "4.3.3"
+  resolved "http://r.npm.sankuai.com/hel-types/download/hel-types-4.3.3.tgz#da23e6514e661ac18264cd3a2248c5cd57f736a1"
+  integrity sha1-2iPmUU5mGsGCZM06IkjFzVf3NqE=
 
 hex-color-regex@^1.1.0:
   version "1.1.0"
@@ -4529,10 +4594,10 @@ levn@~0.3.0:
     prelude-ls "~1.1.2"
     type-check "~0.3.2"
 
-lilith-compiler-vue@^1.5.3:
-  version "1.5.3"
-  resolved "https://registry.npmmirror.com/lilith-compiler-vue/-/lilith-compiler-vue-1.5.3.tgz#2c3ff59fd144540a7bee41dee90265fe04dd0e2a"
-  integrity sha512-UBZ/1w97q45X9+mC3VOFecBQ8IwXH0UHfhSODck7O/ISl1KFFVxPFCdQeqF1XX6CRMRC3iH3ZKcfsidNv2TyZw==
+lilith-compiler-vue@^1.5.4:
+  version "1.5.4"
+  resolved "http://r.npm.sankuai.com/lilith-compiler-vue/download/lilith-compiler-vue-1.5.4.tgz#4e9c1721f2b66e293aab29a845cc4a4429e3e5c4"
+  integrity sha1-TpwXIfK2bik6qymoRcxKRCnj5cQ=
   dependencies:
     "@babel/cli" "^7.5.5"
     "@babel/core" "^7.5.5"

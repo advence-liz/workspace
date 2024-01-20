@@ -13,10 +13,13 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "hash-sum": "^2.0.0",
+    "hel-lodash": "^2.3.4",
+    "hel-micro": "^4.2.0",
     "vue": "^2.6.11"
   },
   "devDependencies": {
     "lilith-compiler": "^1.3.0",
-    "lilith-compiler-vue": "^1.5.3"
+    "lilith-compiler-vue": "^1.5.4"
   }
 }
