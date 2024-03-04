@@ -1,7 +1,9 @@
 
 ## 锁
 - https://cloud.tencent.com/developer/article/1748597
-- https://www.cnblogs.com/laoyeye/p/8228467.html
+- https://www.cnblogs.com/laoyeye/p/8228467.\
+
+共享锁和排它锁  意向锁
 乐观锁
 
 乐观锁和悲观锁并不是锁，而是锁的设计思想。
