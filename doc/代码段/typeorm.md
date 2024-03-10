@@ -19,3 +19,5 @@ const result = await employeeRepository
 
 ```
 
+
+## setLock
