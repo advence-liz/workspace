@@ -27,3 +27,14 @@
 
 注：需要注意的是，在事务中，只有SELECT ... FOR UPDATE 或LOCK IN SHARE MODE 同一笔数据时会等待其它事务结束后才执行，一般SELECT ... 则不受此影响。拿上面的实例来说，当我执行select status from t_goods where id=1 for update;后。我在另外的事务中如果再次执行select status from t_goods where id=1 for update;则第二个事务会一直等待第一个事务的提交，此时第二个查询处于阻塞的状态，但是如果我是在第二个事务中执行select status from t_goods where id=1;则能正常查询出数据，不会受第一个事务的影响。
 
+
+
+当要更新一条记录的时候，希望这条记录没有被别人更新
+乐观锁实现方式：
+
+取出记录时，获取当前 version
+更新时，带上这个 version
+执行更新时， set version = newVersion where version = oldVersion
+如果 version 不对，就更新失败'
+
+https://www.volcengine.com/theme/6611009-R-7-1
