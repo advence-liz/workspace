@@ -1,6 +1,9 @@
 ## 垃圾回收
 
 - [v8链接回收](https://www.jianshu.com/p/6e38b56ecff6)
+- [V8内存浅析](https://brightc.netlify.app/2019/08/04/v8%E5%86%85%E5%AD%98%E6%B5%85%E6%9E%90/) 易懂版
+- [node 性能提升](https://juejin.cn/post/6844903733432680455)
+- [解读v8 GC](https://developer.aliyun.com/article/592878)
 
 ## 开启主动 gc
 ```js
