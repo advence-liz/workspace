@@ -1,13 +1,11 @@
-var fn = x => {
+var fn = (x) => {
     console.log(x)
-    return new Promise(resolve=>{
-        setTimeout(resolve,1000,x+1)
+    return new Promise((resolve) => {
+        setTimeout(resolve, 1000, x + 1)
     })
     // return Promise.resolve(x + 1)
-
 }
 var arr = [fn, fn, fn]
-
 
 var p = Promise.resolve(1)
 

@@ -33,3 +33,5 @@ const r = flatten(list)
 
 console.log(r)
 /* ================ 到这里结束 ================ */
+
+function flatten(arr) {}

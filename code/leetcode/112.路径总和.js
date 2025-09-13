@@ -19,19 +19,17 @@
  * @return {boolean}
  * 自顶向下
  */
-var hasPathSum = function(root, targetSum) {
-  function dsf(node, targetSum) {
-    if (!node) return false
-    if (node.val === targetSum) return true
-    if (!node.left && node.right) {
-      return node.val === targetSum
+var hasPathSum = function (root, targetSum) {
+    function dfs(node, sum) {
+        if (!node) return false
+        // 如果是叶子节点
+        if (!node.left && !node.right) {
+            return node.val === sum
+        }
+        // 递归检查左右子树
+        return dfs(node.left, sum - node.val) || dfs(node.right, sum - node.val)
     }
-
-    return (
-      dsf(node.left, targetSum - node.val) ||
-      dsf(node.right, targetSum - node.val)
-    )
-  }
-  return dsf(root, targetSum)
+    return dfs(root, targetSum)
 }
+
 // @lc code=end

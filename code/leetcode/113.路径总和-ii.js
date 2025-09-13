@@ -18,7 +18,7 @@
  * @param {number} targetSum
  * @return {number[][]}
  */
-var pathSum = function(root, targetSum) {
+var pathSum = function (root, targetSum) {
     let res = []
     function dsf(root, paths, targetSum) {
         if (!root) return
