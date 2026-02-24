@@ -3,17 +3,23 @@ class RequestPool {
         this.max = max
         this.queue = []
         this.count = 0
+        this.currentIndex = 0
+        this.results = []
     }
 
     add(func) {
+        let index = this.currentIndex
+        this.currentIndex++
         return new Promise((resolve, reject) => {
             const task = async () => {
                 this.count++
 
                 try {
                     const res = await func()
+                    this.results[index] = res
                     resolve(res)
                 } catch (error) {
+                    this.results[index] = error
                     reject(error)
                 } finally {
                     this.count--

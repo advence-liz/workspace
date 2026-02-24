@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>广告拦截器</title>
+  <link rel="stylesheet" href="popup.css">
+</head>
+<body>
+  <div class="container">
+    <header>
+      <h1>🛡️ 广告拦截器</h1>
+    </header>
+
+    <div class="stats">
+      <div class="stat-item">
+        <div class="stat-label">今日拦截</div>
+        <div class="stat-value" id="blockedToday">0</div>
+      </div>
+      <div class="stat-item">
+        <div class="stat-label">总计拦截</div>
+        <div class="stat-value" id="blockedTotal">0</div>
+      </div>
+    </div>
+
+    <div class="toggle-section">
+      <label class="switch">
+        <input type="checkbox" id="enableSwitch" checked>
+        <span class="slider"></span>
+      </label>
+      <span class="toggle-label">启用拦截</span>
+    </div>
+
+    <div class="actions">
+      <button id="pickElement" class="btn btn-primary">
+        🎯 选择元素拦截
+      </button>
+      <button id="openOptions" class="btn btn-secondary">
+        ⚙️ 高级设置
+      </button>
+    </div>
+
+    <footer>
+      <p class="version">v1.0.0</p>
+    </footer>
+  </div>
+
+  <script src="popup.js"></script>
+</body>
+</html>

@@ -1,0 +1,69 @@
+/* CSS 规则 - 直接隐藏广告元素 */
+
+/* 通用广告类 */
+.ad,
+.ads,
+.advertisement,
+.banner-ad,
+[class*="ad-"],
+[id*="ad-"],
+[class*="advertisement"],
+[id*="advertisement"] {
+  display: none !important;
+  visibility: hidden !important;
+  opacity: 0 !important;
+  height: 0 !important;
+  width: 0 !important;
+  overflow: hidden !important;
+}
+
+/* Google Ads */
+.adsbygoogle,
+#google_ads_iframe,
+[class*="google-ad"] {
+  display: none !important;
+}
+
+/* 侧边栏广告 */
+.sidebar-ad,
+.right-ad,
+.left-ad {
+  display: none !important;
+}
+
+/* 弹窗广告 */
+.popup-ad,
+.modal-ad,
+.overlay-ad {
+  display: none !important;
+}
+
+/* 视频广告 */
+.video-ad,
+.preroll-ad {
+  display: none !important;
+}
+
+/* 横幅广告 */
+.top-banner,
+.bottom-banner,
+.header-ad,
+.footer-ad {
+  display: none !important;
+}
+
+/* iframe 广告 */
+iframe[src*="doubleclick"],
+iframe[src*="googlesyndication"],
+iframe[src*="advertising"],
+iframe[src*="adservice"] {
+  display: none !important;
+}
+
+/* 常见广告容器 */
+div[id*="banner"],
+div[class*="banner"],
+div[id*="sponsor"],
+div[class*="sponsor"] {
+  display: none !important;
+}
