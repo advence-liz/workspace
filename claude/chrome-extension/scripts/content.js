@@ -56,6 +56,7 @@ function loadCustomRules() {
     chrome.storage.local.get(['customSelectors'], (result) => {
         if (result.customSelectors) {
             customSelectors = result.customSelectors
+            removeAds()
         }
     })
 }
@@ -319,8 +320,9 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
 })
 
 // 页面加载完成后初始化
-if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', init)
-} else {
+// if (document.readyState === 'loading') {
+//     document.addEventListener('DOMContentLoaded', init)
+// } else {
+//     init()
+// }
     init()
-}
