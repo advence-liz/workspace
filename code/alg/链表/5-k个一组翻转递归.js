@@ -10,22 +10,27 @@ const { ListNode, createLinkList, print } = require('./helper')
  *  pre
  */
 var reverseKGroup = function(head, k) {
-  let pre = null
-  let cur = head
-  let p = head
-  for (let i = 0; i < k; i++) {
-    if (!p) return head
-    p = p.next
-  }
-  for (let i = 0; i < k; i++) {
-    let next = cur.next
-    cur.next = pre
-    pre = cur
-    cur = next
-  }
-  head.next = reverseKGroup(cur, k)
-  return pre
-}
+    // 检查是否有足够的节点进行反转
+    let check = head;
+    for (let i = 0; i < k; i++) {
+        if (!check) return head; // 不足k个，直接返回
+        check = check.next;
+    }
+    
+    // 反转当前k个节点
+    let prev = null;
+    let curr = head;
+    for (let i = 0; i < k; i++) {
+        let next = curr.next;
+        curr.next = prev;
+        prev = curr;
+        curr = next;
+    }
+    
+    // 递归处理后续节点并连接
+    head.next = reverseKGroup(curr, k);
+    return prev;
+};
 
 let head = createLinkList([1, 2, 3, 4, 5, 6, 7])
 let r = reverseKGroup(head, 3)
