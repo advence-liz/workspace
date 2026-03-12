@@ -632,8 +632,8 @@ function receiveMessage(event) {
   // object.
   // 这里不准确，chrome没有这个属性
   var origin = event.origin || event.originalEvent.origin
-  // if (origin.includes('sankuai.com') || origin === window.origin) return
-  // if (origin.includes('sankuai.com') || origin === window.origin) return
+  // if (origin.includes('example.com') || origin === window.origin) return
+  // if (origin.includes('example.com') || origin === window.origin) return
 
   // ...
   // const { source, payload } = (event.data && JSON.parse(event.data)) || {}
@@ -657,13 +657,13 @@ function receiveMessage(event) {
  
 
 // hash: "uuid"
-// host: "dev.sankuai.com"
+// host: "dev.example.com"
 // path: undefined
 // port: undefined
 // query: "userid=1&uuid=1"
 // scheme: "https"
 // slash: "//"
-// url: "https://dev.sankuai.com/cccc/aaa?userid=1&uuid=1#uuid"
+// url: "https://dev.example.com/cccc/aaa?userid=1&uuid=1#uuid"
 function parseUrl (uri) {
     const parse_url = /^(?:([A-Za-z]+):)?(\/{0,3})([0-9.\-A-Za-z]+)(?::(\d+))?(?:\/([^?#]*))?(?:\?([^#]*))?(?:#(.*))?$/;
     const result = parse_url.exec(uri);

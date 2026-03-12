@@ -6,7 +6,7 @@
 
 
 
-curl --location 'https://aigc.sankuai.com/v1/openai/native/chat/completions' \
+curl --location 'https://api.openai.com/v1/chat/completions' \
 --header 'Content-Type: application/json' \
 --header 'Authorization: Bearer 21896445674749874258' \
 --data '{
@@ -26,7 +26,7 @@ curl --location 'https://aigc.sankuai.com/v1/openai/native/chat/completions' \
 
 
 
-curl --location 'https://aigc.sankuai.com/v1/openai/native/chat/completions' \
+curl --location 'https://api.openai.com/v1/chat/completions' \
 --header 'Authorization: Bearer 21896445674749874258' \
 --header 'Content-Type: application/json' \
 --data-raw '{

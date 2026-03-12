@@ -1,0 +1,43 @@
+{
+  "name": "langchain-agent-demos",
+  "version": "1.0.0",
+  "description": "LangChain Agent 典型示例集合",
+  "type": "module",
+  "engines": {
+    "node": ">=18.0.0",
+    "npm": ">=8.0.0"
+  },
+  "scripts": {
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "start": "node demos/00-demo-selector.js",
+    "demo1": "node demos/01-basic-react-agent.js",
+    "demo2": "node demos/02-search-agent.js",
+    "demo3": "node demos/03-calculator-agent.js",
+    "demo4": "node demos/04-memory-agent.js",
+    "demo5": "node demos/05-custom-tools-agent.js",
+    "demo6": "node demos/06-multi-agent-collaboration.js",
+    "demo7": "node demos/07-structured-output-agent.js",
+    "demo8": "node demos/08-error-handling-agent.js",
+    "demo9": "node demos/09-shell-and-skill-agent/index.js"
+  },
+  "keywords": [
+    "langchain",
+    "agent",
+    "demo"
+  ],
+  "author": "",
+  "license": "MIT",
+  "dependencies": {
+    "@langchain/community": "^0.3.0",
+    "@langchain/core": "^0.3.0",
+    "@langchain/openai": "^0.3.0",
+    "dotenv": "^16.4.5",
+    "duck-duck-scrape": "^2.2.7",
+    "langchain": "^0.3.0",
+    "zod": "^3.22.4"
+  },
+  "devDependencies": {
+    "vitest": "^4.0.18"
+  }
+}
