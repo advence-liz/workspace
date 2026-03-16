@@ -1,0 +1,46 @@
+# 依赖
+node_modules/
+package-lock.json
+yarn.lock
+pnpm-lock.yaml
+
+# 日志
+logs/
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# 环境变量
+.env
+.env.local
+.env.*.local
+
+# 输出文件
+output/
+data/
+*.json
+*.csv
+
+# 截图
+*.png
+*.jpg
+*.jpeg
+
+# 编辑器
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# 操作系统
+.DS_Store
+Thumbs.db
+
+# Puppeteer
+.local-chromium/
+
+# 临时文件
+tmp/
+temp/

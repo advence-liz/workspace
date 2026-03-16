@@ -1,0 +1,33 @@
+.
+├── README.md
+├── backend
+│   ├── nest-cli.json
+│   ├── package.json
+│   ├── src
+│   │   ├── app.module.ts
+│   │   ├── main.ts
+│   │   └── modules
+│   └── tsconfig.json
+├── docs
+│   ├── CRAWLER_ANALYSIS.md
+│   ├── DEPLOYMENT.md
+│   ├── PROJECT_SUMMARY.md
+│   ├── QUICK_START.md
+│   └── REQUIREMENTS.md
+├── frontend
+│   ├── index.html
+│   ├── package.json
+│   ├── src
+│   │   ├── App.tsx
+│   │   ├── api
+│   │   ├── components
+│   │   ├── index.css
+│   │   ├── main.tsx
+│   │   └── pages
+│   ├── tsconfig.json
+│   ├── tsconfig.node.json
+│   └── vite.config.ts
+├── project-structure.txt
+└── start.sh
+
+10 directories, 21 files

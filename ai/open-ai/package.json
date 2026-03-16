@@ -1,0 +1,39 @@
+{
+  "name": "openai-learning",
+  "version": "1.0.0",
+  "description": "OpenAI API 系统性学习项目",
+  "type": "module",
+  "scripts": {
+    "demo:list": "node --loader ts-node/esm demos/index.ts",
+    "demo:chat": "node --loader ts-node/esm demos/basic/chat.ts",
+    "demo:stream": "node --loader ts-node/esm demos/basic/stream.ts",
+    "demo:function": "node --loader ts-node/esm demos/advanced/function-calling.ts",
+    "demo:embeddings": "node --loader ts-node/esm demos/basic/embeddings.ts",
+    "demo:vision": "node --loader ts-node/esm demos/advanced/vision.ts",
+    "demo:audio": "node --loader ts-node/esm demos/advanced/audio.ts",
+    "demo:assistant": "node --loader ts-node/esm demos/advanced/assistant.ts",
+    "demo:rag": "node --loader ts-node/esm demos/use-cases/rag-system.ts",
+    "dev": "tsx watch",
+    "type-check": "tsc --noEmit"
+  },
+  "keywords": [
+    "openai",
+    "gpt",
+    "ai",
+    "llm",
+    "learning"
+  ],
+  "author": "",
+  "license": "MIT",
+  "dependencies": {
+    "openai": "^4.73.0",
+    "dotenv": "^16.4.7",
+    "zod": "^3.24.1"
+  },
+  "devDependencies": {
+    "@types/node": "^22.10.2",
+    "typescript": "^5.7.2",
+    "tsx": "^4.19.2",
+    "ts-node": "^10.9.2"
+  }
+}

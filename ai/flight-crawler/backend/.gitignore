@@ -1,0 +1,29 @@
+# 依赖
+node_modules/
+dist/
+
+# 日志
+logs/
+*.log
+
+# 数据库
+data/
+*.db
+*.db-journal
+
+# 环境变量
+.env
+.env.local
+
+# 截图
+debug-screenshots/
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# 系统文件
+.DS_Store
+Thumbs.db

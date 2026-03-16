@@ -1700,9 +1700,9 @@ export class CrawlerService {
         dates.push(date.toISOString().split('T')[0]);
       }
 
-      // 清理发现阶段的临时航班数据（保留发现航班阶段的完整数据）
-      this.logger.log('🧹 清理发现阶段的临时航班数据...');
-      await this.flightService.deleteDiscoveryFlights(dates);
+      // 注意：不再删除旧数据，采用增量更新模式
+      // 这样可以保证数据的可用性，避免因为删除行为导致程序不可用
+      this.logger.log('📝 采用增量更新模式，保留已有数据...');
 
       // 并行爬取所有种子机场（提效）
       this.logger.log(`🚀 并行爬取 ${seedAirports.length} 个种子机场...`);
@@ -1804,10 +1804,9 @@ export class CrawlerService {
         dates.push(date.toISOString().split('T')[0]);
       }
 
-      // 清理所有未来的航班数据（避免重复）
-      this.logger.log('🧹 清理旧的未来航班数据...');
-      const deletedCount = await this.flightService.deleteFutureFlights();
-      this.logger.log(`✅ 已删除 ${deletedCount} 条旧数据`);
+      // 注意：不再删除旧数据，采用增量更新模式
+      // 这样可以保证数据的可用性，避免因为删除行为导致程序不可用
+      this.logger.log('📝 采用增量更新模式，新数据将与已有数据合并...');
 
       // 并行爬取所有机场，但限制并发数（避免过载）
       const CONCURRENT_LIMIT = 5; // 最多同时爬取 5 个机场
