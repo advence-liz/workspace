@@ -65,11 +65,14 @@ export class CrawlerService {
         // 一次性爬取所有权益卡类型的航班
         this.logger.log(`爬取所有权益卡 - ${date}`);
         const dayFlights = await this.crawlFlightsByDate(origin, date, cardTypes);
+        this.logger.log(`✅ ${origin} - ${date}: 爬取 ${dayFlights.length} 条航班`);
         flights.push(...dayFlights);
 
         // 随机延迟，避免被封
         await this.randomDelay();
       }
+
+      this.logger.log(`📊 ${origin} 总计爬取 ${flights.length} 条航班`);
 
       // 保存到数据库
       if (saveToDb && flights.length > 0) {
@@ -1737,13 +1740,20 @@ export class CrawlerService {
 
       // 从航班数据中自动发现机场
       this.logger.log(`📊 分析航班数据，发现机场...`);
-      await this.flightService.discoverAirportsFromFlights(allFlights);
+
+      // 只有爬取到航班数据才能发现机场
+      if (allFlights.length > 0) {
+        await this.flightService.discoverAirportsFromFlights(allFlights);
+      } else {
+        this.logger.warn('⚠️ 本次爬取未获得任何航班数据，跳过机场发现');
+      }
 
       // 获取发现的机场数量
       const airports = await this.flightService.getEnabledOriginAirports();
 
       this.logger.log(`✅ 【初始化阶段1】完成！发现 ${airports.length} 个机场`);
       this.logger.log(`📋 机场列表: ${airports.join(', ')}`);
+      this.logger.log(`📊 本次爬取航班数: ${allFlights.length} 条`);
 
       // 完成日志记录
       await this.completeCrawlerLog(log.id, true, {
