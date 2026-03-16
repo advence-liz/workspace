@@ -1848,7 +1848,7 @@ export class CrawlerService {
           airports,
           airportResults,
           dateRange: dates,
-          deletedCount,
+          updateMode: 'incremental', // 采用增量更新模式
         },
       });
 
