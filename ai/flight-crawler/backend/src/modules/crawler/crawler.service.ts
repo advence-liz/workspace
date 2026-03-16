@@ -18,6 +18,8 @@ export class CrawlerService {
   private readonly logger = new Logger(CrawlerService.name);
   private browser: puppeteer.Browser | null = null;
   private readonly screenshotDir = path.join(process.cwd(), 'debug-screenshots');
+  private isCrawlerRunning = false; // 并发锁：防止多个爬虫同时运行
+  private runningTaskId: number | null = null; // 当前运行的任务 ID
 
   constructor(
     private readonly flightService: FlightService,
@@ -1681,8 +1683,22 @@ export class CrawlerService {
   async initializeDiscoverAirports(days: number = 1): Promise<{ success: boolean; airportCount: number; flightCount: number }> {
     this.logger.log(`🔍 【初始化阶段1】开始发现机场（爬取未来 ${days} 天）...`);
 
+    // 检查是否有其他爬虫任务正在运行（并发锁）
+    if (this.isCrawlerRunning) {
+      this.logger.warn(`⚠️ 爬虫已在运行中（任务 ID: ${this.runningTaskId}），新任务被拒绝`);
+      return {
+        success: false,
+        airportCount: 0,
+        flightCount: 0,
+      };
+    }
+
     // 创建执行日志
     const log = await this.createCrawlerLog(CrawlerTaskType.DISCOVER_AIRPORTS, days);
+
+    // 获取并发锁
+    this.isCrawlerRunning = true;
+    this.runningTaskId = log.id;
 
     try {
       // 种子机场：用于发现其他机场
@@ -1783,6 +1799,11 @@ export class CrawlerService {
       });
 
       return { success: false, airportCount: 0, flightCount: 0 };
+    } finally {
+      // 释放并发锁
+      this.isCrawlerRunning = false;
+      this.runningTaskId = null;
+      this.logger.log('🔓 爬虫锁已释放');
     }
   }
 
@@ -1794,8 +1815,21 @@ export class CrawlerService {
   async initializeRefreshFlights(days: number = 7): Promise<{ success: boolean; count: number }> {
     this.logger.log(`🔄 【初始化阶段2】开始发现航班数据（爬取未来 ${days} 天）...`);
 
+    // 检查是否有其他爬虫任务正在运行（并发锁）
+    if (this.isCrawlerRunning) {
+      this.logger.warn(`⚠️ 爬虫已在运行中（任务 ID: ${this.runningTaskId}），新任务被拒绝`);
+      return {
+        success: false,
+        count: 0,
+      };
+    }
+
     // 创建执行日志
     const log = await this.createCrawlerLog(CrawlerTaskType.REFRESH_FLIGHTS, days);
+
+    // 获取并发锁
+    this.isCrawlerRunning = true;
+    this.runningTaskId = log.id;
 
     try {
       // 获取所有启用爬虫的机场
@@ -1896,6 +1930,11 @@ export class CrawlerService {
       });
 
       return { success: false, count: 0 };
+    } finally {
+      // 释放并发锁
+      this.isCrawlerRunning = false;
+      this.runningTaskId = null;
+      this.logger.log('🔓 爬虫锁已释放');
     }
   }
 
