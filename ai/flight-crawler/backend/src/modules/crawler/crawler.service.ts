@@ -1700,9 +1700,10 @@ export class CrawlerService {
         dates.push(date.toISOString().split('T')[0]);
       }
 
-      // 注意：不再删除旧数据，采用增量更新模式
-      // 这样可以保证数据的可用性，避免因为删除行为导致程序不可用
-      this.logger.log('📝 采用增量更新模式，保留已有数据...');
+      // 采用"爬取完成后一次性替换"的策略
+      // 先爬取所有数据，然后一次性删除旧数据并保存新数据
+      // 这样可以最小化数据空白期，同时确保新数据完全覆盖旧数据
+      this.logger.log('📝 采用智能替换模式：爬取完成后一次性替换旧数据...');
 
       // 并行爬取所有种子机场（提效）
       this.logger.log(`🚀 并行爬取 ${seedAirports.length} 个种子机场...`);
@@ -1724,6 +1725,15 @@ export class CrawlerService {
 
       const flightsArrays = await Promise.all(crawlPromises);
       const allFlights = flightsArrays.flat();
+
+      // 爬取完成后，删除旧数据并保存新数据（一次性操作，最小化空白期）
+      if (allFlights.length > 0) {
+        this.logger.log(`🔄 开始替换数据：删除旧数据并保存 ${allFlights.length} 条新数据...`);
+        const deletedCount = await this.flightService.deleteDiscoveryFlights(dates);
+        this.logger.log(`🗑️ 已删除 ${deletedCount} 条旧数据`);
+        await this.flightService.saveFlights(allFlights);
+        this.logger.log(`✅ 已保存 ${allFlights.length} 条新数据`);
+      }
 
       // 从航班数据中自动发现机场
       this.logger.log(`📊 分析航班数据，发现机场...`);
@@ -1804,14 +1814,16 @@ export class CrawlerService {
         dates.push(date.toISOString().split('T')[0]);
       }
 
-      // 注意：不再删除旧数据，采用增量更新模式
-      // 这样可以保证数据的可用性，避免因为删除行为导致程序不可用
-      this.logger.log('📝 采用增量更新模式，新数据将与已有数据合并...');
+      // 采用"爬取完成后一次性替换"的策略
+      // 先爬取所有数据，然后一次性删除旧数据并保存新数据
+      // 这样可以最小化数据空白期，同时确保新数据完全覆盖旧数据
+      this.logger.log('📝 采用智能替换模式：爬取完成后一次性替换旧数据...');
 
       // 并行爬取所有机场，但限制并发数（避免过载）
       const CONCURRENT_LIMIT = 5; // 最多同时爬取 5 个机场
       let totalCount = 0;
       const airportResults: Record<string, number> = {};
+      const allCollectedFlights: Partial<Flight>[] = []; // 收集所有爬取的航班
 
       this.logger.log(`🚀 并行爬取 ${airports.length} 个机场（并发限制: ${CONCURRENT_LIMIT}）...`);
 
@@ -1821,10 +1833,11 @@ export class CrawlerService {
         this.logger.log(`📦 批次 ${Math.floor(i / CONCURRENT_LIMIT) + 1}/${Math.ceil(airports.length / CONCURRENT_LIMIT)}: ${batch.join(', ')}`);
 
         const batchPromises = batch.map(airport =>
-          this.crawlFlights(airport, dates)
-            .then(({ count }) => {
+          this.crawlFlights(airport, dates, true, false) // 不直接保存，先收集
+            .then(({ count, flights }) => {
               this.logger.log(`✅ ${airport} 爬取完成，获得 ${count} 条数据`);
               airportResults[airport] = count;
+              allCollectedFlights.push(...flights); // 收集航班数据
               return count;
             })
             .catch(error => {
@@ -1838,6 +1851,15 @@ export class CrawlerService {
         totalCount += batchCounts.reduce((sum, count) => sum + count, 0);
       }
 
+      // 爬取完成后，删除旧数据并保存新数据（一次性操作，最小化空白期）
+      if (allCollectedFlights.length > 0) {
+        this.logger.log(`🔄 开始替换数据：删除旧数据并保存 ${allCollectedFlights.length} 条新数据...`);
+        const deletedCount = await this.flightService.deleteFutureFlights();
+        this.logger.log(`🗑️ 已删除 ${deletedCount} 条旧数据`);
+        await this.flightService.saveFlights(allCollectedFlights);
+        this.logger.log(`✅ 已保存 ${allCollectedFlights.length} 条新数据`);
+      }
+
       this.logger.log(`✅ 【初始化阶段2】完成！共爬取 ${totalCount} 条航班数据`);
 
       // 完成日志记录
@@ -1848,7 +1870,7 @@ export class CrawlerService {
           airports,
           airportResults,
           dateRange: dates,
-          updateMode: 'incremental', // 采用增量更新模式
+          updateMode: 'smart-replace', // 采用智能替换模式
         },
       });
 
