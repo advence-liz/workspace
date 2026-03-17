@@ -39,15 +39,25 @@ import {
 const { Title, Paragraph } = Typography;
 const { RangePicker } = DatePicker;
 
-// 获取权益卡类型的显示文本
-const getCardTypeDisplay = (cardType: string): string => {
+// 获取权益卡类型的 tag 显示（拆分为两个 tag）
+const getCardTypeTags = (cardType: string): JSX.Element => {
   if (cardType === '666权益卡航班') {
-    return '666';
+    return (
+      <Space size="small">
+        <Tag color="blue">666</Tag>
+        <Tag>权益卡航班</Tag>
+      </Space>
+    );
   }
   if (cardType === '2666权益卡航班') {
-    return '2666';
+    return (
+      <Space size="small">
+        <Tag color="green">2666</Tag>
+        <Tag>权益卡航班</Tag>
+      </Space>
+    );
   }
-  return cardType;
+  return <Tag>{cardType}</Tag>;
 };
 
 function FlightManagement() {
@@ -278,7 +288,7 @@ function FlightManagement() {
       目的地: flight.destination,
       起飞时间: dayjs(flight.departureTime).format('YYYY-MM-DD HH:mm'),
       到达时间: dayjs(flight.arrivalTime).format('YYYY-MM-DD HH:mm'),
-      权益卡类型: getCardTypeDisplay(flight.cardType),
+      权益卡类型: flight.cardType,
       可用座位: flight.availableSeats || '-',
       机型: flight.aircraftType || '-',
       爬取时间: flight.crawledAt ? dayjs(flight.crawledAt).format('YYYY-MM-DD HH:mm') : '-',
@@ -333,16 +343,8 @@ function FlightManagement() {
       title: '权益卡类型',
       dataIndex: 'cardType',
       key: 'cardType',
-      width: 100,
-      render: (type) => {
-        if (type === '666权益卡航班') {
-          return <Tag color="blue">666</Tag>;
-        }
-        if (type === '2666权益卡航班') {
-          return <Tag color="green">2666</Tag>;
-        }
-        return <Tag>{type}</Tag>;
-      },
+      width: 160,
+      render: (type) => getCardTypeTags(type),
     },
     {
       title: '可用座位',
@@ -407,12 +409,12 @@ function FlightManagement() {
         </Col>
         <Col xs={12} sm={6}>
           <Card>
-            <Statistic title="666" value={stats.cardType666Count} valueStyle={{ color: '#1890ff' }} />
+            <Statistic title="666权益卡航班" value={stats.cardType666Count} valueStyle={{ color: '#1890ff' }} />
           </Card>
         </Col>
         <Col xs={12} sm={6}>
           <Card>
-            <Statistic title="2666" value={stats.cardType2666Count} valueStyle={{ color: '#52c41a' }} />
+            <Statistic title="2666权益卡航班" value={stats.cardType2666Count} valueStyle={{ color: '#52c41a' }} />
           </Card>
         </Col>
       </Row>
@@ -461,10 +463,10 @@ function FlightManagement() {
           </Form.Item>
 
           <Form.Item name="cardType" label="权益卡类型">
-            <Select placeholder="请选择" allowClear style={{ width: 150 }}>
+            <Select placeholder="请选择" allowClear style={{ width: 180 }}>
               <Select.Option value="全部">全部</Select.Option>
-              <Select.Option value="666权益卡航班">666</Select.Option>
-              <Select.Option value="2666权益卡航班">2666</Select.Option>
+              <Select.Option value="666权益卡航班">666权益卡航班</Select.Option>
+              <Select.Option value="2666权益卡航班">2666权益卡航班</Select.Option>
             </Select>
           </Form.Item>
 
@@ -554,8 +556,9 @@ function FlightManagement() {
 
           <Form.Item name="cardType" label="权益卡类型" rules={[{ required: true, message: '请选择权益卡类型' }]}>
             <Select>
-              <Select.Option value="666权益卡航班">666</Select.Option>
-              <Select.Option value="2666权益卡航班">2666</Select.Option>
+              <Select.Option value="全部">全部</Select.Option>
+              <Select.Option value="666权益卡航班">666权益卡航班</Select.Option>
+              <Select.Option value="2666权益卡航班">2666权益卡航班</Select.Option>
             </Select>
           </Form.Item>
 
