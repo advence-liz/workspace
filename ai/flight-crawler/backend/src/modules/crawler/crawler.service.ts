@@ -41,6 +41,32 @@ export class CrawlerService {
   }
 
   /**
+   * 清理旧的截图文件
+   */
+  private cleanOldScreenshots(): void {
+    try {
+      if (fs.existsSync(this.screenshotDir)) {
+        const files = fs.readdirSync(this.screenshotDir);
+        let deletedCount = 0;
+
+        files.forEach(file => {
+          if (file.endsWith('.png')) {
+            const filePath = path.join(this.screenshotDir, file);
+            fs.unlinkSync(filePath);
+            deletedCount++;
+          }
+        });
+
+        if (deletedCount > 0) {
+          this.logger.log(`🗑️ 已清理 ${deletedCount} 个旧截图文件`);
+        }
+      }
+    } catch (error) {
+      this.logger.warn('清理截图文件失败', error);
+    }
+  }
+
+  /**
    * 启动爬虫任务 - 同时爬取666和2666权益卡航班（一次性操作）
    * @param origin 出发城市
    * @param dates 日期列表
@@ -1593,6 +1619,9 @@ export class CrawlerService {
     this.logger.log(`🔍 开始调试爬虫 (出发地: ${origin}, 日期: ${crawlDate})...`);
 
     try {
+      // 清理之前的截图文件
+      this.cleanOldScreenshots();
+
       // 记录开始时间，用于筛选本次调试的截图
       const startTime = Date.now();
 
