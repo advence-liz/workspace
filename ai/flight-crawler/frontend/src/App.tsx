@@ -3,6 +3,7 @@ import Layout from './components/Layout';
 import DestinationQuery from './pages/DestinationQuery';
 import RoutePlanner from './pages/RoutePlanner';
 import DataManagement from './pages/DataManagement';
+import FlightManagement from './pages/FlightManagement';
 
 function App() {
   return (
@@ -12,6 +13,7 @@ function App() {
         <Route path="destination" element={<DestinationQuery />} />
         <Route path="route-planner" element={<RoutePlanner />} />
         <Route path="data-management" element={<DataManagement />} />
+        <Route path="flight-management" element={<FlightManagement />} />
       </Route>
     </Routes>
   );

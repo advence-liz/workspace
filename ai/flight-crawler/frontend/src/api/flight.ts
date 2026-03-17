@@ -35,7 +35,9 @@ export interface Flight {
   departureTime: string;
   arrivalTime: string;
   availableSeats?: number;
+  aircraftType?: string;
   cardType: string;
+  crawledAt?: string;
 }
 
 // 查询所有可达目的地
@@ -221,4 +223,52 @@ export const queryRoundTripFlights = (
   params: QueryFlightsParams
 ): Promise<RoundTripFlights> => {
   return api.get('/flights/round-trip', { params });
+};
+
+// 分页查询航班（带筛选和排序）
+export const queryFlightsWithPagination = (params: {
+  page?: number;
+  pageSize?: number;
+  origin?: string;
+  destination?: string;
+  startDate?: string;
+  endDate?: string;
+  cardType?: string;
+  flightNo?: string;
+  sortBy?: 'departureTime' | 'arrivalTime' | 'flightNo' | 'createdAt';
+  sortOrder?: 'ASC' | 'DESC';
+}): Promise<{
+  flights: Flight[];
+  total: number;
+  page: number;
+  pageSize: number;
+}> => {
+  return api.get('/flights/paginated', { params });
+};
+
+// 按 ID 获取航班详情
+export const getFlightById = (id: number): Promise<Flight> => {
+  return api.get(`/flights/${id}`);
+};
+
+// 更新航班
+export const updateFlight = (id: number, data: Partial<Flight>): Promise<{
+  message: string;
+  flight: Flight;
+}> => {
+  return api.put(`/flights/${id}`, data);
+};
+
+// 删除航班
+export const deleteFlight = (id: number): Promise<{ success: boolean; message: string }> => {
+  return api.delete(`/flights/${id}`);
+};
+
+// 批量删除航班
+export const batchDeleteFlights = (ids: number[]): Promise<{
+  success: boolean;
+  deletedCount: number;
+  message: string;
+}> => {
+  return api.post('/flights/batch-delete', { ids });
 };

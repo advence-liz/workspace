@@ -1,6 +1,22 @@
-import { Controller, Get, Query, HttpCode, HttpStatus } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Query,
+  HttpCode,
+  HttpStatus,
+  Put,
+  Delete,
+  Post,
+  Param,
+  Body,
+  NotFoundException,
+  BadRequestException,
+} from '@nestjs/common';
 import { FlightService } from './flight.service';
 import { QueryFlightsDto } from './dto/query-flights.dto';
+import { QueryFlightsWithPaginationDto } from './dto/query-flights-pagination.dto';
+import { UpdateFlightDto } from './dto/update-flight.dto';
+import { BatchDeleteFlightsDto } from './dto/batch-delete-flights.dto';
 
 @Controller('flights')
 export class FlightController {
@@ -44,5 +60,80 @@ export class FlightController {
   @HttpCode(HttpStatus.OK)
   async getRoundTripFlights(@Query() query: QueryFlightsDto) {
     return this.flightService.queryRoundTripFlights(query);
+  }
+
+  /**
+   * 分页查询航班（带高级筛选）
+   * GET /api/flights/paginated
+   */
+  @Get('paginated')
+  @HttpCode(HttpStatus.OK)
+  async getFlightsWithPagination(@Query() query: QueryFlightsWithPaginationDto) {
+    return this.flightService.queryFlightsWithPagination(query);
+  }
+
+  /**
+   * 按 ID 获取航班详情
+   * GET /api/flights/:id
+   */
+  @Get(':id')
+  @HttpCode(HttpStatus.OK)
+  async getFlightById(@Param('id') id: number) {
+    const flight = await this.flightService.findFlightById(id);
+    if (!flight) {
+      throw new NotFoundException(`航班 ID ${id} 不存在`);
+    }
+    return flight;
+  }
+
+  /**
+   * 更新航班
+   * PUT /api/flights/:id
+   */
+  @Put(':id')
+  @HttpCode(HttpStatus.OK)
+  async updateFlight(
+    @Param('id') id: number,
+    @Body() updateData: UpdateFlightDto,
+  ) {
+    try {
+      const flight = await this.flightService.updateFlight(id, updateData);
+      return {
+        message: '更新成功',
+        flight,
+      };
+    } catch (error: any) {
+      throw new BadRequestException(error.message);
+    }
+  }
+
+  /**
+   * 删除航班
+   * DELETE /api/flights/:id
+   */
+  @Delete(':id')
+  @HttpCode(HttpStatus.OK)
+  async deleteFlight(@Param('id') id: number) {
+    try {
+      await this.flightService.deleteFlight(id);
+      return { success: true, message: '删除成功' };
+    } catch (error: any) {
+      throw new NotFoundException(error.message);
+    }
+  }
+
+  /**
+   * 批量删除航班
+   * POST /api/flights/batch-delete
+   */
+  @Post('batch-delete')
+  @HttpCode(HttpStatus.OK)
+  async batchDeleteFlights(@Body() body: BatchDeleteFlightsDto) {
+    const deletedCount = await this.flightService.batchDeleteFlights(body.ids);
+    return {
+      success: true,
+      deletedCount,
+      message: `成功删除 ${deletedCount} 条航班`,
+    };
   }
 }

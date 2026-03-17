@@ -9,6 +9,9 @@ import {
   DestinationsResponseDto,
   RoundTripFlightsDto,
 } from './dto/destination-result.dto';
+import { QueryFlightsWithPaginationDto } from './dto/query-flights-pagination.dto';
+import { UpdateFlightDto } from './dto/update-flight.dto';
+import { BatchDeleteFlightsDto } from './dto/batch-delete-flights.dto';
 
 @Injectable()
 export class FlightService {
@@ -430,5 +433,122 @@ export class FlightService {
       order: { city: 'ASC', name: 'ASC' },
     });
     return airports.map(a => a.name);
+  }
+
+  /**
+   * 分页查询航班（支持筛选、排序）
+   */
+  async queryFlightsWithPagination(
+    dto: QueryFlightsWithPaginationDto,
+  ): Promise<{
+    flights: Flight[];
+    total: number;
+    page: number;
+    pageSize: number;
+  }> {
+    const {
+      page = 1,
+      pageSize = 10,
+      origin,
+      destination,
+      startDate,
+      endDate,
+      cardType,
+      flightNo,
+      sortBy = 'departureTime',
+      sortOrder = 'ASC',
+    } = dto;
+
+    // 构建查询条件
+    const queryBuilder = this.flightRepository.createQueryBuilder('flight');
+
+    if (origin) {
+      queryBuilder.andWhere('flight.origin = :origin', { origin });
+    }
+
+    if (destination) {
+      queryBuilder.andWhere('flight.destination = :destination', { destination });
+    }
+
+    if (startDate && endDate) {
+      const startDateTime = new Date(startDate);
+      const endDateTime = new Date(endDate);
+      endDateTime.setHours(23, 59, 59, 999);
+      queryBuilder.andWhere('flight.departureTime BETWEEN :startDate AND :endDate', {
+        startDate: startDateTime,
+        endDate: endDateTime,
+      });
+    }
+
+    if (cardType && cardType !== '全部') {
+      queryBuilder.andWhere('flight.cardType = :cardType', { cardType });
+    }
+
+    if (flightNo) {
+      queryBuilder.andWhere('flight.flightNo LIKE :flightNo', { flightNo: `%${flightNo}%` });
+    }
+
+    // 排序
+    queryBuilder.orderBy(`flight.${sortBy}`, sortOrder);
+
+    // 分页
+    const skip = (page - 1) * pageSize;
+    queryBuilder.skip(skip).take(pageSize);
+
+    // 执行查询
+    const [flights, total] = await queryBuilder.getManyAndCount();
+
+    return {
+      flights,
+      total,
+      page,
+      pageSize,
+    };
+  }
+
+  /**
+   * 按 ID 查询单条航班
+   */
+  async findFlightById(id: number): Promise<Flight | null> {
+    return this.flightRepository.findOne({ where: { id } });
+  }
+
+  /**
+   * 更新航班
+   */
+  async updateFlight(id: number, updateData: UpdateFlightDto): Promise<Flight> {
+    const flight = await this.findFlightById(id);
+    if (!flight) {
+      throw new Error(`航班 ID ${id} 不存在`);
+    }
+
+    // 如果有时间字段，转换为 Date 对象
+    if (updateData.departureTime) {
+      updateData.departureTime = new Date(updateData.departureTime) as any;
+    }
+    if (updateData.arrivalTime) {
+      updateData.arrivalTime = new Date(updateData.arrivalTime) as any;
+    }
+
+    Object.assign(flight, updateData);
+    return this.flightRepository.save(flight);
+  }
+
+  /**
+   * 删除单条航班
+   */
+  async deleteFlight(id: number): Promise<void> {
+    const result = await this.flightRepository.delete(id);
+    if (result.affected === 0) {
+      throw new Error(`航班 ID ${id} 不存在`);
+    }
+  }
+
+  /**
+   * 批量删除航班
+   */
+  async batchDeleteFlights(ids: number[]): Promise<number> {
+    const result = await this.flightRepository.delete(ids);
+    return result.affected || 0;
   }
 }

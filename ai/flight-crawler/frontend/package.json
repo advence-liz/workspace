@@ -10,19 +10,21 @@
     "lint": "eslint . --ext ts,tsx --report-unused-disable-directives --max-warnings 0"
   },
   "dependencies": {
+    "antd": "^5.12.0",
+    "axios": "^1.6.0",
+    "dayjs": "^1.11.10",
+    "echarts": "^5.4.0",
+    "echarts-for-react": "^3.0.2",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
     "react-router-dom": "^6.20.0",
-    "antd": "^5.12.0",
-    "axios": "^1.6.0",
-    "zustand": "^4.4.0",
-    "dayjs": "^1.11.10",
-    "echarts": "^5.4.0",
-    "echarts-for-react": "^3.0.2"
+    "xlsx": "^0.18.5",
+    "zustand": "^4.4.0"
   },
   "devDependencies": {
     "@types/react": "^18.2.0",
     "@types/react-dom": "^18.2.0",
+    "@types/xlsx": "^0.0.36",
     "@typescript-eslint/eslint-plugin": "^6.0.0",
     "@typescript-eslint/parser": "^6.0.0",
     "@vitejs/plugin-react": "^4.2.0",
