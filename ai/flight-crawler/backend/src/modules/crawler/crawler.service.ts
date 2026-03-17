@@ -1620,6 +1620,84 @@ export class CrawlerService {
   }
 
   /**
+   * 调试爬虫 - 爬取指定出发地和日期的航班
+   * 用于诊断特定航线是否缺失问题
+   * @param origin 出发地（如：北京首都）
+   * @param date 日期（可选，格式：2026-03-19，不提供则爬取明天）
+   */
+  async debugFlightByDate(origin: string, date?: string): Promise<{
+    success: boolean;
+    count: number;
+    flights: Partial<Flight>[];
+    screenshots: string[];
+    logs: string[];
+  }> {
+    // 如果不提供日期，则使用明天
+    let crawlDate = date;
+    if (!crawlDate) {
+      const tomorrow = new Date();
+      tomorrow.setDate(tomorrow.getDate() + 1);
+      crawlDate = tomorrow.toISOString().split('T')[0];
+    }
+
+    this.logger.log(`🔍 开始调试爬虫 (出发地: ${origin}, 日期: ${crawlDate})...`);
+
+    try {
+      // 记录开始时间，用于筛选本次调试的截图
+      const startTime = Date.now();
+
+      // 调用爬虫逻辑，不保存到数据库
+      const { count, flights } = await this.crawlFlights(origin, [crawlDate], false, false);
+
+      // 收集本次调试生成的截图
+      const screenshots = fs.readdirSync(this.screenshotDir)
+        .filter(file => {
+          const filePath = path.join(this.screenshotDir, file);
+          const stats = fs.statSync(filePath);
+          return stats.mtimeMs >= startTime && file.includes(origin) && file.includes(crawlDate);
+        })
+        .map(file => path.join(this.screenshotDir, file))
+        .sort();
+
+      // 收集本次调试的日志
+      const logFile = path.join(process.cwd(), 'logs', `app-${crawlDate}.log`);
+      let logs: string[] = [];
+      if (fs.existsSync(logFile)) {
+        const content = fs.readFileSync(logFile, 'utf-8');
+        // 提取与该出发地相关的日志行
+        logs = content
+          .split('\n')
+          .filter(line =>
+            line.includes(origin) ||
+            line.includes('所有目的地') ||
+            line.includes('航班被过滤') ||
+            line.includes('过滤统计')
+          )
+          .slice(-50); // 只返回最后 50 行
+      }
+
+      this.logger.log(`✅ 调试完成: 找到 ${count} 条航班, ${screenshots.length} 张截图, ${logs.length} 条日志`);
+
+      return {
+        success: true,
+        count: count,
+        flights: flights,
+        screenshots: screenshots,
+        logs: logs,
+      };
+    } catch (error) {
+      this.logger.error('调试失败', error);
+      return {
+        success: false,
+        count: 0,
+        flights: [],
+        screenshots: [],
+        logs: [error instanceof Error ? error.message : '未知错误'],
+      };
+    }
+  }
+
+  /**
    * 创建执行日志
    */
   private async createCrawlerLog(

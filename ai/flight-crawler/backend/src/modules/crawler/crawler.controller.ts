@@ -23,13 +23,15 @@ export class CrawlerController {
   }
 
   /**
-   * 调试爬虫 - 单次爬取指定城市（默认北京）
-   * GET /api/crawler/debug?origin=北京
+   * 调试爬虫 - 单次爬取指定城市和日期
+   * GET /api/crawler/debug?origin=北京首都&date=2026-03-19
+   * 如果不提供 date，则爬取明天的数据
    */
   @Get('debug')
   @HttpCode(HttpStatus.OK)
-  async debugPage() {
-    const result = await this.crawlerService.debugPageStructure('北京');
+  async debugPage(@Query('origin') origin?: string, @Query('date') date?: string) {
+    const crawlOrigin = origin || '北京';
+    const result = await this.crawlerService.debugFlightByDate(crawlOrigin, date);
     return {
       message: result.success ? '调试爬虫完成' : '调试爬虫失败',
       ...result,
