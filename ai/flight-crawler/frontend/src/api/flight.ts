@@ -70,13 +70,60 @@ export const initializeDiscoverAirports = (days?: number): Promise<{
   return api.post('/crawler/initialize/discover', { days });
 };
 
-// 初始化阶段2：发现航班数据
-export const initializeDiscoverFlights = (days?: number): Promise<{
+// 初始化阶段2：发现航班数据（统一新方法）
+// 支持三种模式：
+// 1. 按天数：initializeDiscoverFlights({ days: 30 })
+// 2. 按日期区间：initializeDiscoverFlights({ startDate: "2026-03-20", endDate: "2026-03-25" })
+// 3. 仅获取计划：initializeDiscoverFlights({ days: 30, planOnly: true })
+export const initializeDiscoverFlights = (options?: {
+  days?: number;
+  startDate?: string;
+  endDate?: string;
+  planOnly?: boolean;
+}): Promise<{
   success: boolean;
-  count: number;
+  executionPlan: {
+    totalDays: number;
+    totalTasks: number;
+    dateRange: string[];
+    estimatedTime: string;
+    taskList: Array<{ taskId: number; date: string; airports: number }>;
+  };
+  executionResult?: {
+    success: boolean;
+    totalCount: number;
+    successTasks: number;
+    failedTasks: number;
+    taskDetails: Array<{ taskId: number; date: string; success: boolean; count: number }>;
+  };
+}> => {
+  // 兼容旧的调用方式：initializeDiscoverFlights(7) -> initializeDiscoverFlights({ days: 7 })
+  const params = typeof options === 'number' ? { days: options } : (options || {});
+  return api.post('/crawler/initialize/refresh', params);
+};
+
+// 初始化阶段2：按周拆分发现航班数据（优化版）
+export const initializeDiscoverFlightsByWeeks = (totalDays?: number, daysPerTask?: number): Promise<{
+  success: boolean;
+  totalCount: number;
+  tasks: any[];
   message: string;
 }> => {
-  return api.post('/crawler/initialize/refresh', { days });
+  return api.post('/crawler/initialize/refresh-by-weeks', { totalDays, daysPerTask });
+};
+
+// 初始化阶段2：按日期区间发现航班数据
+export const initializeDiscoverFlightsByDateRange = (
+  startDate: string,
+  endDate: string,
+  daysPerTask?: number
+): Promise<{
+  success: boolean;
+  totalCount: number;
+  tasks: any[];
+  message: string;
+}> => {
+  return api.post('/crawler/initialize/refresh-by-date-range', { startDate, endDate, daysPerTask });
 };
 
 // 一键初始化（发现机场 + 发现航班）

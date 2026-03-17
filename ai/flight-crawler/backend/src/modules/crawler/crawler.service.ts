@@ -1,7 +1,7 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
-import { Cron, CronExpression } from '@nestjs/schedule';
+import { Cron } from '@nestjs/schedule';
 import * as puppeteer from 'puppeteer';
 import * as fs from 'fs';
 import * as path from 'path';
@@ -1808,7 +1808,276 @@ export class CrawlerService {
   }
 
   /**
-   * 初始化逻辑2：发现航班所有航班数据
+   * 统一的发现航班方法 - 支持按天数或日期区间输入
+   * 核心特性：每个任务只爬取一天的数据，所有任务并行执行
+   *
+   * 使用示例：
+   * 1. 按天数：{ days: 30 } - 爬取未来 30 天
+   * 2. 按日期区间：{ startDate: "2026-03-20", endDate: "2026-03-25" } - 爬取指定日期范围
+   * 3. 仅获取计划：{ days: 30, planOnly: true } - 返回执行计划，不执行爬虫
+   */
+  async initializeRefreshFlightsUnified(options: {
+    days?: number;
+    startDate?: string;
+    endDate?: string;
+    planOnly?: boolean;
+  }): Promise<{
+    success: boolean;
+    executionPlan: {
+      totalDays: number;
+      totalTasks: number;
+      dateRange: string[];
+      estimatedTime: string;
+      taskList: Array<{ taskId: number; date: string; airports: number }>;
+    };
+    executionResult?: {
+      success: boolean;
+      totalCount: number;
+      successTasks: number;
+      failedTasks: number;
+      taskDetails: Array<{ taskId: number; date: string; success: boolean; count: number }>;
+    };
+  }> {
+    this.logger.log(`🔄 【统一发现航班】处理请求...`);
+
+    // 计算日期列表
+    const dates: string[] = [];
+    if (options.days) {
+      // 方式1：按天数（从明天开始）
+      for (let i = 1; i <= options.days; i++) {
+        const date = new Date();
+        date.setDate(date.getDate() + i);
+        dates.push(date.toISOString().split('T')[0]);
+      }
+    } else if (options.startDate && options.endDate) {
+      // 方式2：按日期区间
+      const start = new Date(options.startDate);
+      const end = new Date(options.endDate);
+      for (let d = new Date(start); d <= end; d.setDate(d.getDate() + 1)) {
+        dates.push(d.toISOString().split('T')[0]);
+      }
+    } else {
+      // 默认：未来 7 天
+      for (let i = 1; i <= 7; i++) {
+        const date = new Date();
+        date.setDate(date.getDate() + i);
+        dates.push(date.toISOString().split('T')[0]);
+      }
+    }
+
+    // 获取启用的机场
+    const airports = await this.flightService.getEnabledOriginAirports();
+    if (airports.length === 0) {
+      this.logger.warn('⚠️ 没有可用的机场，请先执行【初始化阶段1】发现机场');
+      return {
+        success: false,
+        executionPlan: {
+          totalDays: dates.length,
+          totalTasks: dates.length,
+          dateRange: dates,
+          estimatedTime: '无',
+          taskList: [],
+        },
+      };
+    }
+
+    // 生成执行计划
+    const taskList = dates.map((date, idx) => ({
+      taskId: idx + 1,
+      date,
+      airports: airports.length,
+    }));
+
+    const estimatedTime = this.calculateEstimatedTime(dates.length, airports.length);
+
+    const executionPlan = {
+      totalDays: dates.length,
+      totalTasks: dates.length,
+      dateRange: dates,
+      estimatedTime,
+      taskList,
+    };
+
+    this.logger.log(`📋 执行计划生成完毕：${dates.length} 个任务，预计 ${estimatedTime}`);
+
+    // 如果仅获取计划，直接返回
+    if (options.planOnly) {
+      return {
+        success: true,
+        executionPlan,
+      };
+    }
+
+    // 检查并发锁
+    if (this.isCrawlerRunning) {
+      this.logger.warn(`⚠️ 爬虫已在运行中（任务 ID: ${this.runningTaskId}），新任务被拒绝`);
+      return {
+        success: false,
+        executionPlan,
+      };
+    }
+
+    // 获取并发锁
+    this.isCrawlerRunning = true;
+    this.runningTaskId = -1; // 标记为批量任务
+
+    try {
+      // 执行所有日期任务（分批并行）
+      const MAX_CONCURRENT_TASKS = 10; // 最多同时执行 10 个日期任务
+      const taskResults: Array<{ taskId: number; date: string; success: boolean; count: number }> = [];
+      let totalCount = 0;
+
+      for (let i = 0; i < dates.length; i += MAX_CONCURRENT_TASKS) {
+        const batch = dates.slice(i, i + MAX_CONCURRENT_TASKS);
+        const batchIndex = Math.floor(i / MAX_CONCURRENT_TASKS) + 1;
+        const totalBatches = Math.ceil(dates.length / MAX_CONCURRENT_TASKS);
+
+        this.logger.log(`📦 批次 ${batchIndex}/${totalBatches}：执行 ${batch.length} 个日期任务 (${batch.join(', ')})`);
+
+        const batchPromises = batch.map((date, idx) =>
+          this.executeDailyTask(date, airports, i + idx + 1)
+            .then(result => {
+              this.logger.log(`✅ 任务 ${result.taskId}（${date}）完成，爬取 ${result.count} 条航班`);
+              taskResults.push(result);
+              totalCount += result.count;
+              return result;
+            })
+            .catch(error => {
+              this.logger.error(`❌ 任务 ${i + idx + 1}（${date}）失败`, error);
+              const failedResult = { taskId: i + idx + 1, date, success: false, count: 0 };
+              taskResults.push(failedResult);
+              return failedResult;
+            })
+        );
+
+        await Promise.all(batchPromises);
+      }
+
+      // 排序结果（按任务 ID）
+      taskResults.sort((a, b) => a.taskId - b.taskId);
+
+      const successCount = taskResults.filter(t => t.success).length;
+      const failedCount = taskResults.filter(t => !t.success).length;
+
+      this.logger.log(`🎉 所有任务完成！成功 ${successCount} 个，失败 ${failedCount} 个，总计 ${totalCount} 条航班`);
+
+      return {
+        success: failedCount === 0,
+        executionPlan,
+        executionResult: {
+          success: failedCount === 0,
+          totalCount,
+          successTasks: successCount,
+          failedTasks: failedCount,
+          taskDetails: taskResults,
+        },
+      };
+    } finally {
+      // 释放并发锁
+      this.isCrawlerRunning = false;
+      this.runningTaskId = null;
+      this.logger.log('🔓 爬虫锁已释放');
+    }
+  }
+
+  /**
+   * 执行单个日期的爬取任务
+   * 特点：数据隔离清晰，每个任务只操作一天的数据
+   */
+  private async executeDailyTask(
+    date: string,
+    airports: string[],
+    taskId: number,
+  ): Promise<{ taskId: number; date: string; success: boolean; count: number }> {
+    this.logger.log(`🚀 启动任务 ${taskId}（日期: ${date}）...`);
+
+    try {
+      // 创建任务日志
+      const log = await this.createCrawlerLog(CrawlerTaskType.REFRESH_FLIGHTS, 1);
+
+      // 并行爬取所有机场（该日期），按批次执行
+      const CONCURRENT_LIMIT = 5; // 每批最多爬取 5 个机场
+      let totalCount = 0;
+      const allCollectedFlights: Partial<Flight>[] = [];
+
+      this.logger.log(`📋 任务 ${taskId}: 准备爬取 ${airports.length} 个机场（${date}）...`);
+
+      // 分批执行
+      for (let i = 0; i < airports.length; i += CONCURRENT_LIMIT) {
+        const batch = airports.slice(i, i + CONCURRENT_LIMIT);
+        const batchNum = Math.floor(i / CONCURRENT_LIMIT) + 1;
+        const totalBatches = Math.ceil(airports.length / CONCURRENT_LIMIT);
+
+        this.logger.log(`  └─ 机场批次 ${batchNum}/${totalBatches}（任务 ${taskId}）: ${batch.join(', ')}`);
+
+        const batchPromises = batch.map(airport =>
+          this.crawlFlights(airport, [date], true, false) // 不直接保存，先收集
+            .then(({ count, flights }) => {
+              this.logger.log(`  ✅ ${airport}（任务 ${taskId}）: 爬取 ${count} 条`);
+              allCollectedFlights.push(...flights);
+              return count;
+            })
+            .catch(error => {
+              this.logger.error(`  ❌ ${airport}（任务 ${taskId}）失败`, error);
+              return 0;
+            })
+        );
+
+        const batchCounts = await Promise.all(batchPromises);
+        totalCount += batchCounts.reduce((sum, count) => sum + count, 0);
+      }
+
+      // 数据隔离：删除该日期的旧数据
+      const deletedCount = await this.flightService.deleteFlightsByDate(date);
+      this.logger.log(`  🗑️ 任务 ${taskId}: 已删除 ${deletedCount} 条旧数据（${date}）`);
+
+      // 保存新数据
+      if (allCollectedFlights.length > 0) {
+        await this.flightService.saveFlights(allCollectedFlights);
+        this.logger.log(`  ✅ 任务 ${taskId}: 已保存 ${allCollectedFlights.length} 条新数据（${date}）`);
+      }
+
+      // 完成日志记录
+      await this.completeCrawlerLog(log.id, true, {
+        airportCount: airports.length,
+        flightCount: totalCount,
+        details: {
+          date,
+          taskId,
+          airports,
+        },
+      });
+
+      return { taskId, date, success: true, count: totalCount };
+    } catch (error) {
+      this.logger.error(`❌ 任务 ${taskId}（${date}）异常`, error);
+      return { taskId, date, success: false, count: 0 };
+    }
+  }
+
+  /**
+   * 计算预估执行时间
+   */
+  private calculateEstimatedTime(totalDays: number, airportCount: number): string {
+    // 估算：每个机场每天需要 30-60 秒
+    // 10 个任务并行，每个任务 5 个机场并行
+    const timePerAirportPerDay = 45; // 秒
+    const concurrentTasks = 10;
+    const airportsPerTask = Math.ceil(airportCount / concurrentTasks);
+
+    const estimatedSeconds = Math.ceil((totalDays / concurrentTasks) * (airportsPerTask * timePerAirportPerDay));
+    const minutes = Math.ceil(estimatedSeconds / 60);
+
+    if (minutes < 1) return '小于 1 分钟';
+    if (minutes < 60) return `约 ${minutes} 分钟`;
+
+    const hours = Math.ceil(minutes / 60);
+    return `约 ${hours} 小时`;
+  }
+
+  /**
+   * 初始化逻辑2：发现航班所有航班数据（旧方法，已弃用）
+   * @deprecated 请使用 initializeRefreshFlightsUnified 方法
    * 基于已发现的机场，全量爬取未来7天的航班数据
    * 注意：发现航班前会先清理所有未来的航班数据，确保数据最新且无重复
    */
@@ -1895,13 +2164,19 @@ export class CrawlerService {
         totalCount += batchCounts.reduce((sum, count) => sum + count, 0);
       }
 
-      // 爬取完成后，删除旧数据并保存新数据（一次性操作，最小化空白期）
+      // 爬取完成后，删除本任务日期范围的旧数据并保存新数据
+      this.logger.log(`🔄 开始替换数据：删除 ${dates[0]} 至 ${dates[dates.length - 1]} 的旧数据...`);
+
+      // 先删除本任务日期范围的旧数据（无论是否爬到新数据）
+      const deletedCount = await this.flightService.deleteDiscoveryFlights(dates);
+      this.logger.log(`🗑️ 已删除 ${deletedCount} 条旧数据（日期范围: ${dates[0]} ~ ${dates[dates.length - 1]}）`);
+
+      // 如果爬到了新数据，则保存
       if (allCollectedFlights.length > 0) {
-        this.logger.log(`🔄 开始替换数据：删除旧数据并保存 ${allCollectedFlights.length} 条新数据...`);
-        const deletedCount = await this.flightService.deleteFutureFlights();
-        this.logger.log(`🗑️ 已删除 ${deletedCount} 条旧数据`);
         await this.flightService.saveFlights(allCollectedFlights);
         this.logger.log(`✅ 已保存 ${allCollectedFlights.length} 条新数据`);
+      } else {
+        this.logger.warn(`⚠️ 本任务未爬取到数据，已清空该日期范围的旧数据`);
       }
 
       this.logger.log(`✅ 【初始化阶段2】完成！共爬取 ${totalCount} 条航班数据`);
@@ -1937,6 +2212,558 @@ export class CrawlerService {
       this.logger.log('🔓 爬虫锁已释放');
     }
   }
+
+  /**
+   * 按周拆分执行发现航班任务（优化版）
+   * @param totalDays 总天数（例如 30）
+   * @param daysPerTask 每个任务的天数（默认 7）
+   */
+  async initializeRefreshFlightsByWeeks(
+    totalDays: number = 30,
+    daysPerTask: number = 7,
+  ): Promise<{ success: boolean; totalCount: number; tasks: any[] }> {
+    this.logger.log(`🔄 开始按周拆分执行发现航班任务（总计 ${totalDays} 天，每批 ${daysPerTask} 天）...`);
+
+    // 检查是否有其他爬虫任务正在运行（并发锁）
+    if (this.isCrawlerRunning) {
+      this.logger.warn(`⚠️ 爬虫已在运行中（任务 ID: ${this.runningTaskId}），新任务被拒绝`);
+      return {
+        success: false,
+        totalCount: 0,
+        tasks: [],
+      };
+    }
+
+    // 获取并发锁（整个按周任务期间持有）
+    this.isCrawlerRunning = true;
+    this.runningTaskId = -1; // 标记为批量任务
+
+    try {
+      const taskResults = [];
+      let totalCount = 0;
+
+      // 计算任务数量
+      const taskCount = Math.ceil(totalDays / daysPerTask);
+
+      // 并行执行所有周任务
+      this.logger.log(`🚀 并行执行 ${taskCount} 个周任务...`);
+
+      const taskPromises = [];
+      for (let taskIndex = 0; taskIndex < taskCount; taskIndex++) {
+        const startDay = taskIndex * daysPerTask + 1;
+        const daysInThisTask = Math.min(daysPerTask, totalDays - taskIndex * daysPerTask);
+
+        this.logger.log(`📅 启动任务 ${taskIndex + 1}/${taskCount}: 爬取第 ${startDay}-${startDay + daysInThisTask - 1} 天`);
+
+        // 创建并行任务
+        const taskPromise = this.executeWeekTaskWithoutLock(startDay, daysInThisTask)
+          .then(result => ({
+            taskIndex: taskIndex + 1,
+            startDay,
+            days: daysInThisTask,
+            success: result.success,
+            count: result.count,
+          }))
+          .catch(error => ({
+            taskIndex: taskIndex + 1,
+            startDay,
+            days: daysInThisTask,
+            success: false,
+            count: 0,
+            error: error.message,
+          }));
+
+        taskPromises.push(taskPromise);
+      }
+
+      // 等待所有任务完成
+      const results = await Promise.all(taskPromises);
+
+      // 汇总结果
+      for (const result of results) {
+        taskResults.push(result);
+        totalCount += result.count;
+        this.logger.log(`✅ 任务 ${result.taskIndex}/${taskCount} 完成，获得 ${result.count} 条数据`);
+      }
+
+      this.logger.log(`🎉 所有任务完成！总计 ${totalCount} 条航班数据`);
+
+      return {
+        success: taskResults.every(t => t.success),
+        totalCount,
+        tasks: taskResults,
+      };
+    } finally {
+      // 释放并发锁
+      this.isCrawlerRunning = false;
+      this.runningTaskId = null;
+      this.logger.log('🔓 批量任务锁已释放');
+    }
+  }
+
+  /**
+   * 按日期区间拆分执行发现航班任务（支持指定起止日期）
+   * @param startDate 开始日期（格式：YYYY-MM-DD，例如 "2026-03-20"）
+   * @param endDate 结束日期（格式：YYYY-MM-DD，例如 "2026-03-25"）
+   * @param daysPerTask 每个任务的天数（默认 7）
+   */
+  async initializeRefreshFlightsByDateRange(
+    startDate: string,
+    endDate: string,
+    daysPerTask: number = 7,
+  ): Promise<{ success: boolean; totalCount: number; tasks: any[] }> {
+    this.logger.log(`🔄 开始按日期区间执行发现航班任务（${startDate} 至 ${endDate}，每批 ${daysPerTask} 天）...`);
+
+    // 检查是否有其他爬虫任务正在运行（并发锁）
+    if (this.isCrawlerRunning) {
+      this.logger.warn(`⚠️ 爬虫已在运行中（任务 ID: ${this.runningTaskId}），新任务被拒绝`);
+      return {
+        success: false,
+        totalCount: 0,
+        tasks: [],
+      };
+    }
+
+    // 验证日期格式和有效性
+    const start = new Date(startDate);
+    const end = new Date(endDate);
+
+    if (isNaN(start.getTime()) || isNaN(end.getTime())) {
+      this.logger.error('❌ 日期格式错误，请使用 YYYY-MM-DD 格式');
+      return {
+        success: false,
+        totalCount: 0,
+        tasks: [],
+      };
+    }
+
+    if (start > end) {
+      this.logger.error('❌ 开始日期不能晚于结束日期');
+      return {
+        success: false,
+        totalCount: 0,
+        tasks: [],
+      };
+    }
+
+    // 获取并发锁（整个按周任务期间持有）
+    this.isCrawlerRunning = true;
+    this.runningTaskId = -1; // 标记为批量任务
+
+    try {
+      const taskResults = [];
+      let totalCount = 0;
+
+      // 生成日期列表
+      const dateList: string[] = [];
+      const currentDate = new Date(start);
+      while (currentDate <= end) {
+        dateList.push(currentDate.toISOString().split('T')[0]);
+        currentDate.setDate(currentDate.getDate() + 1);
+      }
+
+      const totalDays = dateList.length;
+      this.logger.log(`📅 日期区间共 ${totalDays} 天: ${dateList[0]} 至 ${dateList[dateList.length - 1]}`);
+
+      // 计算任务数量
+      const taskCount = Math.ceil(totalDays / daysPerTask);
+
+      // 并行执行所有任务
+      this.logger.log(`🚀 并行执行 ${taskCount} 个任务...`);
+
+      const taskPromises = [];
+      for (let taskIndex = 0; taskIndex < taskCount; taskIndex++) {
+        const startIdx = taskIndex * daysPerTask;
+        const endIdx = Math.min(startIdx + daysPerTask, totalDays);
+        const taskDates = dateList.slice(startIdx, endIdx);
+
+        this.logger.log(`📅 启动任务 ${taskIndex + 1}/${taskCount}: ${taskDates[0]} 至 ${taskDates[taskDates.length - 1]} (${taskDates.length}天)`);
+
+        // 创建并行任务
+        const taskPromise = this.executeTaskByDateList(taskDates)
+          .then(result => ({
+            taskIndex: taskIndex + 1,
+            startDate: taskDates[0],
+            endDate: taskDates[taskDates.length - 1],
+            days: taskDates.length,
+            success: result.success,
+            count: result.count,
+          }))
+          .catch(error => ({
+            taskIndex: taskIndex + 1,
+            startDate: taskDates[0],
+            endDate: taskDates[taskDates.length - 1],
+            days: taskDates.length,
+            success: false,
+            count: 0,
+            error: error.message,
+          }));
+
+        taskPromises.push(taskPromise);
+      }
+
+      // 等待所有任务完成
+      const results = await Promise.all(taskPromises);
+
+      // 汇总结果
+      for (const result of results) {
+        taskResults.push(result);
+        totalCount += result.count;
+        this.logger.log(`✅ 任务 ${result.taskIndex}/${taskCount} 完成，获得 ${result.count} 条数据`);
+      }
+
+      this.logger.log(`🎉 所有任务完成！总计 ${totalCount} 条航班数据`);
+
+      return {
+        success: taskResults.every(t => t.success),
+        totalCount,
+        tasks: taskResults,
+      };
+    } finally {
+      // 释放并发锁
+      this.isCrawlerRunning = false;
+      this.runningTaskId = null;
+      this.logger.log('🔓 批量任务锁已释放');
+    }
+  }
+
+  /**
+   * 根据日期列表执行爬取任务（不检查并发锁，用于并行执行）
+   * @param dates 日期列表（格式：["2026-03-20", "2026-03-21", ...]）
+   */
+  private async executeTaskByDateList(
+    dates: string[],
+  ): Promise<{ success: boolean; count: number }> {
+    this.logger.log(`🔄 【子任务】开始爬取 ${dates.length} 天: ${dates[0]} 至 ${dates[dates.length - 1]}`);
+
+    // 创建执行日志
+    const log = await this.createCrawlerLog(CrawlerTaskType.REFRESH_FLIGHTS, dates.length);
+
+    try {
+      // 获取所有启用爬虫的机场
+      const airports = await this.flightService.getEnabledOriginAirports();
+
+      if (airports.length === 0) {
+        this.logger.warn('⚠️ 没有可用的机场');
+        await this.completeCrawlerLog(log.id, false, {
+          airportCount: 0,
+          flightCount: 0,
+          errorMessage: '没有可用的机场',
+        });
+        return { success: false, count: 0 };
+      }
+
+      this.logger.log(`📋 [子任务] 准备爬取 ${airports.length} 个机场`);
+
+      // 并行爬取所有机场
+      const CONCURRENT_LIMIT = 5;
+      let totalCount = 0;
+      const airportResults: Record<string, number> = {};
+      const allCollectedFlights: Partial<Flight>[] = [];
+
+      for (let i = 0; i < airports.length; i += CONCURRENT_LIMIT) {
+        const batch = airports.slice(i, i + CONCURRENT_LIMIT);
+
+        const batchPromises = batch.map(airport =>
+          this.crawlFlights(airport, dates, true, false)
+            .then(({ count, flights }) => {
+              airportResults[airport] = count;
+              allCollectedFlights.push(...flights);
+              return count;
+            })
+            .catch(error => {
+              this.logger.error(`❌ ${airport} 爬取失败`, error);
+              airportResults[airport] = 0;
+              return 0;
+            })
+        );
+
+        const batchCounts = await Promise.all(batchPromises);
+        totalCount += batchCounts.reduce((sum, count) => sum + count, 0);
+      }
+
+      // 删除本任务日期范围的旧数据并保存新数据
+      this.logger.log(`🔄 [子任务] 开始替换数据：删除 ${dates[0]} 至 ${dates[dates.length - 1]} 的旧数据...`);
+
+      // 先删除本任务日期范围的旧数据（无论是否爬到新数据）
+      const deletedCount = await this.flightService.deleteDiscoveryFlights(dates);
+      this.logger.log(`🗑️ [子任务] 已删除 ${deletedCount} 条旧数据（日期范围: ${dates[0]} ~ ${dates[dates.length - 1]}）`);
+
+      // 如果爬到了新数据，则保存
+      if (allCollectedFlights.length > 0) {
+        await this.flightService.saveFlights(allCollectedFlights);
+        this.logger.log(`✅ [子任务] 已保存 ${allCollectedFlights.length} 条新数据`);
+      } else {
+        this.logger.warn(`⚠️ [子任务] 未爬取到数据，已清空该日期范围的旧数据`);
+      }
+
+      // 完成日志
+      await this.completeCrawlerLog(log.id, true, {
+        airportCount: airports.length,
+        flightCount: totalCount,
+        details: {
+          airports,
+          airportResults,
+          dateRange: dates,
+        },
+      });
+
+      return { success: true, count: totalCount };
+    } catch (error) {
+      this.logger.error('❌ [子任务] 失败', error);
+      await this.completeCrawlerLog(log.id, false, {
+        airportCount: 0,
+        flightCount: 0,
+        errorMessage: error.message || '未知错误',
+      });
+      return { success: false, count: 0 };
+    }
+  }
+
+  /**
+   * 执行周任务（不检查并发锁，用于并行执行）
+   * @param startDay 开始天数
+   * @param days 爬取天数
+   */
+  private async executeWeekTaskWithoutLock(
+    startDay: number,
+    days: number,
+  ): Promise<{ success: boolean; count: number }> {
+    this.logger.log(`🔄 【子任务】开始爬取第 ${startDay} 天起，共 ${days} 天...`);
+
+    // 创建执行日志
+    const log = await this.createCrawlerLog(CrawlerTaskType.REFRESH_FLIGHTS, days);
+
+    try {
+      // 获取所有启用爬虫的机场
+      const airports = await this.flightService.getEnabledOriginAirports();
+
+      if (airports.length === 0) {
+        this.logger.warn('⚠️ 没有可用的机场');
+        await this.completeCrawlerLog(log.id, false, {
+          airportCount: 0,
+          flightCount: 0,
+          errorMessage: '没有可用的机场',
+        });
+        return { success: false, count: 0 };
+      }
+
+      // 生成日期范围
+      const dates: string[] = [];
+      for (let i = startDay; i < startDay + days; i++) {
+        const date = new Date();
+        date.setDate(date.getDate() + i);
+        dates.push(date.toISOString().split('T')[0]);
+      }
+
+      this.logger.log(`📋 [子任务] 日期: ${dates[0]} 至 ${dates[dates.length - 1]}`);
+
+      // 并行爬取所有机场
+      const CONCURRENT_LIMIT = 5;
+      let totalCount = 0;
+      const airportResults: Record<string, number> = {};
+      const allCollectedFlights: Partial<Flight>[] = [];
+
+      for (let i = 0; i < airports.length; i += CONCURRENT_LIMIT) {
+        const batch = airports.slice(i, i + CONCURRENT_LIMIT);
+
+        const batchPromises = batch.map(airport =>
+          this.crawlFlights(airport, dates, true, false)
+            .then(({ count, flights }) => {
+              airportResults[airport] = count;
+              allCollectedFlights.push(...flights);
+              return count;
+            })
+            .catch(error => {
+              this.logger.error(`❌ ${airport} 爬取失败`, error);
+              airportResults[airport] = 0;
+              return 0;
+            })
+        );
+
+        const batchCounts = await Promise.all(batchPromises);
+        totalCount += batchCounts.reduce((sum, count) => sum + count, 0);
+      }
+
+      // 删除本任务日期范围的旧数据并保存新数据
+      this.logger.log(`🔄 [子任务] 开始替换数据：删除 ${dates[0]} 至 ${dates[dates.length - 1]} 的旧数据...`);
+
+      // 先删除本任务日期范围的旧数据（无论是否爬到新数据）
+      const deletedCount = await this.flightService.deleteDiscoveryFlights(dates);
+      this.logger.log(`🗑️ [子任务] 已删除 ${deletedCount} 条旧数据（日期范围: ${dates[0]} ~ ${dates[dates.length - 1]}）`);
+
+      // 如果爬到了新数据，则保存
+      if (allCollectedFlights.length > 0) {
+        await this.flightService.saveFlights(allCollectedFlights);
+        this.logger.log(`✅ [子任务] 已保存 ${allCollectedFlights.length} 条新数据`);
+      } else {
+        this.logger.warn(`⚠️ [子任务] 未爬取到数据，已清空该日期范围的旧数据`);
+      }
+
+      // 完成日志
+      await this.completeCrawlerLog(log.id, true, {
+        airportCount: airports.length,
+        flightCount: totalCount,
+        details: {
+          airports,
+          airportResults,
+          dateRange: dates,
+          startDay,
+        },
+      });
+
+      return { success: true, count: totalCount };
+    } catch (error) {
+      this.logger.error('❌ [子任务] 失败', error);
+      await this.completeCrawlerLog(log.id, false, {
+        airportCount: 0,
+        flightCount: 0,
+        errorMessage: error.message || '未知错误',
+      });
+      return { success: false, count: 0 };
+    }
+  }
+
+  /**
+   * 带偏移量的发现航班任务（按周拆分的核心方法）
+   * @param startDay 开始天数（1 表示明天，2 表示后天）
+   * @param days 爬取天数
+   */
+  async initializeRefreshFlightsWithOffset(
+    startDay: number,
+    days: number,
+  ): Promise<{ success: boolean; count: number }> {
+    this.logger.log(`🔄 【初始化阶段2-分批】开始发现航班数据（第 ${startDay} 天起，共 ${days} 天）...`);
+
+    // 检查是否有其他爬虫任务正在运行（并发锁）
+    if (this.isCrawlerRunning) {
+      this.logger.warn(`⚠️ 爬虫已在运行中（任务 ID: ${this.runningTaskId}），新任务被拒绝`);
+      return {
+        success: false,
+        count: 0,
+      };
+    }
+
+    // 创建执行日志
+    const log = await this.createCrawlerLog(CrawlerTaskType.REFRESH_FLIGHTS, days);
+
+    // 获取并发锁
+    this.isCrawlerRunning = true;
+    this.runningTaskId = log.id;
+
+    try {
+      // 获取所有启用爬虫的机场
+      const airports = await this.flightService.getEnabledOriginAirports();
+
+      if (airports.length === 0) {
+        this.logger.warn('⚠️ 没有可用的机场，请先执行【初始化阶段1】发现机场');
+
+        // 记录失败日志
+        await this.completeCrawlerLog(log.id, false, {
+          airportCount: 0,
+          flightCount: 0,
+          errorMessage: '没有可用的机场，请先执行发现机场',
+        });
+
+        return { success: false, count: 0 };
+      }
+
+      this.logger.log(`📋 准备爬取 ${airports.length} 个机场: ${airports.join(', ')}`);
+
+      // 生成日期范围（从 startDay 开始）
+      const dates: string[] = [];
+      for (let i = startDay; i < startDay + days; i++) {
+        const date = new Date();
+        date.setDate(date.getDate() + i);
+        dates.push(date.toISOString().split('T')[0]);
+      }
+
+      this.logger.log(`📋 日期范围: ${dates[0]} 至 ${dates[dates.length - 1]}`);
+
+      // 采用"爬取完成后一次性替换"的策略
+      this.logger.log('📝 采用智能替换模式：爬取完成后一次性替换旧数据...');
+
+      // 并行爬取所有机场，但限制并发数（避免过载）
+      const CONCURRENT_LIMIT = 5; // 最多同时爬取 5 个机场
+      let totalCount = 0;
+      const airportResults: Record<string, number> = {};
+      const allCollectedFlights: Partial<Flight>[] = []; // 收集所有爬取的航班
+
+      this.logger.log(`🚀 并行爬取 ${airports.length} 个机场（并发限制: ${CONCURRENT_LIMIT}）...`);
+
+      // 分批执行，每批最多 CONCURRENT_LIMIT 个
+      for (let i = 0; i < airports.length; i += CONCURRENT_LIMIT) {
+        const batch = airports.slice(i, i + CONCURRENT_LIMIT);
+        this.logger.log(`📦 批次 ${Math.floor(i / CONCURRENT_LIMIT) + 1}/${Math.ceil(airports.length / CONCURRENT_LIMIT)}: ${batch.join(', ')}`);
+
+        const batchPromises = batch.map(airport =>
+          this.crawlFlights(airport, dates, true, false) // 不直接保存，先收集
+            .then(({ count, flights }) => {
+              this.logger.log(`✅ ${airport} 爬取完成，获得 ${count} 条数据`);
+              airportResults[airport] = count;
+              allCollectedFlights.push(...flights); // 收集航班数据
+              return count;
+            })
+            .catch(error => {
+              this.logger.error(`❌ ${airport} 爬取失败`, error);
+              airportResults[airport] = 0;
+              return 0;
+            })
+        );
+
+        const batchCounts = await Promise.all(batchPromises);
+        totalCount += batchCounts.reduce((sum, count) => sum + count, 0);
+      }
+
+      // 爬取完成后，删除本任务日期范围的旧数据并保存新数据
+      this.logger.log(`🔄 开始替换数据：删除 ${dates[0]} 至 ${dates[dates.length - 1]} 的旧数据...`);
+
+      // 先删除本任务日期范围的旧数据（无论是否爬到新数据）
+      const deletedCount = await this.flightService.deleteDiscoveryFlights(dates);
+      this.logger.log(`🗑️ 已删除 ${deletedCount} 条旧数据（日期范围: ${dates[0]} ~ ${dates[dates.length - 1]}）`);
+
+      // 如果爬到了新数据，则保存
+      if (allCollectedFlights.length > 0) {
+        await this.flightService.saveFlights(allCollectedFlights);
+        this.logger.log(`✅ 已保存 ${allCollectedFlights.length} 条新数据`);
+      } else {
+        this.logger.warn(`⚠️ 本任务未爬取到数据，已清空该日期范围的旧数据`);
+      }
+
+      this.logger.log(`✅ 【初始化阶段2】完成！共爬取 ${totalCount} 条航班数据`);
+
+      // 完成日志记录
+      await this.completeCrawlerLog(log.id, true, {
+        airportCount: airports.length,
+        flightCount: totalCount,
+        details: {
+          airports,
+          airportResults,
+          dateRange: dates,
+          updateMode: 'smart-replace', // 采用智能替换模式
+        },
+      });
+
+      return { success: true, count: totalCount };
+    } catch (error) {
+      this.logger.error('❌ 【初始化阶段2】失败', error);
+
+      // 记录失败日志
+      await this.completeCrawlerLog(log.id, false, {
+        airportCount: 0,
+        flightCount: 0,
+        errorMessage: error.message || '未知错误',
+      });
+
+      return { success: false, count: 0 };
+    } finally {
+      // 释放并发锁
+      this.isCrawlerRunning = false;
+      this.runningTaskId = null;
+      this.logger.log('🔓 爬虫锁已释放');
+    }
+  }
+
 
   /**
    * 手动触发爬虫（用于测试）- 执行完整的两阶段初始化

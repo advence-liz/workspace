@@ -1,6 +1,6 @@
-import { Controller, Post, Get, Delete, HttpCode, HttpStatus, Body, Query, Param } from '@nestjs/common';
+import { Controller, Post, Get, Delete, HttpCode, HttpStatus, Body, Query, Param, BadRequestException } from '@nestjs/common';
 import { CrawlerService } from './crawler.service';
-import { InitializeDiscoverDto, InitializeRefreshDto } from './dto/initialize.dto';
+import { InitializeDiscoverDto, InitializeRefreshFlightsDto } from './dto/initialize.dto';
 import { QueryLogsDto } from './dto/query-logs.dto';
 import { CleanLogsDto } from './dto/clean-logs.dto';
 
@@ -54,17 +54,103 @@ export class CrawlerController {
   }
 
   /**
-   * 初始化阶段2：发现所有航班数据
+   * 初始化阶段2：发现所有航班数据（统一新方法）
    * POST /api/crawler/initialize/refresh
-   * Body: { days?: number } // 可选，默认 7 天
+   * Body: { days?: number } 或 { startDate?: string, endDate?: string } 或 { planOnly?: boolean }
+   *
+   * 支持三种模式：
+   * 1. 按天数：{ "days": 30 } - 爬取未来 30 天
+   * 2. 按日期区间：{ "startDate": "2026-03-20", "endDate": "2026-03-25" } - 爬取指定日期范围
+   * 3. 仅获取计划：{ "days": 30, "planOnly": true } - 返回执行计划，不执行爬虫
    */
   @Post('initialize/refresh')
   @HttpCode(HttpStatus.OK)
-  async initializeRefresh(@Body() dto: InitializeRefreshDto) {
-    const result = await this.crawlerService.initializeRefreshFlights(dto.days);
+  async initializeRefresh(@Body() dto: InitializeRefreshFlightsDto) {
+    // 验证参数：days 和 startDate/endDate 二选一
+    if (dto.days && (dto.startDate || dto.endDate)) {
+      throw new BadRequestException('days 和 startDate/endDate 不能同时指定，请选择其中一种方式');
+    }
+
+    if ((dto.startDate && !dto.endDate) || (!dto.startDate && dto.endDate)) {
+      throw new BadRequestException('startDate 和 endDate 必须同时指定');
+    }
+
+    const result = await this.crawlerService.initializeRefreshFlightsUnified({
+      days: dto.days,
+      startDate: dto.startDate,
+      endDate: dto.endDate,
+      planOnly: dto.planOnly,
+    });
+
+    if (dto.planOnly) {
+      return {
+        message: `执行计划已生成：${result.executionPlan.totalTasks} 个任务，预计 ${result.executionPlan.estimatedTime}`,
+        ...result,
+      };
+    }
+
     return {
       message: result.success
-        ? `航班发现完成！共爬取 ${result.count} 条航班`
+        ? `航班发现完成！成功 ${result.executionResult?.successTasks} 个任务，失败 ${result.executionResult?.failedTasks} 个，共爬取 ${result.executionResult?.totalCount} 条航班`
+        : '航班发现失败',
+      ...result,
+    };
+  }
+
+  /**
+   * 初始化阶段2：按周拆分发现航班数据（优化版）
+   * POST /api/crawler/initialize/refresh-by-weeks
+   * Body: { totalDays?: number, daysPerTask?: number }
+   */
+  @Post('initialize/refresh-by-weeks')
+  @HttpCode(HttpStatus.OK)
+  async initializeRefreshByWeeks(
+    @Body() body: { totalDays?: number; daysPerTask?: number },
+  ) {
+    const totalDays = body.totalDays || 30;
+    const daysPerTask = body.daysPerTask || 7;
+
+    const result = await this.crawlerService.initializeRefreshFlightsByWeeks(totalDays, daysPerTask);
+    return {
+      message: result.success
+        ? `航班发现完成！总计爬取 ${result.totalCount} 条航班，分 ${result.tasks.length} 个任务执行`
+        : '航班发现失败',
+      ...result,
+    };
+  }
+
+  /**
+   * 初始化阶段2：按日期区间发现航班数据
+   * POST /api/crawler/initialize/refresh-by-date-range
+   * Body: { startDate: string, endDate: string, daysPerTask?: number }
+   * 示例: { "startDate": "2026-03-20", "endDate": "2026-03-25", "daysPerTask": 3 }
+   */
+  @Post('initialize/refresh-by-date-range')
+  @HttpCode(HttpStatus.OK)
+  async initializeRefreshByDateRange(
+    @Body() body: { startDate: string; endDate: string; daysPerTask?: number },
+  ) {
+    const { startDate, endDate } = body;
+    const daysPerTask = body.daysPerTask || 7;
+
+    if (!startDate || !endDate) {
+      return {
+        success: false,
+        message: '请提供开始日期和结束日期',
+        totalCount: 0,
+        tasks: [],
+      };
+    }
+
+    const result = await this.crawlerService.initializeRefreshFlightsByDateRange(
+      startDate,
+      endDate,
+      daysPerTask,
+    );
+
+    return {
+      message: result.success
+        ? `航班发现完成！日期区间 ${startDate} 至 ${endDate}，总计爬取 ${result.totalCount} 条航班，分 ${result.tasks.length} 个任务执行`
         : '航班发现失败',
       ...result,
     };

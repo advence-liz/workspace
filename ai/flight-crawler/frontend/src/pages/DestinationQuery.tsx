@@ -20,6 +20,7 @@ import {
   getAvailableCities,
   queryRoundTripFlights,
   RoundTripFlights,
+  Flight,
 } from '@/api/flight';
 
 const { RangePicker } = DatePicker;

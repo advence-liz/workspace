@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository, Between, In, Like, MoreThanOrEqual, LessThanOrEqual } from 'typeorm';
+import { Repository } from 'typeorm';
 import { Flight } from './entities/flight.entity';
 import { Airport } from './entities/airport.entity';
 import { QueryFlightsDto } from './dto/query-flights.dto';
@@ -262,6 +262,29 @@ export class FlightService {
       .createQueryBuilder()
       .delete()
       .where('departureTime >= :start AND departureTime <= :end', {
+        start: startOfDay,
+        end: endOfDay,
+      })
+      .execute();
+
+    return result.affected || 0;
+  }
+
+  /**
+   * 删除指定单个日期的航班数据（按天粒度删除，用于每日任务）
+   * 返回删除的记录数
+   */
+  async deleteFlightsByDate(date: string): Promise<number> {
+    const startOfDay = new Date(date);
+    startOfDay.setHours(0, 0, 0, 0);
+
+    const endOfDay = new Date(date);
+    endOfDay.setHours(23, 59, 59, 999);
+
+    const result = await this.flightRepository
+      .createQueryBuilder()
+      .delete()
+      .where('departureTime >= :start AND departureTime < :end', {
         start: startOfDay,
         end: endOfDay,
       })
