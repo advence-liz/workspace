@@ -87,7 +87,20 @@ export const initializeDiscoverFlights = (options?: {
     totalTasks: number;
     dateRange: string[];
     estimatedTime: string;
-    taskList: Array<{ taskId: number; date: string; airports: number }>;
+    totalAirports: number;
+    airportList: string[];
+    taskList: Array<{
+      taskId: number;
+      date: string;
+      airports: number;
+      airportNames: string[];
+      estimatedTaskTime: string;
+      crawlerInfo: {
+        description: string;
+        expectedFlights: number;
+        maxConcurrency: number;
+      };
+    }>;
   };
   executionResult?: {
     success: boolean;

@@ -441,35 +441,105 @@ function DataManagement() {
 
           {/* 执行计划预览 */}
           {executionPlan && (
-            <Card
-              size="small"
-              style={{ marginBottom: 16, background: '#f0f5ff' }}
-              title={
-                <Space>
-                  <CheckCircleOutlined style={{ color: '#1890ff' }} />
-                  <Text strong>执行计划</Text>
+            <div style={{ marginBottom: 16 }}>
+              {/* 整体计划摘要 */}
+              <Card
+                size="small"
+                style={{ marginBottom: 12, background: '#f0f5ff' }}
+                title={
+                  <Space>
+                    <CheckCircleOutlined style={{ color: '#1890ff' }} />
+                    <Text strong>执行计划摘要</Text>
+                  </Space>
+                }
+              >
+                <Descriptions column={2} size="small">
+                  <Descriptions.Item label="总天数">
+                    {executionPlan.totalDays} 天
+                  </Descriptions.Item>
+                  <Descriptions.Item label="总任务数">
+                    {executionPlan.totalTasks} 个
+                  </Descriptions.Item>
+                  <Descriptions.Item label="总机场数">
+                    {executionPlan.totalAirports} 个
+                  </Descriptions.Item>
+                  <Descriptions.Item label="并发度">
+                    10 个任务/批
+                  </Descriptions.Item>
+                  <Descriptions.Item label="预计耗时">
+                    {executionPlan.estimatedTime}
+                  </Descriptions.Item>
+                  <Descriptions.Item label="日期范围">
+                    {executionPlan.dateRange[0]} ~ {executionPlan.dateRange[executionPlan.dateRange.length - 1]}
+                  </Descriptions.Item>
+                </Descriptions>
+              </Card>
+
+              {/* 城市列表 */}
+              <Card
+                size="small"
+                style={{ marginBottom: 12, background: '#f6ffed' }}
+                title={
+                  <Space>
+                    <Text strong>🌍 爬取城市列表 ({executionPlan.totalAirports} 个)</Text>
+                  </Space>
+                }
+              >
+                <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px' }}>
+                  {executionPlan.airportList.map((airport: string, idx: number) => (
+                    <Tag key={idx} color="green">
+                      {airport}
+                    </Tag>
+                  ))}
+                </div>
+              </Card>
+
+              {/* 子任务详情 */}
+              <Card
+                size="small"
+                style={{ background: '#fffbe6' }}
+                title={
+                  <Space>
+                    <Text strong>📅 每日任务详情</Text>
+                  </Space>
+                }
+              >
+                <Space direction="vertical" style={{ width: '100%' }}>
+                  {executionPlan.taskList.map((task: any) => (
+                    <Card
+                      key={task.taskId}
+                      size="small"
+                      style={{ background: '#fafafa' }}
+                      title={`任务 ${task.taskId}: ${task.date}`}
+                    >
+                      <Descriptions column={1} size="small">
+                        <Descriptions.Item label="爬虫配置">
+                          {task.crawlerInfo.description}
+                        </Descriptions.Item>
+                        <Descriptions.Item label="预期航班数">
+                          {task.crawlerInfo.expectedFlights} 班
+                        </Descriptions.Item>
+                        <Descriptions.Item label="最大并发数">
+                          {task.crawlerInfo.maxConcurrency} 个机场并行
+                        </Descriptions.Item>
+                        <Descriptions.Item label="预计耗时">
+                          {task.estimatedTaskTime}
+                        </Descriptions.Item>
+                        <Descriptions.Item label="爬取城市">
+                          <div style={{ display: 'flex', flexWrap: 'wrap', gap: '4px' }}>
+                            {task.airportNames.map((name: string, idx: number) => (
+                              <Tag key={idx}>
+                                {name}
+                              </Tag>
+                            ))}
+                          </div>
+                        </Descriptions.Item>
+                      </Descriptions>
+                    </Card>
+                  ))}
                 </Space>
-              }
-            >
-              <Descriptions column={2} size="small">
-                <Descriptions.Item label="总天数">
-                  {executionPlan.totalDays} 天
-                </Descriptions.Item>
-                <Descriptions.Item label="总任务数">
-                  {executionPlan.totalTasks} 个
-                </Descriptions.Item>
-                <Descriptions.Item label="并发度">
-                  10 个任务/批
-                </Descriptions.Item>
-                <Descriptions.Item label="预计耗时">
-                  {executionPlan.estimatedTime}
-                </Descriptions.Item>
-              </Descriptions>
-              <Divider style={{ margin: '12px 0' }} />
-              <Text type="secondary">
-                日期范围：{executionPlan.dateRange[0]} ~ {executionPlan.dateRange[executionPlan.dateRange.length - 1]}
-              </Text>
-            </Card>
+              </Card>
+            </div>
           )}
 
           <Form.Item>
