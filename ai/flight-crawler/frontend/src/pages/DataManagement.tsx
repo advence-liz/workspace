@@ -16,6 +16,7 @@ import {
   Modal,
   DatePicker,
   Descriptions,
+  InputNumber,
 } from 'antd';
 import type { ColumnsType } from 'antd/es/table';
 import {
@@ -30,6 +31,7 @@ import {
 import dayjs from 'dayjs';
 import duration from 'dayjs/plugin/duration';
 import {
+  initializeDiscoverAirports,
   initializeDiscoverFlights,
   queryCrawlerLogs,
   getCrawlerLogDetail,
@@ -45,7 +47,12 @@ dayjs.extend(duration);
 const { Title, Paragraph, Text } = Typography;
 
 function DataManagement() {
+  const [discoverForm] = Form.useForm();
   const [refreshForm] = Form.useForm();
+
+  // 发现机场相关状态
+  const [discoverLoading, setDiscoverLoading] = useState(false);
+  const [discoverResult, setDiscoverResult] = useState<any>(null);
 
   const [refreshLoading, setRefreshLoading] = useState(false);
   const [refreshResult, setRefreshResult] = useState<{
@@ -151,6 +158,33 @@ function DataManagement() {
   }, [autoRefresh, refreshInterval, logsPagination.current, logsPagination.pageSize]);
 
   // 生成执行计划（监听日期变化）
+  // 发现机场
+  const handleDiscoverAirports = async (values: any) => {
+    const { days } = values;
+    if (!days || days < 1 || days > 7) {
+      message.error('请输入 1-7 之间的天数');
+      return;
+    }
+
+    setDiscoverLoading(true);
+    try {
+      const result = await initializeDiscoverAirports(days);
+      message.success(
+        `发现机场完成！发现 ${result.airportCount} 个机场，爬取 ${result.flightCount} 条航班`
+      );
+      setDiscoverResult(result);
+      discoverForm.resetFields();
+      // 刷新日志
+      loadLogs(1, logsPagination.pageSize);
+      loadLogStats();
+    } catch (error: any) {
+      message.error(`发现机场失败: ${error.message || '未知错误'}`);
+      console.error(error);
+    } finally {
+      setDiscoverLoading(false);
+    }
+  };
+
   const handleDateRangeChange = async (dates: any) => {
     if (!dates || dates.length !== 2 || !dates[0] || !dates[1]) {
       setExecutionPlan(null);
@@ -424,6 +458,9 @@ function DataManagement() {
         description={
           <div>
             <p>
+              <strong>发现机场：</strong>爬取指定天数的航班数据，自动发现所有可用机场
+            </p>
+            <p>
               <strong>发现航班：</strong>选择日期范围，系统将自动拆分为多个每日任务并行执行，最大化提效
             </p>
             <p>
@@ -438,6 +475,87 @@ function DataManagement() {
         showIcon
         style={{ marginBottom: 24 }}
       />
+
+      {/* 发现机场卡片 */}
+      <Card
+        title={
+          <Space>
+            <ReloadOutlined />
+            发现机场
+          </Space>
+        }
+        style={{ marginBottom: 24 }}
+      >
+        <Paragraph type="secondary">
+          爬取指定天数的航班数据，自动发现所有可用机场
+        </Paragraph>
+
+        <Form
+          form={discoverForm}
+          layout="vertical"
+          onFinish={handleDiscoverAirports}
+        >
+          <Form.Item
+            name="days"
+            label="爬取天数"
+            rules={[
+              { required: true, message: '请输入爬取天数' },
+              {
+                type: 'number',
+                min: 1,
+                max: 7,
+                message: '请输入 1-7 之间的天数',
+              },
+            ]}
+            initialValue={1}
+          >
+            <InputNumber
+              min={1}
+              max={7}
+              placeholder="请输入 1-7 之间的天数"
+              style={{ width: '100%' }}
+            />
+          </Form.Item>
+
+          <Form.Item>
+            <Button
+              type="primary"
+              htmlType="submit"
+              icon={<ReloadOutlined />}
+              loading={discoverLoading}
+              block
+            >
+              开始发现机场
+            </Button>
+          </Form.Item>
+        </Form>
+
+        {/* 发现机场结果 */}
+        {discoverResult && (
+          <Card size="small" style={{ marginTop: 16 }}>
+            <Row gutter={16}>
+              <Col span={12}>
+                <Statistic
+                  title="发现机场数"
+                  value={discoverResult.airportCount}
+                  suffix="个"
+                  valueStyle={{ color: '#3f8600' }}
+                />
+              </Col>
+              <Col span={12}>
+                <Statistic
+                  title="爬取航班数"
+                  value={discoverResult.flightCount}
+                  suffix="条"
+                  valueStyle={{ color: '#1890ff' }}
+                />
+              </Col>
+            </Row>
+          </Card>
+        )}
+      </Card>
+
+      <Divider />
 
       {/* 发现航班卡片 */}
       <Card
