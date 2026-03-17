@@ -47,15 +47,6 @@ export const queryDestinations = (
   return api.get('/flights/destinations', { params });
 };
 
-// 查询航班列表
-export const queryFlights = (params: QueryFlightsParams): Promise<Flight[]> => {
-  return api.get('/flights', { params });
-};
-
-// 触发爬虫
-export const triggerCrawler = (): Promise<{ success: boolean; count: number }> => {
-  return api.post('/crawler/trigger');
-};
 
 // 获取所有可用的城市列表
 export const getAvailableCities = (): Promise<{ origins: string[]; destinations: string[] }> => {
@@ -118,38 +109,6 @@ export const initializeDiscoverFlights = (options?: {
   return api.post('/crawler/initialize/refresh', params);
 };
 
-// 初始化阶段2：按周拆分发现航班数据（优化版）
-export const initializeDiscoverFlightsByWeeks = (totalDays?: number, daysPerTask?: number): Promise<{
-  success: boolean;
-  totalCount: number;
-  tasks: any[];
-  message: string;
-}> => {
-  return api.post('/crawler/initialize/refresh-by-weeks', { totalDays, daysPerTask });
-};
-
-// 初始化阶段2：按日期区间发现航班数据
-export const initializeDiscoverFlightsByDateRange = (
-  startDate: string,
-  endDate: string,
-  daysPerTask?: number
-): Promise<{
-  success: boolean;
-  totalCount: number;
-  tasks: any[];
-  message: string;
-}> => {
-  return api.post('/crawler/initialize/refresh-by-date-range', { startDate, endDate, daysPerTask });
-};
-
-// 一键初始化（发现机场 + 发现航班）
-export const initializeAll = (discoverDays?: number, refreshDays?: number): Promise<{
-  success: boolean;
-  count: number;
-  message: string;
-}> => {
-  return api.post('/crawler/trigger', { discoverDays, refreshDays });
-};
 
 // 执行日志相关接口
 export interface CrawlerLog {

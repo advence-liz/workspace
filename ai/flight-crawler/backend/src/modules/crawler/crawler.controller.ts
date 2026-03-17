@@ -109,64 +109,6 @@ export class CrawlerController {
     };
   }
 
-  /**
-   * 初始化阶段2：按周拆分发现航班数据（优化版）
-   * POST /api/crawler/initialize/refresh-by-weeks
-   * Body: { totalDays?: number, daysPerTask?: number }
-   */
-  @Post('initialize/refresh-by-weeks')
-  @HttpCode(HttpStatus.OK)
-  async initializeRefreshByWeeks(
-    @Body() body: { totalDays?: number; daysPerTask?: number },
-  ) {
-    const totalDays = body.totalDays || 30;
-    const daysPerTask = body.daysPerTask || 7;
-
-    const result = await this.crawlerService.initializeRefreshFlightsByWeeks(totalDays, daysPerTask);
-    return {
-      message: result.success
-        ? `航班发现完成！总计爬取 ${result.totalCount} 条航班，分 ${result.tasks.length} 个任务执行`
-        : '航班发现失败',
-      ...result,
-    };
-  }
-
-  /**
-   * 初始化阶段2：按日期区间发现航班数据
-   * POST /api/crawler/initialize/refresh-by-date-range
-   * Body: { startDate: string, endDate: string, daysPerTask?: number }
-   * 示例: { "startDate": "2026-03-20", "endDate": "2026-03-25", "daysPerTask": 3 }
-   */
-  @Post('initialize/refresh-by-date-range')
-  @HttpCode(HttpStatus.OK)
-  async initializeRefreshByDateRange(
-    @Body() body: { startDate: string; endDate: string; daysPerTask?: number },
-  ) {
-    const { startDate, endDate } = body;
-    const daysPerTask = body.daysPerTask || 7;
-
-    if (!startDate || !endDate) {
-      return {
-        success: false,
-        message: '请提供开始日期和结束日期',
-        totalCount: 0,
-        tasks: [],
-      };
-    }
-
-    const result = await this.crawlerService.initializeRefreshFlightsByDateRange(
-      startDate,
-      endDate,
-      daysPerTask,
-    );
-
-    return {
-      message: result.success
-        ? `航班发现完成！日期区间 ${startDate} 至 ${endDate}，总计爬取 ${result.totalCount} 条航班，分 ${result.tasks.length} 个任务执行`
-        : '航班发现失败',
-      ...result,
-    };
-  }
 
   /**
    * 查询执行日志

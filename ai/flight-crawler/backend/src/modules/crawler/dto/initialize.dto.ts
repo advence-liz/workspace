@@ -10,15 +10,6 @@ export class InitializeDiscoverDto {
   days?: number = 1; // 默认 1 天
 }
 
-export class InitializeRefreshDto {
-  @IsOptional()
-  @Type(() => Number)
-  @IsInt()
-  @Min(1)
-  @Max(30)
-  days?: number = 7; // 默认 7 天
-}
-
 /**
  * 统一的发现航班 DTO
  * 支持两种输入方式：
