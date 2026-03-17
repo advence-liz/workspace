@@ -1850,18 +1850,16 @@ export class CrawlerService {
   }
 
   /**
-   * 统一的发现航班方法 - 支持按天数或日期区间输入
+   * 发现航班方法 - 按日期区间查询
    * 核心特性：每个任务只爬取一天的数据，所有任务并行执行
    *
    * 使用示例：
-   * 1. 按天数：{ days: 30 } - 爬取未来 30 天
-   * 2. 按日期区间：{ startDate: "2026-03-20", endDate: "2026-03-25" } - 爬取指定日期范围
-   * 3. 仅获取计划：{ days: 30, planOnly: true } - 返回执行计划，不执行爬虫
+   * { startDate: "2026-03-18", endDate: "2026-03-25" } - 爬取指定日期范围
+   * { startDate: "2026-03-18", endDate: "2026-03-25", planOnly: true } - 仅返回执行计划，不执行爬虫
    */
-  async initializeRefreshFlightsUnified(options: {
-    days?: number;
-    startDate?: string;
-    endDate?: string;
+  async initializeRefreshFlightsByDateRange(options: {
+    startDate: string;
+    endDate: string;
     planOnly?: boolean;
     async?: boolean;
   }): Promise<{
@@ -1895,31 +1893,14 @@ export class CrawlerService {
       taskDetails: Array<{ taskId: number; date: string; success: boolean; count: number }>;
     };
   }> {
-    this.logger.log(`🔄 【统一发现航班】处理请求...`);
+    this.logger.log(`🔄 【发现航班】按日期区间 ${options.startDate} ~ ${options.endDate}...`);
 
-    // 计算日期列表
+    // 计算日期列表（按日期区间）
     const dates: string[] = [];
-    if (options.days) {
-      // 方式1：按天数（从明天开始）
-      for (let i = 1; i <= options.days; i++) {
-        const date = new Date();
-        date.setDate(date.getDate() + i);
-        dates.push(date.toISOString().split('T')[0]);
-      }
-    } else if (options.startDate && options.endDate) {
-      // 方式2：按日期区间
-      const start = new Date(options.startDate);
-      const end = new Date(options.endDate);
-      for (let d = new Date(start); d <= end; d.setDate(d.getDate() + 1)) {
-        dates.push(d.toISOString().split('T')[0]);
-      }
-    } else {
-      // 默认：未来 7 天
-      for (let i = 1; i <= 7; i++) {
-        const date = new Date();
-        date.setDate(date.getDate() + i);
-        dates.push(date.toISOString().split('T')[0]);
-      }
+    const start = new Date(options.startDate);
+    const end = new Date(options.endDate);
+    for (let d = new Date(start); d <= end; d.setDate(d.getDate() + 1)) {
+      dates.push(d.toISOString().split('T')[0]);
     }
 
     // 获取启用的机场
@@ -2464,6 +2445,7 @@ export class CrawlerService {
    */
   /**
    * 手动触发爬虫（用于测试）- 执行完整的两阶段初始化
+   * 默认爬取未来 7 天的航班数据
    */
   async triggerCrawl(): Promise<{ success: boolean; count: number }> {
     try {
@@ -2478,22 +2460,25 @@ export class CrawlerService {
         if (!phase1.success) {
           return { success: false, count: 0 };
         }
-
-        // 阶段2：发现航班数据（使用统一方法，默认 7 天）
-        const phase2 = await this.initializeRefreshFlightsUnified({ days: 7, async: false });
-        return {
-          success: phase2.success,
-          count: phase2.executionResult?.totalCount || 0,
-        };
-      } else {
-        this.logger.log('🔄 机场已存在，直接发现航班航班数据...');
-        // 如果已有机场数据，直接发现航班（使用统一方法，默认 7 天）
-        const result = await this.initializeRefreshFlightsUnified({ days: 7, async: false });
-        return {
-          success: result.success,
-          count: result.executionResult?.totalCount || 0,
-        };
       }
+
+      // 阶段2：发现航班数据（默认未来 7 天）
+      this.logger.log('🔄 开始发现航班数据（未来 7 天）...');
+      const tomorrow = new Date();
+      tomorrow.setDate(tomorrow.getDate() + 1);
+      const endDate = new Date();
+      endDate.setDate(endDate.getDate() + 7);
+
+      const result = await this.initializeRefreshFlightsByDateRange({
+        startDate: tomorrow.toISOString().split('T')[0],
+        endDate: endDate.toISOString().split('T')[0],
+        async: false,
+      });
+
+      return {
+        success: result.success,
+        count: result.executionResult?.totalCount || 0,
+      };
     } catch (error) {
       this.logger.error('手动触发爬虫失败', error);
       return { success: false, count: 0 };
