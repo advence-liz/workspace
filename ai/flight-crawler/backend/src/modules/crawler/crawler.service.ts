@@ -1469,198 +1469,86 @@ export class CrawlerService {
 
   /**
    * 选择出发日期
+   * 日历结构说明：
+   * - 日历容器：.hna-calendar-container（滚动式，包含多个月份）
+   * - 月份容器：.month-box，id 为 YYYYMM 格式（如 202603）
+   * - 日期格子：.cell，有 data-date="YYYYMMDD" 属性
+   * - 禁用日期：.cell.disabled
    */
   private async selectDate(page: puppeteer.Page, targetDate: string): Promise<boolean> {
     this.logger.log(`📅 尝试选择日期: ${targetDate}`);
 
     try {
-      // 策略 1: 点击日期选择器
+      // 将目标日期转换为 data-date 属性格式（YYYYMMDD）
+      const dataDateValue = targetDate.replace(/-/g, '');
+      this.logger.log(`目标 data-date: ${dataDateValue}`);
+
+      // 策略 1: 点击日期选择器打开日历
       this.logger.log(`[策略1] 尝试点击日期选择器`);
-
-      // 先诊断页面上有哪些日期相关元素
-      const dateElements = await page.evaluate(() => {
-        const selectors = [
-          '.date-box',
-          '.dep-date',
-          '.date',
-          '[class*="date"]',
-        ];
-
-        const result: any[] = [];
-        for (const selector of selectors) {
-          const elements = document.querySelectorAll(selector);
-          for (const el of elements) {
-            result.push({
-              selector,
-              tag: el.tagName,
-              className: (el as HTMLElement).className,
-              text: (el.textContent || '').trim().substring(0, 50),
-            });
-          }
-        }
-        return result;
-      });
-      this.logger.log(`[诊断] 找到的日期相关元素: ${JSON.stringify(dateElements, null, 2)}`);
-
       const dateBoxClicked = await page.evaluate(() => {
-        const selectors = [
-          '.date-box',
-          '.dep-date',
-          '.date',
-          '[class*="date"]',
-          'input[type="date"]',
-          '[placeholder*="日期"]',
-          '[placeholder*="出发"]',
-        ];
-
-        for (const selector of selectors) {
-          const elements = document.querySelectorAll(selector);
-
-          for (const el of elements) {
-            const text = (el.textContent || '').trim();
-            // 检查是否是日期相关的元素
-            if (text.includes('日期') || text.match(/\d{2}月\d{2}日/) || text.match(/\d{4}-\d{2}-\d{2}/) || text.match(/\d{2}\/\d{2}/)) {
-              (el as HTMLElement).click();
-              return true;
-            }
-          }
+        const el = document.querySelector('.date-box');
+        if (el) {
+          (el as HTMLElement).click();
+          return true;
         }
-
         return false;
       });
 
       if (!dateBoxClicked) {
-        this.logger.warn('⚠️ 未找到日期选择器，可能页面默认日期已满足需求');
-        return true; // 假设页面默认日期正确
+        this.logger.warn('⚠️ 未找到 .date-box，跳过日期选择');
+        return true;
       }
-
       this.logger.log('✅ 日期选择器已点击');
 
       // 等待日历弹出并渲染
       await page.waitForTimeout(1000);
 
-      // 等待日历日期元素渲染（最多等待 5 秒）
+      // 等待日历容器渲染（最多等待 5 秒）
       let calendarReady = false;
       for (let i = 0; i < 10; i++) {
-        const hasDateElements = await page.evaluate(() => {
-          const selectors = [
-            '.hna-calendar-container span',
-            '.hna-calendar-container div',
-            '.hna-calendar-container td',
-          ];
-
-          for (const selector of selectors) {
-            const elements = document.querySelectorAll(selector);
-            for (const el of elements) {
-              const text = (el.textContent || '').trim();
-              const num = parseInt(text, 10);
-              // 如果找到 1-31 之间的数字，说明日历已渲染
-              if (!isNaN(num) && num >= 1 && num <= 31 && text.length <= 2) {
-                return true;
-              }
-            }
-          }
-          return false;
+        const hasCalendar = await page.evaluate(() => {
+          return !!document.querySelector('.hna-calendar-container .cell');
         });
-
-        if (hasDateElements) {
+        if (hasCalendar) {
           calendarReady = true;
-          this.logger.log(`[诊断] 日历日期元素已渲染 (等待 ${(i + 1) * 500}ms)`);
+          this.logger.log(`[诊断] 日历已渲染 (等待 ${(i + 1) * 500}ms)`);
           break;
         }
-
         await page.waitForTimeout(500);
       }
 
       if (!calendarReady) {
-        this.logger.warn('[诊断] 日历日期元素未渲染，可能日历不需要点击');
+        this.logger.warn('[诊断] 日历未渲染');
+        return false;
       }
 
-      // 策略 2: 从日历中选择日期
-      this.logger.log(`[策略2] 从日历中选择日期: ${targetDate}`);
-
-      // 解析目标日期
-      const targetDateObj = new Date(targetDate);
-      const targetDay = targetDateObj.getDate();
-      const targetMonth = targetDateObj.getMonth() + 1;
-      const targetYear = targetDateObj.getFullYear();
-
-      this.logger.log(`目标日期: ${targetYear}年${targetMonth}月${targetDay}日`);
-
-      // 先诊断页面上有哪些日历元素（更精确的选择器）
-      const calendarElements = await page.evaluate(() => {
-        const selectors = [
-          '.hna-calendar-container .day',
-          '.hna-calendar-container td',
-          '.hna-calendar-container span',
-          '.hna-calendar-container div[class*="day"]',
-          '.calendar-day',
-          '.date-item',
-        ];
-
-        const result: any[] = [];
-        for (const selector of selectors) {
-          const elements = document.querySelectorAll(selector);
-          for (let i = 0; i < Math.min(elements.length, 10); i++) {
-            const el = elements[i];
-            const text = (el.textContent || '').trim();
-            // 只记录看起来像日期数字的元素
-            if (text.length <= 3 && !isNaN(parseInt(text))) {
-              result.push({
-                selector,
-                tag: el.tagName,
-                className: (el as HTMLElement).className,
-                text: text,
-              });
-            }
-          }
-        }
-        return result;
-      });
-      this.logger.log(`[诊断] 找到的日历日期元素 (前10个): ${JSON.stringify(calendarElements, null, 2)}`);
-
-      const dateSelected = await page.evaluate((day, month, year) => {
-        // 查找日历中的日期元素 - 使用更精确的选择器
-        const selectors = [
-          '.hna-calendar-container .day',
-          '.hna-calendar-container td',
-          '.hna-calendar-container span',
-          '.hna-calendar-container div',
-          '.calendar-day',
-          '.date-item',
-          'td[class*="day"]',
-          'div[class*="day"]',
-          'span[class*="day"]',
-        ];
-
-        for (const selector of selectors) {
-          const elements = document.querySelectorAll(selector);
-
-          for (const el of elements) {
-            const text = (el.textContent || '').trim();
-            const dayNumber = parseInt(text, 10);
-
-            // 只处理纯数字且在合理范围内的元素
-            if (!isNaN(dayNumber) && dayNumber >= 1 && dayNumber <= 31 && text.length <= 2) {
-              // 检查是否匹配目标日期
-              if (dayNumber === day) {
-                // 检查是否可点击（不是禁用状态）
-                const isDisabled = el.classList.contains('disabled') ||
-                                   el.classList.contains('past') ||
-                                   el.classList.contains('inactive') ||
-                                   el.hasAttribute('disabled');
-
-                if (!isDisabled) {
-                  (el as HTMLElement).click();
-                  return true;
-                }
-              }
-            }
-          }
+      // 策略 2: 直接通过 data-date 属性精确选择日期
+      this.logger.log(`[策略2] 通过 data-date="${dataDateValue}" 精确选择日期`);
+      const dateSelected = await page.evaluate((dataDate) => {
+        // 通过 data-date 属性精确定位日期格子
+        const cell = document.querySelector(`.cell[data-date="${dataDate}"]`);
+        if (!cell) {
+          console.log(`未找到 data-date="${dataDate}" 的日期格子`);
+          return false;
         }
 
-        return false;
-      }, targetDay, targetMonth, targetYear);
+        // 检查是否被禁用
+        const isDisabled = cell.classList.contains('disabled') ||
+                           cell.classList.contains('past') ||
+                           cell.classList.contains('inactive') ||
+                           cell.hasAttribute('disabled');
+
+        if (isDisabled) {
+          console.log(`日期 ${dataDate} 已被禁用，无法选择`);
+          return false;
+        }
+
+        // 滚动到该元素并点击
+        (cell as HTMLElement).scrollIntoView({ behavior: 'smooth', block: 'center' });
+        (cell as HTMLElement).click();
+        console.log(`✓ 点击了日期: ${dataDate}`);
+        return true;
+      }, dataDateValue);
 
       if (dateSelected) {
         this.logger.log(`✅ 日期选择成功: ${targetDate}`);
@@ -1668,20 +1556,8 @@ export class CrawlerService {
         return true;
       }
 
-      // 策略 3: 如果日历选择失败，尝试直接输入日期
-      this.logger.log(`[策略3] 尝试直接输入日期`);
-      const dateInput = await page.$('input[type="date"], input[placeholder*="日期"]');
-      if (dateInput) {
-        await dateInput.click({ clickCount: 3 }); // 选中所有文本
-        await page.keyboard.type(targetDate);
-        await page.keyboard.press('Enter');
-        this.logger.log(`✅ 日期输入成功: ${targetDate}`);
-        await page.waitForTimeout(1000);
-        return true;
-      }
-
-      this.logger.warn('⚠️ 所有日期选择策略都失败，使用页面默认日期');
-      return true; // 假设页面默认日期可用
+      this.logger.warn(`⚠️ 日期选择失败: ${targetDate} (data-date=${dataDateValue})`);
+      return false;
 
     } catch (error) {
       this.logger.error(`❌ 选择日期异常: ${error.message}`);
@@ -1735,12 +1611,13 @@ export class CrawlerService {
       // 参数说明：origin, dates, headless=true, saveToDb=false
       const { count, flights } = await this.crawlFlights(origin, [crawlDate], true, false);
 
-      // 收集本次调试生成的截图
+      // 收集本次调试生成的截图（只按时间戳过滤，避免中文文件名编码问题）
       const screenshots = fs.readdirSync(this.screenshotDir)
         .filter(file => {
+          if (!file.endsWith('.png')) return false;
           const filePath = path.join(this.screenshotDir, file);
           const stats = fs.statSync(filePath);
-          return stats.mtimeMs >= startTime && file.includes(origin) && file.includes(crawlDate);
+          return stats.mtimeMs >= startTime;
         })
         .map(file => path.join(this.screenshotDir, file))
         .sort();
