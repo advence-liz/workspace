@@ -39,25 +39,42 @@ import {
 const { Title, Paragraph } = Typography;
 const { RangePicker } = DatePicker;
 
-// 获取权益卡类型的 tag 显示（拆分为两个 tag）
+// 获取权益卡类型的 tag 显示（按逗号拆分为多个 tag）
 const getCardTypeTags = (cardType: string): JSX.Element => {
+  if (!cardType) {
+    return <Tag>-</Tag>;
+  }
+
+  // 检查是否包含逗号，如果有则拆分
+  if (cardType.includes(',')) {
+    const types = cardType.split(',').map(t => t.trim());
+    return (
+      <Space size="small">
+        {types.map((type) => {
+          let color = 'default';
+          if (type === '666权益卡航班') {
+            color = 'blue';
+          } else if (type === '2666权益卡航班') {
+            color = 'green';
+          }
+          return (
+            <Tag key={type} color={color}>
+              {type}
+            </Tag>
+          );
+        })}
+      </Space>
+    );
+  }
+
+  // 单个值的情况
+  let color = 'default';
   if (cardType === '666权益卡航班') {
-    return (
-      <Space size="small">
-        <Tag color="blue">666</Tag>
-        <Tag>权益卡航班</Tag>
-      </Space>
-    );
+    color = 'blue';
+  } else if (cardType === '2666权益卡航班') {
+    color = 'green';
   }
-  if (cardType === '2666权益卡航班') {
-    return (
-      <Space size="small">
-        <Tag color="green">2666</Tag>
-        <Tag>权益卡航班</Tag>
-      </Space>
-    );
-  }
-  return <Tag>{cardType}</Tag>;
+  return <Tag color={color}>{cardType}</Tag>;
 };
 
 function FlightManagement() {
