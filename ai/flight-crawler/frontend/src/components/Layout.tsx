@@ -1,6 +1,6 @@
 import { Layout as AntLayout, Menu } from 'antd';
 import { Outlet, useNavigate, useLocation } from 'react-router-dom';
-import { CompassOutlined, AimOutlined, DatabaseOutlined, UnorderedListOutlined } from '@ant-design/icons';
+import { CompassOutlined, AimOutlined, DatabaseOutlined, UnorderedListOutlined, EnvironmentOutlined } from '@ant-design/icons';
 
 const { Header, Content } = AntLayout;
 
@@ -23,6 +23,11 @@ function Layout() {
       key: '/flight-management',
       icon: <UnorderedListOutlined />,
       label: '航班管理',
+    },
+    {
+      key: '/airport-management',
+      icon: <EnvironmentOutlined />,
+      label: '机场管理',
     },
     {
       key: '/data-management',
