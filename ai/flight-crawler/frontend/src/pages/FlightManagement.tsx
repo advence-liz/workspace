@@ -39,6 +39,17 @@ import {
 const { Title, Paragraph } = Typography;
 const { RangePicker } = DatePicker;
 
+// 获取权益卡类型的完整说明
+const getCardTypeDescription = (cardType: string): string => {
+  if (cardType === '666权益卡航班') {
+    return '666权益卡航班 (666/2666权益卡会员可用)';
+  }
+  if (cardType === '2666权益卡航班') {
+    return '2666权益卡航班 (仅2666权益卡会员可用)';
+  }
+  return cardType;
+};
+
 function FlightManagement() {
   const [filterForm] = Form.useForm();
   const [editForm] = Form.useForm();
@@ -267,7 +278,7 @@ function FlightManagement() {
       目的地: flight.destination,
       起飞时间: dayjs(flight.departureTime).format('YYYY-MM-DD HH:mm'),
       到达时间: dayjs(flight.arrivalTime).format('YYYY-MM-DD HH:mm'),
-      权益卡类型: flight.cardType,
+      权益卡类型: getCardTypeDescription(flight.cardType),
       可用座位: flight.availableSeats || '-',
       机型: flight.aircraftType || '-',
       爬取时间: flight.crawledAt ? dayjs(flight.crawledAt).format('YYYY-MM-DD HH:mm') : '-',
@@ -322,12 +333,23 @@ function FlightManagement() {
       title: '权益卡类型',
       dataIndex: 'cardType',
       key: 'cardType',
-      width: 140,
+      width: 180,
       render: (type) => {
-        let color = 'default';
-        if (type === '666权益卡航班') color = 'blue';
-        if (type === '2666权益卡航班') color = 'green';
-        return <Tag color={color}>{type}</Tag>;
+        if (type === '666权益卡航班') {
+          return (
+            <Tag color="blue" title="666和2666权益卡会员都可以兑换">
+              {type}
+            </Tag>
+          );
+        }
+        if (type === '2666权益卡航班') {
+          return (
+            <Tag color="green" title="仅2666权益卡会员可以兑换">
+              {type}
+            </Tag>
+          );
+        }
+        return <Tag>{type}</Tag>;
       },
     },
     {
@@ -393,12 +415,22 @@ function FlightManagement() {
         </Col>
         <Col xs={12} sm={6}>
           <Card>
-            <Statistic title="666权益卡" value={stats.cardType666Count} valueStyle={{ color: '#1890ff' }} />
+            <div>
+              <div style={{ fontSize: '12px', color: '#999', marginBottom: '8px' }}>
+                666权益卡航班 (666/2666可用)
+              </div>
+              <Statistic value={stats.cardType666Count} valueStyle={{ color: '#1890ff' }} />
+            </div>
           </Card>
         </Col>
         <Col xs={12} sm={6}>
           <Card>
-            <Statistic title="2666权益卡" value={stats.cardType2666Count} valueStyle={{ color: '#52c41a' }} />
+            <div>
+              <div style={{ fontSize: '12px', color: '#999', marginBottom: '8px' }}>
+                2666权益卡航班 (仅2666可用)
+              </div>
+              <Statistic value={stats.cardType2666Count} valueStyle={{ color: '#52c41a' }} />
+            </div>
           </Card>
         </Col>
       </Row>
@@ -447,10 +479,10 @@ function FlightManagement() {
           </Form.Item>
 
           <Form.Item name="cardType" label="权益卡类型">
-            <Select placeholder="请选择" allowClear style={{ width: 150 }}>
+            <Select placeholder="请选择" allowClear style={{ width: 200 }}>
               <Select.Option value="全部">全部</Select.Option>
-              <Select.Option value="666权益卡航班">666权益卡航班</Select.Option>
-              <Select.Option value="2666权益卡航班">2666权益卡航班</Select.Option>
+              <Select.Option value="666权益卡航班">666权益卡航班 (666/2666权益卡会员可用)</Select.Option>
+              <Select.Option value="2666权益卡航班">2666权益卡航班 (仅2666权益卡会员可用)</Select.Option>
             </Select>
           </Form.Item>
 
@@ -540,9 +572,8 @@ function FlightManagement() {
 
           <Form.Item name="cardType" label="权益卡类型" rules={[{ required: true, message: '请选择权益卡类型' }]}>
             <Select>
-              <Select.Option value="全部">全部</Select.Option>
-              <Select.Option value="666权益卡航班">666权益卡航班</Select.Option>
-              <Select.Option value="2666权益卡航班">2666权益卡航班</Select.Option>
+              <Select.Option value="666权益卡航班">666权益卡航班 (666/2666权益卡会员可用)</Select.Option>
+              <Select.Option value="2666权益卡航班">2666权益卡航班 (仅2666权益卡会员可用)</Select.Option>
             </Select>
           </Form.Item>
 
