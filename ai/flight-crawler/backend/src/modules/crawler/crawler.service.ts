@@ -175,6 +175,15 @@ export class CrawlerService {
         'Mozilla/5.0 (iPhone; CPU iPhone OS 15_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/15.0 Mobile/15E148 Safari/604.1',
       );
 
+      // 监听浏览器控制台输出
+      page.on('console', (msg) => {
+        const text = msg.text();
+        // 只记录我们的调试信息
+        if (text.includes('===') || text.includes('选择器') || text.includes('日期元素') || text.includes('✓') || text.includes('✗')) {
+          this.logger.log(`[浏览器控制台] ${text}`);
+        }
+      });
+
       // 监听所有网络请求
       page.on('response', async (response) => {
         const url = response.url();
@@ -1467,10 +1476,37 @@ export class CrawlerService {
     try {
       // 策略 1: 点击日期选择器
       this.logger.log(`[策略1] 尝试点击日期选择器`);
+
+      // 先诊断页面上有哪些日期相关元素
+      const dateElements = await page.evaluate(() => {
+        const selectors = [
+          '.date-box',
+          '.dep-date',
+          '.date',
+          '[class*="date"]',
+        ];
+
+        const result: any[] = [];
+        for (const selector of selectors) {
+          const elements = document.querySelectorAll(selector);
+          for (const el of elements) {
+            result.push({
+              selector,
+              tag: el.tagName,
+              className: (el as HTMLElement).className,
+              text: (el.textContent || '').trim().substring(0, 50),
+            });
+          }
+        }
+        return result;
+      });
+      this.logger.log(`[诊断] 找到的日期相关元素: ${JSON.stringify(dateElements, null, 2)}`);
+
       const dateBoxClicked = await page.evaluate(() => {
         const selectors = [
           '.date-box',
           '.dep-date',
+          '.date',
           '[class*="date"]',
           'input[type="date"]',
           '[placeholder*="日期"]',
@@ -1479,20 +1515,17 @@ export class CrawlerService {
 
         for (const selector of selectors) {
           const elements = document.querySelectorAll(selector);
-          console.log(`选择器 "${selector}" 找到 ${elements.length} 个元素`);
 
           for (const el of elements) {
             const text = (el.textContent || '').trim();
             // 检查是否是日期相关的元素
-            if (text.includes('日期') || text.includes('出发') || text.match(/\d{4}-\d{2}-\d{2}/) || text.match(/\d{2}\/\d{2}/)) {
-              console.log(`✓ 找到日期元素: ${text}`);
+            if (text.includes('日期') || text.match(/\d{2}月\d{2}日/) || text.match(/\d{4}-\d{2}-\d{2}/) || text.match(/\d{2}\/\d{2}/)) {
               (el as HTMLElement).click();
               return true;
             }
           }
         }
 
-        console.log(`✗ 未找到日期选择器`);
         return false;
       });
 
@@ -1502,7 +1535,46 @@ export class CrawlerService {
       }
 
       this.logger.log('✅ 日期选择器已点击');
+
+      // 等待日历弹出并渲染
       await page.waitForTimeout(1000);
+
+      // 等待日历日期元素渲染（最多等待 5 秒）
+      let calendarReady = false;
+      for (let i = 0; i < 10; i++) {
+        const hasDateElements = await page.evaluate(() => {
+          const selectors = [
+            '.hna-calendar-container span',
+            '.hna-calendar-container div',
+            '.hna-calendar-container td',
+          ];
+
+          for (const selector of selectors) {
+            const elements = document.querySelectorAll(selector);
+            for (const el of elements) {
+              const text = (el.textContent || '').trim();
+              const num = parseInt(text, 10);
+              // 如果找到 1-31 之间的数字，说明日历已渲染
+              if (!isNaN(num) && num >= 1 && num <= 31 && text.length <= 2) {
+                return true;
+              }
+            }
+          }
+          return false;
+        });
+
+        if (hasDateElements) {
+          calendarReady = true;
+          this.logger.log(`[诊断] 日历日期元素已渲染 (等待 ${(i + 1) * 500}ms)`);
+          break;
+        }
+
+        await page.waitForTimeout(500);
+      }
+
+      if (!calendarReady) {
+        this.logger.warn('[诊断] 日历日期元素未渲染，可能日历不需要点击');
+      }
 
       // 策略 2: 从日历中选择日期
       this.logger.log(`[策略2] 从日历中选择日期: ${targetDate}`);
@@ -1515,44 +1587,78 @@ export class CrawlerService {
 
       this.logger.log(`目标日期: ${targetYear}年${targetMonth}月${targetDay}日`);
 
-      const dateSelected = await page.evaluate((day, month, year) => {
-        // 查找日历中的日期元素
+      // 先诊断页面上有哪些日历元素（更精确的选择器）
+      const calendarElements = await page.evaluate(() => {
         const selectors = [
+          '.hna-calendar-container .day',
+          '.hna-calendar-container td',
+          '.hna-calendar-container span',
+          '.hna-calendar-container div[class*="day"]',
           '.calendar-day',
           '.date-item',
-          '[class*="day"]',
-          '[class*="date-cell"]',
+        ];
+
+        const result: any[] = [];
+        for (const selector of selectors) {
+          const elements = document.querySelectorAll(selector);
+          for (let i = 0; i < Math.min(elements.length, 10); i++) {
+            const el = elements[i];
+            const text = (el.textContent || '').trim();
+            // 只记录看起来像日期数字的元素
+            if (text.length <= 3 && !isNaN(parseInt(text))) {
+              result.push({
+                selector,
+                tag: el.tagName,
+                className: (el as HTMLElement).className,
+                text: text,
+              });
+            }
+          }
+        }
+        return result;
+      });
+      this.logger.log(`[诊断] 找到的日历日期元素 (前10个): ${JSON.stringify(calendarElements, null, 2)}`);
+
+      const dateSelected = await page.evaluate((day, month, year) => {
+        // 查找日历中的日期元素 - 使用更精确的选择器
+        const selectors = [
+          '.hna-calendar-container .day',
+          '.hna-calendar-container td',
+          '.hna-calendar-container span',
+          '.hna-calendar-container div',
+          '.calendar-day',
+          '.date-item',
           'td[class*="day"]',
           'div[class*="day"]',
+          'span[class*="day"]',
         ];
 
         for (const selector of selectors) {
           const elements = document.querySelectorAll(selector);
-          console.log(`选择器 "${selector}" 找到 ${elements.length} 个日期元素`);
 
           for (const el of elements) {
             const text = (el.textContent || '').trim();
             const dayNumber = parseInt(text, 10);
 
-            // 检查是否匹配目标日期
-            if (dayNumber === day) {
-              // 检查是否可点击（不是禁用状态）
-              const isDisabled = el.classList.contains('disabled') ||
-                                 el.classList.contains('past') ||
-                                 el.hasAttribute('disabled');
+            // 只处理纯数字且在合理范围内的元素
+            if (!isNaN(dayNumber) && dayNumber >= 1 && dayNumber <= 31 && text.length <= 2) {
+              // 检查是否匹配目标日期
+              if (dayNumber === day) {
+                // 检查是否可点击（不是禁用状态）
+                const isDisabled = el.classList.contains('disabled') ||
+                                   el.classList.contains('past') ||
+                                   el.classList.contains('inactive') ||
+                                   el.hasAttribute('disabled');
 
-              if (!isDisabled) {
-                console.log(`✓ 找到可用日期: ${day}日`);
-                (el as HTMLElement).click();
-                return true;
-              } else {
-                console.log(`✗ 日期 ${day} 已禁用`);
+                if (!isDisabled) {
+                  (el as HTMLElement).click();
+                  return true;
+                }
               }
             }
           }
         }
 
-        console.log(`✗ 未找到日期: ${day}日`);
         return false;
       }, targetDay, targetMonth, targetYear);
 
