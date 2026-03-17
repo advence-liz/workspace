@@ -56,29 +56,30 @@ export class CrawlerController {
   }
 
   /**
-   * 初始化阶段2：发现所有航班数据（统一新方法）
+   * 初始化阶段2：发现所有航班数据（按日期区间）
    * POST /api/crawler/initialize/refresh
-   * Body: { days?: number } 或 { startDate?: string, endDate?: string } 或 { planOnly?: boolean }
+   * Body: { startDate: string, endDate: string, planOnly?: boolean }
    *
-   * 支持三种模式：
-   * 1. 按天数：{ "days": 30 } - 爬取未来 30 天
-   * 2. 按日期区间：{ "startDate": "2026-03-20", "endDate": "2026-03-25" } - 爬取指定日期范围
-   * 3. 仅获取计划：{ "days": 30, "planOnly": true } - 返回执行计划，不执行爬虫
+   * 示例：
+   * 1. 执行爬虫：{ "startDate": "2026-03-18", "endDate": "2026-03-25" }
+   * 2. 仅获取计划：{ "startDate": "2026-03-18", "endDate": "2026-03-25", "planOnly": true }
    */
   @Post('initialize/refresh')
   @HttpCode(HttpStatus.OK)
   async initializeRefresh(@Body() dto: InitializeRefreshFlightsDto) {
-    // 验证参数：days 和 startDate/endDate 二选一
-    if (dto.days && (dto.startDate || dto.endDate)) {
-      throw new BadRequestException('days 和 startDate/endDate 不能同时指定，请选择其中一种方式');
+    // 验证日期有效性
+    const start = new Date(dto.startDate);
+    const end = new Date(dto.endDate);
+
+    if (isNaN(start.getTime()) || isNaN(end.getTime())) {
+      throw new BadRequestException('日期格式错误，请使用 YYYY-MM-DD 格式');
     }
 
-    if ((dto.startDate && !dto.endDate) || (!dto.startDate && dto.endDate)) {
-      throw new BadRequestException('startDate 和 endDate 必须同时指定');
+    if (start > end) {
+      throw new BadRequestException('开始日期不能晚于结束日期');
     }
 
-    const result = await this.crawlerService.initializeRefreshFlightsUnified({
-      days: dto.days,
+    const result = await this.crawlerService.initializeRefreshFlightsByDateRange({
       startDate: dto.startDate,
       endDate: dto.endDate,
       planOnly: dto.planOnly,

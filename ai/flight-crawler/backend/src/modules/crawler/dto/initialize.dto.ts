@@ -11,28 +11,17 @@ export class InitializeDiscoverDto {
 }
 
 /**
- * 统一的发现航班 DTO
- * 支持两种输入方式：
- * 1. days: 从明天开始的天数（1-30）
- * 2. startDate + endDate: 指定日期区间（YYYY-MM-DD 格式）
+ * 发现航班 DTO - 按日期区间查询
+ * 必须同时指定 startDate 和 endDate（YYYY-MM-DD 格式）
  */
 export class InitializeRefreshFlightsDto {
-  @IsOptional()
-  @Type(() => Number)
-  @IsInt()
-  @Min(1)
-  @Max(30)
-  days?: number;
-
-  @IsOptional()
   @IsString()
   @Matches(/^\d{4}-\d{2}-\d{2}$/, { message: '日期格式应为 YYYY-MM-DD' })
-  startDate?: string;
+  startDate: string;
 
-  @IsOptional()
   @IsString()
   @Matches(/^\d{4}-\d{2}-\d{2}$/, { message: '日期格式应为 YYYY-MM-DD' })
-  endDate?: string;
+  endDate: string;
 
   @IsOptional()
   @Type(() => Boolean)

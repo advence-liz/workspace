@@ -63,15 +63,13 @@ export const initializeDiscoverAirports = (days?: number): Promise<{
   return api.post('/crawler/initialize/discover', { days });
 };
 
-// 初始化阶段2：发现航班数据（统一新方法）
-// 支持三种模式：
-// 1. 按天数：initializeDiscoverFlights({ days: 30 })
-// 2. 按日期区间：initializeDiscoverFlights({ startDate: "2026-03-20", endDate: "2026-03-25" })
-// 3. 仅获取计划：initializeDiscoverFlights({ days: 30, planOnly: true })
-export const initializeDiscoverFlights = (options?: {
-  days?: number;
-  startDate?: string;
-  endDate?: string;
+// 初始化阶段2：发现航班数据（按日期区间）
+// 使用示例：
+// 1. 执行爬虫：initializeDiscoverFlights({ startDate: "2026-03-18", endDate: "2026-03-25" })
+// 2. 仅获取计划：initializeDiscoverFlights({ startDate: "2026-03-18", endDate: "2026-03-25", planOnly: true })
+export const initializeDiscoverFlights = (options: {
+  startDate: string;
+  endDate: string;
   planOnly?: boolean;
 }): Promise<{
   success: boolean;
@@ -104,9 +102,7 @@ export const initializeDiscoverFlights = (options?: {
     taskDetails: Array<{ taskId: number; date: string; success: boolean; count: number }>;
   };
 }> => {
-  // 兼容旧的调用方式：initializeDiscoverFlights(7) -> initializeDiscoverFlights({ days: 7 })
-  const params = typeof options === 'number' ? { days: options } : (options || {});
-  return api.post('/crawler/initialize/refresh', params);
+  return api.post('/crawler/initialize/refresh', options);
 };
 
 
