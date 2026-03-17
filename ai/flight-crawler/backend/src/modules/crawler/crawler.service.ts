@@ -1647,7 +1647,8 @@ export class CrawlerService {
       const startTime = Date.now();
 
       // 调用爬虫逻辑，不保存到数据库
-      const { count, flights } = await this.crawlFlights(origin, [crawlDate], false, false);
+      // 参数说明：origin, dates, headless=true, saveToDb=false
+      const { count, flights } = await this.crawlFlights(origin, [crawlDate], true, false);
 
       // 收集本次调试生成的截图
       const screenshots = fs.readdirSync(this.screenshotDir)
