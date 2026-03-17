@@ -1828,7 +1828,20 @@ export class CrawlerService {
       totalTasks: number;
       dateRange: string[];
       estimatedTime: string;
-      taskList: Array<{ taskId: number; date: string; airports: number }>;
+      totalAirports: number;
+      airportList: string[];
+      taskList: Array<{
+        taskId: number;
+        date: string;
+        airports: number;
+        airportNames: string[];
+        estimatedTaskTime: string;
+        crawlerInfo: {
+          description: string;
+          expectedFlights: number;
+          maxConcurrency: number;
+        };
+      }>;
     };
     executionResult?: {
       success: boolean;
@@ -1876,29 +1889,46 @@ export class CrawlerService {
           totalTasks: dates.length,
           dateRange: dates,
           estimatedTime: '无',
+          totalAirports: 0,
+          airportList: [],
           taskList: [],
         },
       };
     }
 
-    // 生成执行计划
-    const taskList = dates.map((date, idx) => ({
-      taskId: idx + 1,
-      date,
-      airports: airports.length,
-    }));
-
+    // 生成执行计划 - 包含详细的城市和爬虫启动信息
+    const airportNames = airports;
     const estimatedTime = this.calculateEstimatedTime(dates.length, airports.length);
+
+    const taskList = dates.map((date, idx) => {
+      const taskId = idx + 1;
+      const estimatedTaskTime = this.calculateEstimatedTime(1, airports.length);
+
+      return {
+        taskId,
+        date,
+        airports: airports.length,
+        airportNames: airports,
+        estimatedTaskTime,
+        crawlerInfo: {
+          description: `爬取 ${date} 日期的 ${airports.length} 个机场的航班数据（权益卡：666 + 2666）`,
+          expectedFlights: Math.ceil(airports.length * 2.5), // 每个机场预期 2-3 班航班
+          maxConcurrency: 5, // 机场级最大并发数
+        },
+      };
+    });
 
     const executionPlan = {
       totalDays: dates.length,
       totalTasks: dates.length,
       dateRange: dates,
       estimatedTime,
+      totalAirports: airports.length,
+      airportList: airportNames,
       taskList,
     };
 
-    this.logger.log(`📋 执行计划生成完毕：${dates.length} 个任务，预计 ${estimatedTime}`);
+    this.logger.log(`📋 执行计划生成完毕：${dates.length} 个任务，${airports.length} 个机场，预计 ${estimatedTime}`);
 
     // 如果仅获取计划，直接返回
     if (options.planOnly) {
