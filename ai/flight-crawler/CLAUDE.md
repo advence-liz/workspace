@@ -97,6 +97,7 @@ npm run lint          # ESLint 检查
   - `POST /api/crawler/initialize/discover` - 发现机场（支持自定义天数 1-7 天，默认 1 天）
   - `POST /api/crawler/initialize/refresh` - 发现航班（支持自定义天数 1-30 天，默认 7 天）
   - `POST /api/crawler/trigger` - 一键初始化（自动执行发现机场和发现航班）
+  - `GET /api/crawler/debug?origin=北京首都&date=2026-03-19` - 调试爬虫（按日期爬取指定出发地，不保存到数据库）
 
 #### 3. Route Module (路径规划模块)
 - **Service**: `RouteService` - 智能行程规划核心算法
@@ -278,3 +279,4 @@ cd frontend && npm run dev
 - [执行日志功能](./docs/CRAWLER_LOG_FEATURE.md) - 执行日志记录和查询功能
 - [日志清理功能](./docs/LOG_CLEANUP_FEATURE.md) - 日志清理和存储空间管理
 - [日志自动刷新功能](./日志自动刷新功能.md) - 实时监控执行日志
+- [按日期调试爬虫](./docs/DEBUG_CRAWLER_BY_DATE.md) - 调试特定日期和出发地的爬虫功能
