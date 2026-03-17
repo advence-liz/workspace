@@ -403,6 +403,11 @@ export class CrawlerService {
           if (possibleFlights && Array.isArray(possibleFlights)) {
             this.logger.log(`✅ 找到 ${possibleFlights.length} 条航班`);
 
+            // 调试：记录所有航班的目的地
+            const allDestinations = possibleFlights.map((f: any) => f.destination || f.arrCity || f.arrival || '(空)');
+            this.logger.debug(`📊 所有目的地: ${Array.from(new Set(allDestinations)).join(', ')}`);
+
+            let filteredCount = 0;
             possibleFlights.forEach((flight: any) => {
               try {
                 // 只保存有明确目的地的航班（有航线就代表可以特价购买）
@@ -469,11 +474,19 @@ export class CrawlerService {
                     crawledAt: new Date(),
                   });
                   this.logger.debug(`✅ 航班: ${flight.origin || origin} → ${destination}, ${depTime.toLocaleTimeString('zh-CN', { hour: '2-digit', minute: '2-digit' })}-${arrTime.toLocaleTimeString('zh-CN', { hour: '2-digit', minute: '2-digit' })}, 权益卡: ${detectedCardType}`);
+                } else {
+                  // 记录被过滤的航班
+                  filteredCount++;
+                  const reason = !destination ? '无目的地' : destination === '未知' ? '目的地为未知' : destination === origin ? '目的地等于出发地' : '其他';
+                  this.logger.debug(`⚠️ 航班被过滤 (${reason}): ${flight.origin || origin} → ${destination || '(空)'}`);
                 }
               } catch (error) {
                 this.logger.error('解析航班失败', error);
               }
             });
+            if (filteredCount > 0) {
+              this.logger.debug(`📊 过滤统计: 找到 ${possibleFlights.length} 条，过滤 ${filteredCount} 条，保存 ${flights.length} 条`);
+            }
           }
         }
       }
