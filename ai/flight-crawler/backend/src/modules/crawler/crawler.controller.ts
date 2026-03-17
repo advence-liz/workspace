@@ -9,20 +9,6 @@ export class CrawlerController {
   constructor(private readonly crawlerService: CrawlerService) {}
 
   /**
-   * 手动触发爬虫
-   * POST /api/crawler/trigger
-   */
-  @Post('trigger')
-  @HttpCode(HttpStatus.OK)
-  async triggerCrawl() {
-    const result = await this.crawlerService.triggerCrawl();
-    return {
-      message: result.success ? '爬虫任务已启动' : '爬虫任务失败',
-      ...result,
-    };
-  }
-
-  /**
    * 调试爬虫 - 单次爬取指定城市和日期
    * GET /api/crawler/debug?origin=北京首都&date=2026-03-19
    * 如果不提供 date，则爬取明天的数据
