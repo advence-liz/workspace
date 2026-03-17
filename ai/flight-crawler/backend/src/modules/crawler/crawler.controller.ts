@@ -80,6 +80,7 @@ export class CrawlerController {
       startDate: dto.startDate,
       endDate: dto.endDate,
       planOnly: dto.planOnly,
+      async: !dto.planOnly, // 非预览模式时启用异步
     });
 
     if (dto.planOnly) {
@@ -89,6 +90,15 @@ export class CrawlerController {
       };
     }
 
+    // 异步模式：返回任务 ID
+    if (result.taskId) {
+      return {
+        message: `任务已创建（ID: ${result.taskId}），正在后台执行，请在日志中查看进度`,
+        ...result,
+      };
+    }
+
+    // 同步模式（向后兼容）
     return {
       message: result.success
         ? `航班发现完成！成功 ${result.executionResult?.successTasks} 个任务，失败 ${result.executionResult?.failedTasks} 个，共爬取 ${result.executionResult?.totalCount} 条航班`

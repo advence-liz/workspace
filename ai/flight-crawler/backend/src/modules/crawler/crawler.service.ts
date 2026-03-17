@@ -1821,8 +1821,10 @@ export class CrawlerService {
     startDate?: string;
     endDate?: string;
     planOnly?: boolean;
+    async?: boolean;
   }): Promise<{
     success: boolean;
+    taskId?: number;
     executionPlan: {
       totalDays: number;
       totalTasks: number;
@@ -1947,10 +1949,32 @@ export class CrawlerService {
       };
     }
 
+    // 创建主日志记录（用于跟踪整个执行过程）
+    const mainLog = await this.createCrawlerLog(CrawlerTaskType.REFRESH_FLIGHTS, dates.length);
+
     // 获取并发锁
     this.isCrawlerRunning = true;
-    this.runningTaskId = -1; // 标记为批量任务
+    this.runningTaskId = mainLog.id;
 
+    // 异步模式：立即返回，后台执行
+    if (options.async) {
+      this.logger.log(`⏳ 异步模式：立即返回任务 ID ${mainLog.id}，后台执行中...`);
+
+      // 使用 setImmediate 在下一个事件循环执行，避免阻塞响应
+      setImmediate(() => {
+        this.executeRefreshFlightsBackground(mainLog.id, dates, airports, executionPlan).catch(error => {
+          this.logger.error('后台执行异常', error);
+        });
+      });
+
+      return {
+        success: true,
+        taskId: mainLog.id,
+        executionPlan,
+      };
+    }
+
+    // 同步模式：等待执行完成（向后兼容）
     try {
       // 执行所有日期任务（分批并行）
       const MAX_CONCURRENT_TASKS = 10; // 最多同时执行 10 个日期任务
@@ -1990,6 +2014,16 @@ export class CrawlerService {
       const failedCount = taskResults.filter(t => !t.success).length;
 
       this.logger.log(`🎉 所有任务完成！成功 ${successCount} 个，失败 ${failedCount} 个，总计 ${totalCount} 条航班`);
+
+      // 更新主日志
+      await this.completeCrawlerLog(mainLog.id, failedCount === 0, {
+        airportCount: airports.length,
+        flightCount: totalCount,
+        details: {
+          executionPlan,
+          taskResults,
+        },
+      });
 
       return {
         success: failedCount === 0,
@@ -2082,6 +2116,84 @@ export class CrawlerService {
     } catch (error) {
       this.logger.error(`❌ 任务 ${taskId}（${date}）异常`, error);
       return { taskId, date, success: false, count: 0 };
+    }
+  }
+
+  /**
+   * 后台执行航班发现任务（异步模式）
+   * 不阻塞响应，在后台执行所有日期任务
+   */
+  private async executeRefreshFlightsBackground(
+    mainLogId: number,
+    dates: string[],
+    airports: string[],
+    executionPlan: any,
+  ): Promise<void> {
+    this.logger.log(`🔄 后台执行开始：主日志 ID ${mainLogId}，${dates.length} 个日期`);
+
+    try {
+      // 执行所有日期任务（分批并行）
+      const MAX_CONCURRENT_TASKS = 10; // 最多同时执行 10 个日期任务
+      const taskResults: Array<{ taskId: number; date: string; success: boolean; count: number }> = [];
+      let totalCount = 0;
+
+      for (let i = 0; i < dates.length; i += MAX_CONCURRENT_TASKS) {
+        const batch = dates.slice(i, i + MAX_CONCURRENT_TASKS);
+        const batchIndex = Math.floor(i / MAX_CONCURRENT_TASKS) + 1;
+        const totalBatches = Math.ceil(dates.length / MAX_CONCURRENT_TASKS);
+
+        this.logger.log(`📦 后台批次 ${batchIndex}/${totalBatches}：执行 ${batch.length} 个日期任务 (${batch.join(', ')})`);
+
+        const batchPromises = batch.map((date, idx) =>
+          this.executeDailyTask(date, airports, i + idx + 1)
+            .then(result => {
+              this.logger.log(`✅ 后台任务 ${result.taskId}（${date}）完成，爬取 ${result.count} 条航班`);
+              taskResults.push(result);
+              totalCount += result.count;
+              return result;
+            })
+            .catch(error => {
+              this.logger.error(`❌ 后台任务 ${i + idx + 1}（${date}）失败`, error);
+              const failedResult = { taskId: i + idx + 1, date, success: false, count: 0 };
+              taskResults.push(failedResult);
+              return failedResult;
+            })
+        );
+
+        await Promise.all(batchPromises);
+      }
+
+      // 排序结果（按任务 ID）
+      taskResults.sort((a, b) => a.taskId - b.taskId);
+
+      const successCount = taskResults.filter(t => t.success).length;
+      const failedCount = taskResults.filter(t => !t.success).length;
+
+      this.logger.log(`🎉 后台执行完成！成功 ${successCount} 个，失败 ${failedCount} 个，总计 ${totalCount} 条航班`);
+
+      // 更新主日志
+      await this.completeCrawlerLog(mainLogId, failedCount === 0, {
+        airportCount: airports.length,
+        flightCount: totalCount,
+        details: {
+          executionPlan,
+          taskResults,
+        },
+      });
+    } catch (error) {
+      this.logger.error(`❌ 后台执行异常`, error);
+
+      // 记录失败
+      await this.completeCrawlerLog(mainLogId, false, {
+        airportCount: airports.length,
+        flightCount: 0,
+        errorMessage: error instanceof Error ? error.message : '未知错误',
+      });
+    } finally {
+      // 释放并发锁
+      this.isCrawlerRunning = false;
+      this.runningTaskId = null;
+      this.logger.log('🔓 后台执行：爬虫锁已释放');
     }
   }
 

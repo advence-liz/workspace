@@ -195,24 +195,47 @@ function DataManagement() {
       });
 
       if (result.success) {
-        message.success(
-          `航班发现完成！成功 ${result.executionResult?.successTasks} 个任务，失败 ${result.executionResult?.failedTasks} 个，共爬取 ${result.executionResult?.totalCount} 条航班`
-        );
-        setRefreshResult({
-          executionPlan: result.executionPlan,
-          executionResult: result.executionResult,
-        });
-        // 刷新日志
-        loadLogs(1, logsPagination.pageSize);
-        loadLogStats();
-        // 清空表单和计划
-        refreshForm.resetFields();
-        setExecutionPlan(null);
+        // 异步模式：立即返回，后台执行
+        if (result.taskId) {
+          message.success(
+            `任务已创建（ID: ${result.taskId}），正在后台执行，请在下方日志中查看进度`,
+            5
+          );
+
+          // 自动开启日志自动刷新
+          setAutoRefresh(true);
+
+          // 清空表单和计划
+          refreshForm.resetFields();
+          setExecutionPlan(null);
+
+          // 立即刷新日志列表（新任务会显示为 running 状态）
+          loadLogs(1, logsPagination.pageSize);
+          loadLogStats();
+
+          // 清空之前的执行结果
+          setRefreshResult({});
+        } else {
+          // 同步模式（向后兼容）
+          message.success(
+            `航班发现完成！成功 ${result.executionResult?.successTasks} 个任务，失败 ${result.executionResult?.failedTasks} 个，共爬取 ${result.executionResult?.totalCount} 条航班`
+          );
+          setRefreshResult({
+            executionPlan: result.executionPlan,
+            executionResult: result.executionResult,
+          });
+          // 刷新日志
+          loadLogs(1, logsPagination.pageSize);
+          loadLogStats();
+          // 清空表单和计划
+          refreshForm.resetFields();
+          setExecutionPlan(null);
+        }
       } else {
-        message.error('航班发现失败');
+        message.error('任务创建失败：已有任务在执行中');
       }
-    } catch (error) {
-      message.error('航班发现失败');
+    } catch (error: any) {
+      message.error(`任务创建失败: ${error.message || '未知错误'}`);
       console.error(error);
     } finally {
       setRefreshLoading(false);
@@ -305,8 +328,16 @@ function DataManagement() {
       key: 'status',
       render: (status: string) => {
         const statusInfo = statusMap[status as keyof typeof statusMap];
+        let icon = null;
+        if (status === 'success') {
+          icon = <CheckCircleOutlined />;
+        } else if (status === 'failed') {
+          icon = <ExclamationCircleOutlined />;
+        } else if (status === 'running') {
+          icon = <SyncOutlined spin />;
+        }
         return (
-          <Tag color={statusInfo?.color}>{statusInfo?.text || status}</Tag>
+          <Tag color={statusInfo?.color} icon={icon}>{statusInfo?.text || status}</Tag>
         );
       },
     },
@@ -353,7 +384,7 @@ function DataManagement() {
       key: 'duration',
       render: (duration?: number) => {
         if (!duration) return '-';
-        const d = dayjs.duration(duration, 'milliseconds');
+        const d = dayjs.duration(duration * 1000, 'milliseconds');
         if (d.asSeconds() < 60) {
           return `${Math.round(d.asSeconds())} 秒`;
         }
@@ -686,6 +717,9 @@ function DataManagement() {
           onChange={(pagination) => {
             loadLogs(pagination.current, pagination.pageSize);
           }}
+          rowClassName={(record) =>
+            record.status === 'running' ? 'running-task-row' : ''
+          }
         />
       </Card>
 
@@ -720,7 +754,7 @@ function DataManagement() {
             )}
             {selectedLog.duration && (
               <Descriptions.Item label="耗时">
-                {dayjs.duration(selectedLog.duration, 'milliseconds').format('HH:mm:ss')}
+                {dayjs.duration(selectedLog.duration * 1000, 'milliseconds').format('HH:mm:ss')}
               </Descriptions.Item>
             )}
             {selectedLog.errorMessage && (
@@ -728,15 +762,112 @@ function DataManagement() {
                 <Text type="danger">{selectedLog.errorMessage}</Text>
               </Descriptions.Item>
             )}
-            {selectedLog.details && (
-              <Descriptions.Item label="详细信息">
-                <pre style={{ background: '#f5f5f5', padding: '8px', borderRadius: '4px' }}>
-                  {typeof selectedLog.details === 'string'
-                    ? selectedLog.details
-                    : JSON.stringify(selectedLog.details, null, 2)}
-                </pre>
-              </Descriptions.Item>
-            )}
+            {selectedLog.details && (() => {
+              try {
+                const details = typeof selectedLog.details === 'string'
+                  ? JSON.parse(selectedLog.details)
+                  : selectedLog.details;
+
+                return (
+                  <>
+                    {/* 任务日期 */}
+                    {details.date && (
+                      <Descriptions.Item label="任务日期">
+                        {details.date}
+                      </Descriptions.Item>
+                    )}
+
+                    {/* 任务 ID */}
+                    {details.taskId && (
+                      <Descriptions.Item label="任务 ID">
+                        {details.taskId}
+                      </Descriptions.Item>
+                    )}
+
+                    {/* 机场列表 */}
+                    {(details.airports || details.airportNames) && (
+                      <Descriptions.Item label="机场列表" span={2}>
+                        <div style={{ maxHeight: 200, overflow: 'auto' }}>
+                          {(details.airports || details.airportNames).map((airport: string) => (
+                            <Tag key={airport} style={{ marginBottom: 4 }}>
+                              {airport}
+                            </Tag>
+                          ))}
+                        </div>
+                      </Descriptions.Item>
+                    )}
+
+                    {/* 日期范围（仅 discover_airports 任务） */}
+                    {details.dateRange && (
+                      <Descriptions.Item label="日期范围" span={2}>
+                        {Array.isArray(details.dateRange)
+                          ? details.dateRange.join(', ')
+                          : details.dateRange}
+                      </Descriptions.Item>
+                    )}
+
+                    {/* 种子机场（仅 discover_airports 任务） */}
+                    {details.seedAirports && (
+                      <Descriptions.Item label="种子机场" span={2}>
+                        {details.seedAirports.map((airport: string) => (
+                          <Tag key={airport} color="blue" style={{ marginBottom: 4 }}>
+                            {airport}
+                          </Tag>
+                        ))}
+                      </Descriptions.Item>
+                    )}
+
+                    {/* 执行计划（主任务日志） */}
+                    {details.executionPlan && (
+                      <Descriptions.Item label="执行计划" span={2}>
+                        <pre style={{ maxHeight: 300, overflow: 'auto', background: '#f5f5f5', padding: 8, borderRadius: 4, fontSize: 12 }}>
+                          {JSON.stringify(details.executionPlan, null, 2)}
+                        </pre>
+                      </Descriptions.Item>
+                    )}
+
+                    {/* 任务结果 */}
+                    {details.taskResults && (
+                      <Descriptions.Item label="任务结果" span={2}>
+                        <pre style={{ maxHeight: 300, overflow: 'auto', background: '#f5f5f5', padding: 8, borderRadius: 4, fontSize: 12 }}>
+                          {JSON.stringify(details.taskResults, null, 2)}
+                        </pre>
+                      </Descriptions.Item>
+                    )}
+
+                    {/* 其他详细信息 */}
+                    {Object.keys(details).filter(key =>
+                      !['date', 'taskId', 'airports', 'airportNames', 'dateRange', 'seedAirports', 'executionPlan', 'taskResults'].includes(key)
+                    ).length > 0 && (
+                      <Descriptions.Item label="其他信息" span={2}>
+                        <pre style={{ maxHeight: 300, overflow: 'auto', background: '#f5f5f5', padding: 8, borderRadius: 4, fontSize: 12 }}>
+                          {JSON.stringify(
+                            Object.fromEntries(
+                              Object.entries(details).filter(([key]) =>
+                                !['date', 'taskId', 'airports', 'airportNames', 'dateRange', 'seedAirports', 'executionPlan', 'taskResults'].includes(key)
+                              )
+                            ),
+                            null,
+                            2
+                          )}
+                        </pre>
+                      </Descriptions.Item>
+                    )}
+                  </>
+                );
+              } catch (e) {
+                // 如果解析失败，显示原始内容
+                return (
+                  <Descriptions.Item label="详细信息" span={2}>
+                    <pre style={{ background: '#f5f5f5', padding: '8px', borderRadius: '4px' }}>
+                      {typeof selectedLog.details === 'string'
+                        ? selectedLog.details
+                        : JSON.stringify(selectedLog.details, null, 2)}
+                    </pre>
+                  </Descriptions.Item>
+                );
+              }
+            })()}
           </Descriptions>
         )}
       </Modal>
@@ -745,3 +876,12 @@ function DataManagement() {
 }
 
 export default DataManagement;
+
+// CSS 样式：高亮正在执行的任务
+const style = document.createElement('style');
+style.textContent = `
+  .running-task-row {
+    background-color: #e6f7ff !important;
+  }
+`;
+document.head.appendChild(style);

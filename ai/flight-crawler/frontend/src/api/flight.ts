@@ -82,6 +82,7 @@ export const initializeDiscoverFlights = (options?: {
   planOnly?: boolean;
 }): Promise<{
   success: boolean;
+  taskId?: number;
   executionPlan: {
     totalDays: number;
     totalTasks: number;
