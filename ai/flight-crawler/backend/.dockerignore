@@ -1,0 +1,11 @@
+node_modules
+dist
+data
+logs
+debug-screenshots
+debug-screenshots-view
+*.db
+*.sqlite
+.env
+.env.local
+coverage
