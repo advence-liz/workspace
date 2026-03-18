@@ -52,4 +52,5 @@ screenshots/
 
 # Debug screenshots
 debug-screenshots/
+debug-screenshots-view/
 debug-*.png
