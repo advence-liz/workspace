@@ -20,6 +20,7 @@ export class CrawlerService {
   private readonly screenshotDir = path.join(process.cwd(), 'debug-screenshots');
   private isCrawlerRunning = false; // 并发锁：防止多个爬虫同时运行
   private runningTaskId: number | null = null; // 当前运行的任务 ID
+  private stopRequested = false; // 停止信号：true 时后台任务应尽快退出
 
   constructor(
     private readonly flightService: FlightService,
@@ -37,6 +38,19 @@ export class CrawlerService {
     if (!fs.existsSync(this.screenshotDir)) {
       fs.mkdirSync(this.screenshotDir, { recursive: true });
       this.logger.log(`📁 创建截图目录: ${this.screenshotDir}`);
+    }
+  }
+
+  /**
+   * 安全截图：失败时只记录警告，不抛出异常
+   */
+  private async safeScreenshot(page: puppeteer.Page, filePath: string, label: string): Promise<void> {
+    try {
+      this.ensureScreenshotDir();
+      await page.screenshot({ path: filePath, fullPage: true });
+      this.logger.log(`📸 ${label}: ${filePath}`);
+    } catch (e) {
+      this.logger.warn(`⚠️ 截图失败 [${label}]: ${e.message}`);
     }
   }
 
@@ -79,6 +93,7 @@ export class CrawlerService {
     dates: string[],
     headless: boolean = true,
     saveToDb: boolean = true,
+    enableScreenshot: boolean = false,
   ): Promise<{ count: number; flights: Partial<Flight>[] }> {
     this.logger.log(`开始爬取航班数据: ${origin}, 日期: ${dates.join(', ')}`);
 
@@ -92,7 +107,7 @@ export class CrawlerService {
       for (const date of dates) {
         // 一次性爬取所有权益卡类型的航班
         this.logger.log(`爬取所有权益卡 - ${date}`);
-        const dayFlights = await this.crawlFlightsByDate(origin, date, cardTypes);
+        const dayFlights = await this.crawlFlightsByDate(origin, date, cardTypes, undefined, enableScreenshot);
         this.logger.log(`✅ ${origin} - ${date}: 爬取 ${dayFlights.length} 条航班`);
         flights.push(...dayFlights);
 
@@ -154,15 +169,20 @@ export class CrawlerService {
   /**
    * 爬取指定日期和权益卡类型的航班
    * @param cardTypes 权益卡类型（字符串或字符串数组）
+   * @param externalBrowser 可选的外部浏览器实例（用于共享浏览器场景）
+   * @param enableScreenshot 是否开启截图（仅 debug 模式使用，默认 false）
    */
   private async crawlFlightsByDate(
     origin: string,
     date: string,
     cardTypes: string | string[],
+    externalBrowser?: puppeteer.Browser,
+    enableScreenshot = false,
   ): Promise<Partial<Flight>[]> {
     // 统一处理为数组
     const cardTypeArray = Array.isArray(cardTypes) ? cardTypes : [cardTypes];
-    const page = await this.browser!.newPage();
+    const browserToUse = externalBrowser || this.browser!;
+    const page = await browserToUse.newPage();
     const flights: Partial<Flight>[] = [];
     const apiResponses: any[] = [];
 
@@ -227,8 +247,7 @@ export class CrawlerService {
         this.screenshotDir,
         `${timestamp}-${origin}-${date}-${cardTypeShort}-init.png`
       );
-      await page.screenshot({ path: screenshotInitPath, fullPage: true });
-      this.logger.log(`📸 初始截图: ${screenshotInitPath}`);
+      if (enableScreenshot) await this.safeScreenshot(page, screenshotInitPath, '初始截图');
 
       // 打印页面HTML结构用于调试
       const pageContent = await page.content();
@@ -290,13 +309,7 @@ export class CrawlerService {
 
       if (!allCardsSelected) {
         this.logger.warn(`⚠️ 部分权益卡选择失败，跳过本次查询`);
-        // 截图记录失败状态
-        const failPath = path.join(
-          this.screenshotDir,
-          `${timestamp}-${origin}-${date}-${cardTypeShort}-card-fail.png`
-        );
-        await page.screenshot({ path: failPath, fullPage: true });
-        this.logger.log(`📸 权益卡选择失败截图: ${failPath}`);
+        if (enableScreenshot) await this.safeScreenshot(page, path.join(this.screenshotDir, `${timestamp}-${origin}-${date}-${cardTypeShort}-card-fail.png`), '权益卡选择失败截图');
         return flights;
       }
       this.logger.log(`✅ 所有权益卡选择完成: ${cardTypeLabel}`);
@@ -305,25 +318,14 @@ export class CrawlerService {
       await page.waitForTimeout(1000);
 
       // 截图查看权益卡选择后的状态
-      const cardSelectedPath = path.join(
-        this.screenshotDir,
-        `${timestamp}-${origin}-${date}-${cardTypeShort}-card-selected.png`
-      );
-      await page.screenshot({ path: cardSelectedPath, fullPage: true });
-      this.logger.log(`📸 权益卡选择后截图: ${cardSelectedPath}`);
+      if (enableScreenshot) await this.safeScreenshot(page, path.join(this.screenshotDir, `${timestamp}-${origin}-${date}-${cardTypeShort}-card-selected.png`), '权益卡选择后截图');
 
       // 选择出发地
       this.logger.log(`🛫 开始选择出发地: ${origin}`);
       const originSelected = await this.selectOrigin(page, origin);
       if (!originSelected) {
         this.logger.warn(`⚠️ 出发地选择失败，跳过: ${origin}`);
-        // 截图记录失败状态
-        const failPath = path.join(
-          this.screenshotDir,
-          `${timestamp}-${origin}-${date}-${cardTypeShort}-origin-fail.png`
-        );
-        await page.screenshot({ path: failPath, fullPage: true });
-        this.logger.log(`📸 出发地选择失败截图: ${failPath}`);
+        if (enableScreenshot) await this.safeScreenshot(page, path.join(this.screenshotDir, `${timestamp}-${origin}-${date}-${cardTypeShort}-origin-fail.png`), '出发地选择失败截图');
         return flights;
       }
       this.logger.log(`✅ 出发地选择成功: ${origin}`);
@@ -336,13 +338,7 @@ export class CrawlerService {
       const dateSelected = await this.selectDate(page, date);
       if (!dateSelected) {
         this.logger.warn(`⚠️ 日期选择失败，跳过: ${date}`);
-        // 截图记录失败状态
-        const failPath = path.join(
-          this.screenshotDir,
-          `${timestamp}-${origin}-${date}-${cardTypeShort}-date-fail.png`
-        );
-        await page.screenshot({ path: failPath, fullPage: true });
-        this.logger.log(`📸 日期选择失败截图: ${failPath}`);
+        if (enableScreenshot) await this.safeScreenshot(page, path.join(this.screenshotDir, `${timestamp}-${origin}-${date}-${cardTypeShort}-date-fail.png`), '日期选择失败截图');
         return flights;
       }
       this.logger.log(`✅ 日期选择成功: ${date}`);
@@ -351,25 +347,14 @@ export class CrawlerService {
       await page.waitForTimeout(1000);
 
       // 截图查看操作后的状态
-      const screenshotPath = path.join(
-        this.screenshotDir,
-        `${timestamp}-${origin}-${date}-${cardTypeShort}-after.png`
-      );
-      await page.screenshot({ path: screenshotPath, fullPage: true });
-      this.logger.log(`📸 操作后截图: ${screenshotPath}`);
+      if (enableScreenshot) await this.safeScreenshot(page, path.join(this.screenshotDir, `${timestamp}-${origin}-${date}-${cardTypeShort}-after.png`), '操作后截图');
 
       // 点击查询按钮
       this.logger.log(`🔍 开始点击查询按钮`);
       const queryClicked = await this.clickSearchButton(page);
       if (!queryClicked) {
         this.logger.warn('⚠️ 查询按钮点击失败，跳过');
-        // 截图记录失败状态
-        const failPath = path.join(
-          this.screenshotDir,
-          `${timestamp}-${origin}-${date}-${cardTypeShort}-query-fail.png`
-        );
-        await page.screenshot({ path: failPath, fullPage: true });
-        this.logger.log(`📸 查询按钮点击失败截图: ${failPath}`);
+        if (enableScreenshot) await this.safeScreenshot(page, path.join(this.screenshotDir, `${timestamp}-${origin}-${date}-${cardTypeShort}-query-fail.png`), '查询按钮点击失败截图');
         return flights;
       }
       this.logger.log(`✅ 查询按钮点击成功`);
@@ -414,12 +399,7 @@ export class CrawlerService {
       }
 
       // 截图查看查询后的结果页面
-      const resultPath = path.join(
-        this.screenshotDir,
-        `${timestamp}-${origin}-${date}-${cardTypeShort}-result.png`
-      );
-      await page.screenshot({ path: resultPath, fullPage: true });
-      this.logger.log(`📸 查询结果截图: ${resultPath}`);
+      if (enableScreenshot) await this.safeScreenshot(page, path.join(this.screenshotDir, `${timestamp}-${origin}-${date}-${cardTypeShort}-result.png`), '查询结果截图');
 
       // 从 API 响应提取数据
       if (apiResponses.length > 0) {
@@ -858,12 +838,7 @@ export class CrawlerService {
       }
 
       // 最终截图 - 显示提取数据的状态
-      const finalPath = path.join(
-        this.screenshotDir,
-        `${timestamp}-${origin}-${date}-${cardTypeShort}-final.png`
-      );
-      await page.screenshot({ path: finalPath, fullPage: true });
-      this.logger.log(`📸 最终状态截图: ${finalPath}`);
+      if (enableScreenshot) await this.safeScreenshot(page, path.join(this.screenshotDir, `${timestamp}-${origin}-${date}-${cardTypeShort}-final.png`), '最终状态截图');
 
       this.logger.log(`${flights.length > 0 ? '✅' : '⚠️'} ${date} 获取 ${flights.length} 条数据`);
     } catch (error) {
@@ -1607,9 +1582,8 @@ export class CrawlerService {
       // 记录开始时间，用于筛选本次调试的截图
       const startTime = Date.now();
 
-      // 调用爬虫逻辑，不保存到数据库
-      // 参数说明：origin, dates, headless=true, saveToDb=false
-      const { count, flights } = await this.crawlFlights(origin, [crawlDate], true, false);
+      // 调用爬虫逻辑，不保存到数据库，开启截图
+      const { count, flights } = await this.crawlFlights(origin, [crawlDate], true, false, true);
 
       // 收集本次调试生成的截图（只按时间戳过滤，避免中文文件名编码问题）
       const screenshots = fs.readdirSync(this.screenshotDir)
@@ -1661,25 +1635,70 @@ export class CrawlerService {
   }
 
   /**
+   * 强制停止当前运行的爬虫任务
+   * 释放并发锁，并将所有 running 状态的日志标记为 failed
+   */
+  async forceStop(): Promise<{ stopped: boolean; taskId: number | null; message: string }> {
+    const wasRunning = this.isCrawlerRunning;
+    const taskId = this.runningTaskId;
+
+    // 设置停止信号，后台任务会在下一个检查点退出
+    this.stopRequested = true;
+
+    // 强制释放锁
+    this.isCrawlerRunning = false;
+    this.runningTaskId = null;
+
+    // 关闭旧版单浏览器（如果有）
+    if (this.browser) {
+      try {
+        await this.browser.close();
+      } catch (e) {
+        this.logger.warn('强制停止时关闭浏览器失败', e);
+      }
+      this.browser = null;
+    }
+
+    // 将所有 running 状态的父任务日志标记为 failed
+    await this.crawlerLogRepository
+      .createQueryBuilder()
+      .update()
+      .set({
+        status: CrawlerTaskStatus.FAILED,
+        errorMessage: '任务被手动强制停止',
+        endTime: new Date(),
+      })
+      .where('status = :status AND parentId IS NULL', { status: CrawlerTaskStatus.RUNNING })
+      .execute();
+
+    const message = wasRunning
+      ? `已强制停止任务（ID: ${taskId}），锁已释放`
+      : '当前没有运行中的任务，锁已重置';
+
+    this.logger.warn(`⛔ ${message}`);
+    return { stopped: wasRunning, taskId, message };
+  }
+
+  /**
    * 创建执行日志
    */
   private async createCrawlerLog(
     taskType: CrawlerTaskType,
     days?: number,
+    parentId?: number,
+    status: CrawlerTaskStatus = CrawlerTaskStatus.RUNNING,
+    details?: string,
   ): Promise<CrawlerLog> {
-    this.logger.log(`📝 创建执行日志: taskType=${taskType}, days=${days}`);
-
     const log = this.crawlerLogRepository.create({
       taskType,
-      status: CrawlerTaskStatus.RUNNING,
+      status,
       days,
-      startTime: new Date(),
+      parentId: parentId ?? null,
+      startTime: status === CrawlerTaskStatus.RUNNING ? new Date() : undefined,
+      details: details ?? undefined,
     });
 
-    const savedLog = await this.crawlerLogRepository.save(log);
-    this.logger.log(`✅ 日志已保存: id=${savedLog.id}`);
-
-    return savedLog;
+    return this.crawlerLogRepository.save(log) as Promise<CrawlerLog>;
   }
 
   /**
@@ -1731,77 +1750,181 @@ export class CrawlerService {
 
   /**
    * 初始化逻辑1：发现所有机场
-   * 以北京、上海、深圳为起点，爬取航班数据并自动发现所有可达的机场
-   * 注意：发现阶段不会清理机场数据（只追加新机场），但会清理临时航班数据
+   * 优化版：共享单个浏览器实例，信号量控制最大并发 page 数（3个）
+   * 所有（机场×日期）任务并发执行，显著提升效率
+   * 支持 planOnly 模式：仅返回执行计划，不实际爬取
    */
-  async initializeDiscoverAirports(days: number = 1): Promise<{ success: boolean; airportCount: number; flightCount: number }> {
-    this.logger.log(`🔍 【初始化阶段1】开始发现机场（爬取未来 ${days} 天）...`);
+  async initializeDiscoverAirports(days: number = 1, planOnly = false): Promise<{
+    success: boolean;
+    taskId?: number;
+    airportCount: number;
+    flightCount: number;
+    executionPlan?: {
+      totalDays: number;
+      totalTasks: number;
+      dateRange: string[];
+      estimatedTime: string;
+      seedAirports: string[];
+      taskList: Array<{
+        taskId: number;
+        date: string;
+        airports: number;
+        airportNames: string[];
+        estimatedTaskTime: string;
+        crawlerInfo: { description: string; expectedFlights: number; maxConcurrency: number };
+      }>;
+    };
+  }> {
+    this.logger.log(`🔍 【初始化阶段1】${planOnly ? '生成执行计划' : '开始发现机场'}（爬取未来 ${days} 天）...`);
 
-    // 检查是否有其他爬虫任务正在运行（并发锁）
-    if (this.isCrawlerRunning) {
-      this.logger.warn(`⚠️ 爬虫已在运行中（任务 ID: ${this.runningTaskId}），新任务被拒绝`);
-      return {
-        success: false,
-        airportCount: 0,
-        flightCount: 0,
-      };
+    const seedAirports = ['北京首都', '北京大兴', '上海浦东', '上海虹桥', '深圳'];
+
+    // 生成日期范围（从明天开始）
+    const dates: string[] = [];
+    for (let i = 1; i <= days; i++) {
+      const date = new Date();
+      date.setDate(date.getDate() + i);
+      dates.push(date.toISOString().split('T')[0]);
     }
 
-    // 创建执行日志
-    const log = await this.createCrawlerLog(CrawlerTaskType.DISCOVER_AIRPORTS, days);
+    // 生成执行计划
+    const totalTasks = seedAirports.length * dates.length;
+    const estimatedTime = this.calculateEstimatedTime(dates.length, seedAirports.length);
+    const taskList = dates.map((date, idx) => ({
+      taskId: idx + 1,
+      date,
+      airports: seedAirports.length,
+      airportNames: seedAirports,
+      estimatedTaskTime: this.calculateEstimatedTime(1, seedAirports.length),
+      crawlerInfo: {
+        description: `爬取 ${date} 日期的 ${seedAirports.length} 个种子机场（权益卡：666 + 2666）`,
+        expectedFlights: Math.ceil(seedAirports.length * 15),
+        maxConcurrency: 3,
+      },
+    }));
 
-    // 获取并发锁
+    const executionPlan = {
+      totalDays: dates.length,
+      totalTasks,
+      dateRange: dates,
+      estimatedTime,
+      seedAirports,
+      taskList,
+    };
+
+    // planOnly 模式：直接返回计划
+    if (planOnly) {
+      return { success: true, airportCount: 0, flightCount: 0, executionPlan };
+    }
+
+    // 检查并发锁
+    if (this.isCrawlerRunning) {
+      this.logger.warn(`⚠️ 爬虫已在运行中（任务 ID: ${this.runningTaskId}），新任务被拒绝`);
+      return { success: false, airportCount: 0, flightCount: 0 };
+    }
+
+    const log = await this.createCrawlerLog(CrawlerTaskType.DISCOVER_AIRPORTS, days);
+    // 立即写入 dateRange，执行中即可显示
+    await this.updateCrawlerLog(log.id, {
+      details: JSON.stringify({ dateRange: dates, seedAirports }),
+    });
+    this.stopRequested = false;
     this.isCrawlerRunning = true;
     this.runningTaskId = log.id;
 
-    try {
-      // 种子机场：用于发现其他机场
-      // 使用精准的机场名，确保同城多机场都能被爬取
-      const seedAirports = [
-        '北京首都',
-        '北京大兴',
-        '上海浦东',
-        '上海虹桥',
-        '深圳',
-      ];
+    // 异步模式：立即返回 taskId，后台执行
+    this.logger.log(`⏳ 异步模式：立即返回任务 ID ${log.id}，后台执行中...`);
+    setImmediate(() => {
+      this.executeDiscoverAirportsBackground(log.id, days, seedAirports, dates, executionPlan).catch(error => {
+        this.logger.error('发现机场后台执行异常', error);
+      });
+    });
 
-      // 生成日期范围（从明天开始）
-      const dates: string[] = [];
-      for (let i = 1; i <= days; i++) {
-        const date = new Date();
-        date.setDate(date.getDate() + i);
-        dates.push(date.toISOString().split('T')[0]);
+    return { success: true, taskId: log.id, airportCount: 0, flightCount: 0, executionPlan };
+  }
+
+  /**
+   * 后台执行发现机场任务
+   */
+  private async executeDiscoverAirportsBackground(
+    logId: number,
+    days: number,
+    seedAirports: string[],
+    dates: string[],
+    executionPlan: any,
+  ): Promise<void> {
+    // 独立浏览器实例（不使用 this.browser，避免与其他任务冲突）
+    let browser: puppeteer.Browser | null = null;
+
+    try {
+      // 生成所有（机场, 日期）任务组合（seedAirports/dates 已在上方生成）
+      const tasks: Array<{ airport: string; date: string }> = [];
+      for (const airport of seedAirports) {
+        for (const date of dates) {
+          tasks.push({ airport, date });
+        }
       }
 
-      // 采用"爬取完成后一次性替换"的策略
-      // 先爬取所有数据，然后一次性删除旧数据并保存新数据
-      // 这样可以最小化数据空白期，同时确保新数据完全覆盖旧数据
-      this.logger.log('📝 采用智能替换模式：爬取完成后一次性替换旧数据...');
+      this.logger.log(`🚀 共 ${tasks.length} 个任务（${seedAirports.length} 机场 × ${dates.length} 天），最大并发 3`);
 
-      // 并行爬取所有种子机场（提效）
-      this.logger.log(`🚀 并行爬取 ${seedAirports.length} 个种子机场...`);
-      const seedAirportResults: Record<string, number> = {};
+      // 启动共享浏览器
+      browser = await puppeteer.launch({
+        headless: true,
+        args: ['--no-sandbox', '--disable-setuid-sandbox', '--disable-dev-shm-usage'],
+      });
+      this.logger.log('🌐 共享浏览器已启动');
 
-      const crawlPromises = seedAirports.map(airport =>
-        this.crawlFlights(airport, dates, true, false)
-          .then(({ flights }) => {
-            this.logger.log(`✅ ${airport} 发现 ${flights.length} 条航班`);
-            seedAirportResults[airport] = flights.length;
-            return flights;
-          })
-          .catch(error => {
-            this.logger.error(`❌ ${airport} 爬取失败`, error);
-            seedAirportResults[airport] = 0;
-            return [];
-          })
-      );
+      // 信号量：最多 3 个 page 同时运行
+      const MAX_CONCURRENT = 3;
+      let running = 0;
+      let taskIndex = 0;
+      const allFlights: Partial<Flight>[] = [];
+      const taskResults: Record<string, number> = {};
 
-      const flightsArrays = await Promise.all(crawlPromises);
-      const allFlights = flightsArrays.flat();
+      await new Promise<void>((resolve, reject) => {
+        const runNext = () => {
+          // 收到停止信号：等当前运行完成后退出
+          if (this.stopRequested && running === 0) {
+            this.logger.warn(`⛔ [发现机场] 收到停止信号，已退出`);
+            resolve();
+            return;
+          }
+          // 所有任务完成
+          if (taskIndex >= tasks.length && running === 0) {
+            resolve();
+            return;
+          }
+          // 填满并发槽
+          while (!this.stopRequested && running < MAX_CONCURRENT && taskIndex < tasks.length) {
+            const { airport, date } = tasks[taskIndex++];
+            running++;
 
-      // 爬取完成后，删除旧数据并保存新数据（一次性操作，最小化空白期）
+            this.crawlSinglePageWithBrowser(browser!, airport, date)
+              .then(flights => {
+                const key = `${airport}@${date}`;
+                taskResults[key] = flights.length;
+                allFlights.push(...flights);
+                this.logger.log(`  ✅ ${airport} / ${date}: ${flights.length} 条`);
+              })
+              .catch(err => {
+                const key = `${airport}@${date}`;
+                taskResults[key] = 0;
+                this.logger.warn(`  ⚠️ ${airport} / ${date}: 失败 - ${err.message}`);
+              })
+              .finally(() => {
+                running--;
+                runNext();
+              });
+          }
+        };
+        runNext();
+      });
+
+      this.logger.log(`📊 全部任务完成，共爬取 ${allFlights.length} 条航班`);
+
+      // 一次性替换数据
       if (allFlights.length > 0) {
-        this.logger.log(`🔄 开始替换数据：删除旧数据并保存 ${allFlights.length} 条新数据...`);
+        this.logger.log(`🔄 替换数据：删除旧数据并保存 ${allFlights.length} 条新数据...`);
         const deletedCount = await this.flightService.deleteDiscoveryFlights(dates);
         this.logger.log(`🗑️ 已删除 ${deletedCount} 条旧数据`);
         await this.flightService.saveFlights(allFlights);
@@ -1809,9 +1932,6 @@ export class CrawlerService {
       }
 
       // 从航班数据中自动发现机场
-      this.logger.log(`📊 分析航班数据，发现机场...`);
-
-      // 只有爬取到航班数据才能发现机场
       if (allFlights.length > 0) {
         await this.flightService.discoverAirportsFromFlights(allFlights);
       } else {
@@ -1825,40 +1945,46 @@ export class CrawlerService {
       this.logger.log(`📋 机场列表: ${airports.join(', ')}`);
       this.logger.log(`📊 本次爬取航班数: ${allFlights.length} 条`);
 
-      // 完成日志记录
-      await this.completeCrawlerLog(log.id, true, {
+      await this.completeCrawlerLog(logId, true, {
         airportCount: airports.length,
         flightCount: allFlights.length,
         details: {
           seedAirports,
-          seedAirportResults,
+          taskResults,
           discoveredAirports: airports,
           dateRange: dates,
         },
       });
-
-      return {
-        success: true,
-        airportCount: airports.length,
-        flightCount: allFlights.length,
-      };
     } catch (error) {
       this.logger.error('❌ 【初始化阶段1】失败', error);
-
-      // 记录失败日志
-      await this.completeCrawlerLog(log.id, false, {
+      await this.completeCrawlerLog(logId, false, {
         airportCount: 0,
         flightCount: 0,
-        errorMessage: error.message || '未知错误',
+        errorMessage: error instanceof Error ? error.message : '未知错误',
       });
-
-      return { success: false, airportCount: 0, flightCount: 0 };
     } finally {
+      // 关闭独立浏览器
+      if (browser) {
+        try { await browser.close(); } catch (e) { /* ignore */ }
+      }
       // 释放并发锁
       this.isCrawlerRunning = false;
       this.runningTaskId = null;
       this.logger.log('🔓 爬虫锁已释放');
     }
+  }
+
+  /**
+   * 用外部传入的浏览器实例爬取单个（机场, 日期）组合
+   * 直接委托给 crawlFlightsByDate，传入 externalBrowser 参数
+   */
+  private async crawlSinglePageWithBrowser(
+    browser: puppeteer.Browser,
+    origin: string,
+    date: string,
+  ): Promise<Partial<Flight>[]> {
+    const cardTypes = ['666权益卡航班', '2666权益卡航班'];
+    return this.crawlFlightsByDate(origin, date, cardTypes, browser);
   }
 
   /**
@@ -1986,8 +2112,13 @@ export class CrawlerService {
 
     // 创建主日志记录（用于跟踪整个执行过程）
     const mainLog = await this.createCrawlerLog(CrawlerTaskType.REFRESH_FLIGHTS, dates.length);
+    // 立即写入 dateRange，执行中即可显示
+    await this.updateCrawlerLog(mainLog.id, {
+      details: JSON.stringify({ dateRange: dates, totalAirports: airports.length }),
+    });
 
     // 获取并发锁
+    this.stopRequested = false;
     this.isCrawlerRunning = true;
     this.runningTaskId = mainLog.id;
 
@@ -2016,23 +2147,24 @@ export class CrawlerService {
       const taskResults: Array<{ taskId: number; date: string; success: boolean; count: number }> = [];
       let totalCount = 0;
 
+      this.logger.log(`📋 [父任务 #${mainLog.id}] 开始执行：${dates.length} 天 × ${airports.length} 个机场`);
+
       for (let i = 0; i < dates.length; i += MAX_CONCURRENT_TASKS) {
         const batch = dates.slice(i, i + MAX_CONCURRENT_TASKS);
         const batchIndex = Math.floor(i / MAX_CONCURRENT_TASKS) + 1;
         const totalBatches = Math.ceil(dates.length / MAX_CONCURRENT_TASKS);
 
-        this.logger.log(`📦 批次 ${batchIndex}/${totalBatches}：执行 ${batch.length} 个日期任务 (${batch.join(', ')})`);
+        this.logger.log(`├─ [批次 ${batchIndex}/${totalBatches}] ${batch.join(', ')}`);
 
         const batchPromises = batch.map((date, idx) =>
-          this.executeDailyTask(date, airports, i + idx + 1)
+          this.executeDailyTask(date, airports, i + idx + 1, mainLog.id)
             .then(result => {
-              this.logger.log(`✅ 任务 ${result.taskId}（${date}）完成，爬取 ${result.count} 条航班`);
               taskResults.push(result);
               totalCount += result.count;
               return result;
             })
             .catch(error => {
-              this.logger.error(`❌ 任务 ${i + idx + 1}（${date}）失败`, error);
+              this.logger.error(`  ├─ [子任务 ${i + idx + 1}] ❌ ${date} 失败`, error);
               const failedResult = { taskId: i + idx + 1, date, success: false, count: 0 };
               taskResults.push(failedResult);
               return failedResult;
@@ -2048,7 +2180,7 @@ export class CrawlerService {
       const successCount = taskResults.filter(t => t.success).length;
       const failedCount = taskResults.filter(t => !t.success).length;
 
-      this.logger.log(`🎉 所有任务完成！成功 ${successCount} 个，失败 ${failedCount} 个，总计 ${totalCount} 条航班`);
+      this.logger.log(`└─ [父任务 #${mainLog.id}] ✅ 全部完成：${successCount} 成功 / ${failedCount} 失败，共 ${totalCount} 条航班`);
 
       // 更新主日志
       await this.completeCrawlerLog(mainLog.id, failedCount === 0, {
@@ -2087,70 +2219,154 @@ export class CrawlerService {
     date: string,
     airports: string[],
     taskId: number,
+    parentLogId?: number,
+    existingLogId?: number,
   ): Promise<{ taskId: number; date: string; success: boolean; count: number }> {
-    this.logger.log(`🚀 启动任务 ${taskId}（日期: ${date}）...`);
+    this.logger.log(`  ├─ [子任务 ${taskId}] 启动 ${date}（${airports.length} 个机场）`);
+
+    let logId: number;
+    if (existingLogId) {
+      // 使用预创建的日志，将状态从 PENDING 改为 RUNNING
+      logId = existingLogId;
+      await this.updateCrawlerLog(logId, {
+        status: CrawlerTaskStatus.RUNNING,
+        startTime: new Date(),
+      });
+    } else {
+      const log = await this.createCrawlerLog(CrawlerTaskType.REFRESH_FLIGHTS_DAILY, 1, parentLogId);
+      logId = log.id;
+      // 立即写入具体日期，执行中即可显示
+      await this.updateCrawlerLog(logId, {
+        details: JSON.stringify({ dateRange: [date], totalAirports: airports.length }),
+      });
+    }
+    let browser: puppeteer.Browser | null = null;
+
+    const launchBrowser = () => puppeteer.launch({
+      headless: true,
+      args: ['--no-sandbox', '--disable-setuid-sandbox', '--disable-dev-shm-usage'],
+      protocolTimeout: 60000,
+    });
 
     try {
-      // 创建任务日志
-      const log = await this.createCrawlerLog(CrawlerTaskType.REFRESH_FLIGHTS, 1);
+      // 每个子任务独立浏览器，由父任务控制并发数（MAX_CONCURRENT_DATES）
+      browser = await launchBrowser();
 
-      // 并行爬取所有机场（该日期），按批次执行
-      const CONCURRENT_LIMIT = 5; // 每批最多爬取 5 个机场
-      let totalCount = 0;
-      const allCollectedFlights: Partial<Flight>[] = [];
+      // 信号量：最多 3 个 page 同时运行（避免资源耗尽）
+      const MAX_CONCURRENT = 3;
+      let running = 0;
+      let airportIndex = 0;
+      let totalSaved = 0;
+      let totalDeleted = 0;
+      const failedAirports: string[] = [];
 
-      this.logger.log(`📋 任务 ${taskId}: 准备爬取 ${airports.length} 个机场（${date}）...`);
+      // 浏览器崩溃检测：Connection closed 或 Target.createTarget timed out
+      const isBrowserCrashError = (msg: string) =>
+        msg.includes('Connection closed') || msg.includes('Target.createTarget timed out');
 
-      // 分批执行
-      for (let i = 0; i < airports.length; i += CONCURRENT_LIMIT) {
-        const batch = airports.slice(i, i + CONCURRENT_LIMIT);
-        const batchNum = Math.floor(i / CONCURRENT_LIMIT) + 1;
-        const totalBatches = Math.ceil(airports.length / CONCURRENT_LIMIT);
+      // 重建浏览器（最多重试 2 次）
+      let browserRestartCount = 0;
+      const MAX_BROWSER_RESTARTS = 2;
+      const restartBrowser = async (): Promise<boolean> => {
+        if (browserRestartCount >= MAX_BROWSER_RESTARTS) {
+          this.logger.error(`  ├─ [子任务 ${taskId}] 浏览器已重建 ${browserRestartCount} 次，放弃`);
+          return false;
+        }
+        browserRestartCount++;
+        this.logger.warn(`  ├─ [子任务 ${taskId}] 🔄 浏览器崩溃，重建中（第 ${browserRestartCount} 次）...`);
+        try { await browser?.close(); } catch { /* ignore */ }
+        await new Promise(r => setTimeout(r, 2000)); // 等 2 秒再重建
+        browser = await launchBrowser();
+        this.logger.log(`  ├─ [子任务 ${taskId}] ✅ 浏览器重建成功`);
+        return true;
+      };
 
-        this.logger.log(`  └─ 机场批次 ${batchNum}/${totalBatches}（任务 ${taskId}）: ${batch.join(', ')}`);
+      // 待重试队列（浏览器崩溃后放入此队列）
+      const retryQueue: string[] = [];
 
-        const batchPromises = batch.map(airport =>
-          this.crawlFlights(airport, [date], true, false) // 不直接保存，先收集
-            .then(({ count, flights }) => {
-              this.logger.log(`  ✅ ${airport}（任务 ${taskId}）: 爬取 ${count} 条`);
-              allCollectedFlights.push(...flights);
-              return count;
-            })
-            .catch(error => {
-              this.logger.error(`  ❌ ${airport}（任务 ${taskId}）失败`, error);
-              return 0;
-            })
-        );
+      await new Promise<void>((resolve, reject) => {
+        const runNext = () => {
+          if (this.stopRequested && running === 0) {
+            this.logger.warn(`⛔ [子任务 ${taskId}/${date}] 收到停止信号，已退出`);
+            resolve();
+            return;
+          }
+          // 合并重试队列和剩余队列
+          const pendingAirports = [...retryQueue.splice(0), ...airports.slice(airportIndex)];
+          if (pendingAirports.length === 0 && airportIndex >= airports.length && running === 0) {
+            resolve();
+            return;
+          }
+          if (airportIndex >= airports.length && retryQueue.length === 0 && running === 0) {
+            resolve();
+            return;
+          }
+          while (!this.stopRequested && running < MAX_CONCURRENT && (airportIndex < airports.length || retryQueue.length > 0)) {
+            const airport = retryQueue.length > 0 ? retryQueue.shift()! : airports[airportIndex++];
+            running++;
 
-        const batchCounts = await Promise.all(batchPromises);
-        totalCount += batchCounts.reduce((sum, count) => sum + count, 0);
-      }
-
-      // 数据隔离：删除该日期的旧数据
-      const deletedCount = await this.flightService.deleteFlightsByDate(date);
-      this.logger.log(`  🗑️ 任务 ${taskId}: 已删除 ${deletedCount} 条旧数据（${date}）`);
-
-      // 保存新数据
-      if (allCollectedFlights.length > 0) {
-        await this.flightService.saveFlights(allCollectedFlights);
-        this.logger.log(`  ✅ 任务 ${taskId}: 已保存 ${allCollectedFlights.length} 条新数据（${date}）`);
-      }
-
-      // 完成日志记录
-      await this.completeCrawlerLog(log.id, true, {
-        airportCount: airports.length,
-        flightCount: totalCount,
-        details: {
-          date,
-          taskId,
-          airports,
-        },
+            this.crawlSinglePageWithBrowser(browser!, airport, date)
+              .then(async flights => {
+                // 爬取成功：删旧存新
+                const deleted = await this.flightService.deleteFlightsByOriginAndDate(airport, date);
+                if (flights.length > 0) {
+                  await this.flightService.saveFlights(flights);
+                }
+                this.logger.log(`  │  │  ✅ ${airport}: 删 ${deleted} 旧，存 ${flights.length} 新`);
+                totalSaved += flights.length;
+                totalDeleted += deleted;
+              })
+              .catch(async err => {
+                if (isBrowserCrashError(err.message)) {
+                  // 浏览器崩溃：尝试重建，并将该机场放入重试队列
+                  const restarted = await restartBrowser();
+                  if (restarted) {
+                    this.logger.warn(`  │  │  🔁 ${airport}: 浏览器崩溃，加入重试队列`);
+                    retryQueue.push(airport);
+                  } else {
+                    this.logger.warn(`  │  │  ⚠️ ${airport}: 浏览器重建失败，放弃`);
+                    failedAirports.push(airport);
+                  }
+                } else {
+                  // 其他错误：保留旧数据不动
+                  this.logger.warn(`  │  │  ⚠️ ${airport}: 失败，保留旧数据（${err.message}）`);
+                  failedAirports.push(airport);
+                }
+              })
+              .finally(() => {
+                running--;
+                runNext();
+              });
+          }
+        };
+        runNext();
       });
 
-      return { taskId, date, success: true, count: totalCount };
+      const successAirports = airports.length - failedAirports.length;
+      this.logger.log(`  ├─ [子任务 ${taskId}] ✅ ${date} 完成：${successAirports}/${airports.length} 机场成功，删 ${totalDeleted} 旧，存 ${totalSaved} 新${failedAirports.length > 0 ? `，失败保留：${failedAirports.join(', ')}` : ''}`);
+
+      await this.completeCrawlerLog(logId, true, {
+        airportCount: airports.length,
+        flightCount: totalSaved,
+        details: { date, taskId, airports, failedAirports, totalDeleted, totalSaved },
+        errorMessage: failedAirports.length > 0
+          ? `${failedAirports.length} 个机场爬取失败（旧数据已保留）：${failedAirports.join(', ')}`
+          : undefined,
+      });
+
+      return { taskId, date, success: true, count: totalSaved };
     } catch (error) {
-      this.logger.error(`❌ 任务 ${taskId}（${date}）异常`, error);
+      this.logger.error(`  ├─ [子任务 ${taskId}] ❌ ${date} 异常`, error);
+      await this.completeCrawlerLog(logId, false, {
+        airportCount: airports.length,
+        flightCount: 0,
+        errorMessage: error instanceof Error ? error.message : '未知错误',
+      });
       return { taskId, date, success: false, count: 0 };
+    } finally {
+      if (browser) {
+        try { await browser.close(); } catch (e) { /* ignore */ }
+      }
     }
   }
 
@@ -2164,38 +2380,82 @@ export class CrawlerService {
     airports: string[],
     executionPlan: any,
   ): Promise<void> {
-    this.logger.log(`🔄 后台执行开始：主日志 ID ${mainLogId}，${dates.length} 个日期`);
+    this.logger.log(`📋 [父任务 #${mainLogId}] 后台开始执行：${dates.length} 天 × ${airports.length} 个机场`);
 
     try {
-      // 执行所有日期任务（分批并行）
-      const MAX_CONCURRENT_TASKS = 10; // 最多同时执行 10 个日期任务
+      // 预创建所有子任务日志记录（状态为 PENDING），让前端能立即看到完整任务列表
+      const pendingLogIds: number[] = [];
+      for (let i = 0; i < dates.length; i++) {
+        const pendingLog = await this.createCrawlerLog(
+          CrawlerTaskType.REFRESH_FLIGHTS_DAILY,
+          1,
+          mainLogId,
+          CrawlerTaskStatus.PENDING,
+          JSON.stringify({ dateRange: [dates[i]], totalAirports: airports.length }),
+        );
+        pendingLogIds.push(pendingLog.id);
+      }
+      this.logger.log(`📝 [父任务 #${mainLogId}] 预创建 ${dates.length} 个子任务记录`);
+
+      // 日期子任务并行执行，每个子任务独立浏览器，最多 MAX_CONCURRENT_DATES 个同时运行
+      const MAX_CONCURRENT_DATES = 3;
       const taskResults: Array<{ taskId: number; date: string; success: boolean; count: number }> = [];
       let totalCount = 0;
+      let dateIndex = 0;
+      let running = 0;
 
-      for (let i = 0; i < dates.length; i += MAX_CONCURRENT_TASKS) {
-        const batch = dates.slice(i, i + MAX_CONCURRENT_TASKS);
-        const batchIndex = Math.floor(i / MAX_CONCURRENT_TASKS) + 1;
-        const totalBatches = Math.ceil(dates.length / MAX_CONCURRENT_TASKS);
+      this.logger.log(`🚀 [父任务 #${mainLogId}] 最多 ${MAX_CONCURRENT_DATES} 个日期并行，每日 3 个机场并发`);
 
-        this.logger.log(`📦 后台批次 ${batchIndex}/${totalBatches}：执行 ${batch.length} 个日期任务 (${batch.join(', ')})`);
+      await new Promise<void>((resolve, reject) => {
+        const runNext = () => {
+          // 收到停止信号：等待当前运行的子任务完成后退出，不再启动新任务
+          if (this.stopRequested && running === 0) {
+            this.logger.warn(`⛔ [父任务 #${mainLogId}] 收到停止信号，已退出`);
+            resolve();
+            return;
+          }
+          if (dateIndex >= dates.length && running === 0) {
+            resolve();
+            return;
+          }
+          while (!this.stopRequested && running < MAX_CONCURRENT_DATES && dateIndex < dates.length) {
+            const date = dates[dateIndex];
+            const taskId = dateIndex + 1;
+            const existingLogId = pendingLogIds[dateIndex];
+            dateIndex++;
+            running++;
 
-        const batchPromises = batch.map((date, idx) =>
-          this.executeDailyTask(date, airports, i + idx + 1)
-            .then(result => {
-              this.logger.log(`✅ 后台任务 ${result.taskId}（${date}）完成，爬取 ${result.count} 条航班`);
-              taskResults.push(result);
-              totalCount += result.count;
-              return result;
-            })
-            .catch(error => {
-              this.logger.error(`❌ 后台任务 ${i + idx + 1}（${date}）失败`, error);
-              const failedResult = { taskId: i + idx + 1, date, success: false, count: 0 };
-              taskResults.push(failedResult);
-              return failedResult;
-            })
-        );
+            this.logger.log(`├─ [子任务 ${taskId}/${dates.length}] 开始 ${date}`);
 
-        await Promise.all(batchPromises);
+            this.executeDailyTask(date, airports, taskId, mainLogId, existingLogId)
+              .then(result => {
+                taskResults.push(result);
+                totalCount += result.count;
+              })
+              .catch(error => {
+                this.logger.error(`  ├─ [子任务 ${taskId}] ❌ ${date} 失败`, error);
+                taskResults.push({ taskId, date, success: false, count: 0 });
+              })
+              .finally(() => {
+                running--;
+                runNext();
+              });
+          }
+        };
+        runNext();
+      });
+
+      // 将剩余 PENDING 子任务（未执行就停止的）标记为 FAILED
+      if (this.stopRequested && dateIndex < dates.length) {
+        const cancelledIds = pendingLogIds.slice(dateIndex);
+        for (const cid of cancelledIds) {
+          await this.crawlerLogRepository.update(cid, {
+            status: CrawlerTaskStatus.FAILED,
+            errorMessage: '任务被停止，未执行',
+            endTime: new Date(),
+          });
+        }
+        this.logger.warn(`⛔ [父任务 #${mainLogId}] 取消 ${cancelledIds.length} 个未执行子任务`);
       }
 
       // 排序结果（按任务 ID）
@@ -2204,7 +2464,7 @@ export class CrawlerService {
       const successCount = taskResults.filter(t => t.success).length;
       const failedCount = taskResults.filter(t => !t.success).length;
 
-      this.logger.log(`🎉 后台执行完成！成功 ${successCount} 个，失败 ${failedCount} 个，总计 ${totalCount} 条航班`);
+      this.logger.log(`└─ [父任务 #${mainLogId}] ✅ 后台完成：${successCount} 成功 / ${failedCount} 失败，共 ${totalCount} 条航班`);
 
       // 更新主日志
       await this.completeCrawlerLog(mainLogId, failedCount === 0, {
@@ -2529,6 +2789,9 @@ export class CrawlerService {
   ): Promise<{ logs: CrawlerLog[]; total: number; page: number; pageSize: number }> {
     const queryBuilder = this.crawlerLogRepository.createQueryBuilder('log');
 
+    // 只返回父任务（parentId 为 null）
+    queryBuilder.andWhere('log.parentId IS NULL');
+
     // 筛选条件
     if (taskType) {
       queryBuilder.andWhere('log.taskType = :taskType', { taskType });
@@ -2551,6 +2814,16 @@ export class CrawlerService {
       page,
       pageSize,
     };
+  }
+
+  /**
+   * 查询某父任务的所有子任务日志
+   */
+  async getSubLogs(parentId: number): Promise<CrawlerLog[]> {
+    return this.crawlerLogRepository.find({
+      where: { parentId },
+      order: { createdAt: 'ASC' },
+    });
   }
 
   /**

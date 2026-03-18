@@ -32,7 +32,15 @@ export class CrawlerController {
   @Post('initialize/discover')
   @HttpCode(HttpStatus.OK)
   async initializeDiscover(@Body() dto: InitializeDiscoverDto) {
-    const result = await this.crawlerService.initializeDiscoverAirports(dto.days);
+    const result = await this.crawlerService.initializeDiscoverAirports(dto.days, dto.planOnly);
+
+    if (dto.planOnly) {
+      return {
+        message: `执行计划已生成：${result.executionPlan?.totalTasks} 个任务，预计 ${result.executionPlan?.estimatedTime}`,
+        ...result,
+      };
+    }
+
     return {
       message: result.success
         ? `机场发现完成！发现 ${result.airportCount} 个机场，${result.flightCount} 条航班`
@@ -98,6 +106,16 @@ export class CrawlerController {
 
 
   /**
+   * 强制停止当前运行的爬虫任务（释放锁）
+   * POST /api/crawler/stop
+   */
+  @Post('stop')
+  @HttpCode(HttpStatus.OK)
+  async stopCrawler() {
+    return this.crawlerService.forceStop();
+  }
+
+  /**
    * 查询执行日志
    * GET /api/crawler/logs
    */
@@ -124,6 +142,16 @@ export class CrawlerController {
       return { message: '日志不存在' };
     }
     return log;
+  }
+
+  /**
+   * 获取某父任务的子任务日志列表
+   * GET /api/crawler/logs/:id/sub-tasks
+   */
+  @Get('logs/:id/sub-tasks')
+  @HttpCode(HttpStatus.OK)
+  async getSubLogs(@Param('id') id: string) {
+    return this.crawlerService.getSubLogs(parseInt(id, 10));
   }
 
   /**

@@ -8,11 +8,13 @@ import {
 
 export enum CrawlerTaskType {
   DISCOVER_AIRPORTS = 'discover_airports',
-  REFRESH_FLIGHTS = 'refresh_flights',
+  REFRESH_FLIGHTS = 'refresh_flights',         // 父任务：发现航班（整体）
+  REFRESH_FLIGHTS_DAILY = 'refresh_flights_daily', // 子任务：单日航班爬取
   FULL_INITIALIZE = 'full_initialize',
 }
 
 export enum CrawlerTaskStatus {
+  PENDING = 'pending',   // 等待执行（已预创建，尚未启动）
   RUNNING = 'running',
   SUCCESS = 'success',
   FAILED = 'failed',
@@ -36,6 +38,9 @@ export class CrawlerLog {
     length: 20,
   })
   status: CrawlerTaskStatus;
+
+  @Column({ type: 'int', nullable: true })
+  parentId: number | null; // 父任务 ID（子任务专用，父任务为 null）
 
   @Column({ type: 'int', nullable: true })
   days: number; // 爬取天数

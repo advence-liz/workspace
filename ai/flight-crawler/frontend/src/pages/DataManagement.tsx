@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import {
   Card,
   Form,
@@ -27,6 +27,7 @@ import {
   DeleteOutlined,
   ExclamationCircleOutlined,
   SyncOutlined,
+  ClockCircleOutlined,
 } from '@ant-design/icons';
 import dayjs from 'dayjs';
 import duration from 'dayjs/plugin/duration';
@@ -36,10 +37,13 @@ import {
   queryCrawlerLogs,
   getCrawlerLogDetail,
   getCrawlerLogStats,
+  getSubLogs,
+  stopCrawler,
   cleanOldLogs,
   cleanAllLogs,
   type CrawlerLog,
   type LogStats,
+  type DiscoverAirportsExecutionPlan,
 } from '@/api/flight';
 
 dayjs.extend(duration);
@@ -53,6 +57,7 @@ function DataManagement() {
   // 发现机场相关状态
   const [discoverLoading, setDiscoverLoading] = useState(false);
   const [discoverResult, setDiscoverResult] = useState<any>(null);
+  const [discoverPlan, setDiscoverPlan] = useState<DiscoverAirportsExecutionPlan | null>(null);
 
   const [refreshLoading, setRefreshLoading] = useState(false);
   const [refreshResult, setRefreshResult] = useState<{
@@ -62,6 +67,9 @@ function DataManagement() {
 
   // 执行计划相关状态
   const [executionPlan, setExecutionPlan] = useState<any>(null);
+
+  // 停止任务
+  const [stopLoading, setStopLoading] = useState(false);
 
   // 日志相关状态
   const [logs, setLogs] = useState<CrawlerLog[]>([]);
@@ -77,6 +85,8 @@ function DataManagement() {
   }>({});
   const [selectedLog, setSelectedLog] = useState<CrawlerLog | null>(null);
   const [logDetailVisible, setLogDetailVisible] = useState(false);
+  const [subLogs, setSubLogs] = useState<CrawlerLog[]>([]);
+  const [subLogsLoading, setSubLogsLoading] = useState(false);
   const [autoRefresh, setAutoRefresh] = useState(false);
   const [refreshInterval] = useState(5); // 默认 5 秒
   const autoRefreshTimerRef = useRef<ReturnType<typeof setInterval> | null>(null);
@@ -120,6 +130,20 @@ function DataManagement() {
       const detail = await getCrawlerLogDetail(log.id);
       setSelectedLog(detail);
       setLogDetailVisible(true);
+      setSubLogs([]);
+
+      // 如果是发现航班父任务，加载子任务列表
+      if (log.taskType === 'refresh_flights') {
+        setSubLogsLoading(true);
+        try {
+          const subs = await getSubLogs(log.id);
+          setSubLogs(subs);
+        } catch {
+          // 子任务加载失败不影响主详情展示
+        } finally {
+          setSubLogsLoading(false);
+        }
+      }
     } catch (error) {
       message.error('加载日志详情失败');
       console.error(error);
@@ -130,6 +154,8 @@ function DataManagement() {
   useEffect(() => {
     loadLogs();
     loadLogStats();
+    // 默认天数为 1，自动生成初始执行计划
+    handleDiscoverDaysChange(1);
   }, [logsFilter]);
 
   // 自动刷新逻辑
@@ -145,6 +171,10 @@ function DataManagement() {
       autoRefreshTimerRef.current = setInterval(() => {
         loadLogs(logsPagination.current, logsPagination.pageSize);
         loadLogStats();
+        // 如果详情弹窗打开且是发现航班父任务，同步刷新子任务列表
+        if (logDetailVisible && selectedLog?.taskType === 'refresh_flights') {
+          getSubLogs(selectedLog.id).then(subs => setSubLogs(subs)).catch(() => {});
+        }
       }, refreshInterval * 1000);
     }
 
@@ -155,9 +185,53 @@ function DataManagement() {
         autoRefreshTimerRef.current = null;
       }
     };
-  }, [autoRefresh, refreshInterval, logsPagination.current, logsPagination.pageSize]);
+  }, [autoRefresh, refreshInterval, logsPagination.current, logsPagination.pageSize, logDetailVisible, selectedLog]);
 
-  // 生成执行计划（监听日期变化）
+  // 停止当前运行中的任务
+  const handleStop = () => {
+    Modal.confirm({
+      title: '确认停止任务',
+      icon: <ExclamationCircleOutlined />,
+      content: '将强制停止当前运行中的爬虫任务，锁将被释放，任务状态标记为失败。确定继续？',
+      okText: '确认停止',
+      okType: 'danger',
+      cancelText: '取消',
+      onOk: async () => {
+        setStopLoading(true);
+        try {
+          const result = await stopCrawler();
+          if (result.stopped) {
+            message.success(`任务已停止（ID: ${result.taskId}）`);
+          } else {
+            message.info(result.message);
+          }
+          loadLogs(1, logsPagination.pageSize);
+          loadLogStats();
+        } catch (error: any) {
+          message.error(`停止失败: ${error.message || '未知错误'}`);
+        } finally {
+          setStopLoading(false);
+        }
+      },
+    });
+  };
+
+  // 天数变化时自动生成执行计划
+  const handleDiscoverDaysChange = async (days: number | null) => {
+    if (!days || days < 1 || days > 7) {
+      setDiscoverPlan(null);
+      return;
+    }
+    try {
+      const result = await initializeDiscoverAirports({ days, planOnly: true });
+      if (result.executionPlan) {
+        setDiscoverPlan(result.executionPlan);
+      }
+    } catch {
+      setDiscoverPlan(null);
+    }
+  };
+
   // 发现机场
   const handleDiscoverAirports = async (values: any) => {
     const { days } = values;
@@ -168,11 +242,12 @@ function DataManagement() {
 
     setDiscoverLoading(true);
     try {
-      const result = await initializeDiscoverAirports(days);
+      const result = await initializeDiscoverAirports({ days, planOnly: false });
       message.success(
         `发现机场完成！发现 ${result.airportCount} 个机场，爬取 ${result.flightCount} 条航班`
       );
       setDiscoverResult(result);
+      setDiscoverPlan(null);
       discoverForm.resetFields();
       // 刷新日志
       loadLogs(1, logsPagination.pageSize);
@@ -338,11 +413,13 @@ function DataManagement() {
   const taskTypeMap = {
     discover_airports: '发现机场',
     refresh_flights: '发现航班',
+    refresh_flights_daily: '单日爬取',
     full_initialize: '一键初始化',
   };
 
   // 状态映射
   const statusMap = {
+    pending: { text: '等待中', color: 'default' },
     running: { text: '执行中', color: 'processing' },
     success: { text: '成功', color: 'success' },
     failed: { text: '失败', color: 'error' },
@@ -369,6 +446,8 @@ function DataManagement() {
           icon = <ExclamationCircleOutlined />;
         } else if (status === 'running') {
           icon = <SyncOutlined spin />;
+        } else if (status === 'pending') {
+          icon = <ClockCircleOutlined />;
         }
         return (
           <Tag color={statusInfo?.color} icon={icon}>{statusInfo?.text || status}</Tag>
@@ -500,12 +579,7 @@ function DataManagement() {
             label="爬取天数"
             rules={[
               { required: true, message: '请输入爬取天数' },
-              {
-                type: 'number',
-                min: 1,
-                max: 7,
-                message: '请输入 1-7 之间的天数',
-              },
+              { type: 'number', min: 1, max: 7, message: '请输入 1-7 之间的天数' },
             ]}
             initialValue={1}
           >
@@ -514,8 +588,75 @@ function DataManagement() {
               max={7}
               placeholder="请输入 1-7 之间的天数"
               style={{ width: '100%' }}
+              onChange={handleDiscoverDaysChange}
             />
           </Form.Item>
+
+          {/* 执行计划预览 */}
+          {discoverPlan && (
+            <div style={{ marginBottom: 16 }}>
+              {/* 整体计划摘要 */}
+              <Card
+                size="small"
+                style={{ marginBottom: 12, background: '#f0f5ff' }}
+                title={
+                  <Space>
+                    <CheckCircleOutlined style={{ color: '#1890ff' }} />
+                    <Text strong>执行计划摘要</Text>
+                  </Space>
+                }
+              >
+                <Descriptions column={2} size="small">
+                  <Descriptions.Item label="总天数">{discoverPlan.totalDays} 天</Descriptions.Item>
+                  <Descriptions.Item label="总任务数">{discoverPlan.totalTasks} 个</Descriptions.Item>
+                  <Descriptions.Item label="种子机场数">{discoverPlan.seedAirports.length} 个</Descriptions.Item>
+                  <Descriptions.Item label="最大并发">3 个 page</Descriptions.Item>
+                  <Descriptions.Item label="预计耗时">{discoverPlan.estimatedTime}</Descriptions.Item>
+                  <Descriptions.Item label="日期范围">
+                    {discoverPlan.dateRange[0]} ~ {discoverPlan.dateRange[discoverPlan.dateRange.length - 1]}
+                  </Descriptions.Item>
+                </Descriptions>
+              </Card>
+
+              {/* 种子机场 */}
+              <Card
+                size="small"
+                style={{ marginBottom: 12, background: '#f6ffed' }}
+                title={<Text strong>🌍 种子机场（{discoverPlan.seedAirports.length} 个）</Text>}
+              >
+                <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px' }}>
+                  {discoverPlan.seedAirports.map((airport, idx) => (
+                    <Tag key={idx} color="green">{airport}</Tag>
+                  ))}
+                </div>
+              </Card>
+
+              {/* 每日任务 */}
+              <Card
+                size="small"
+                style={{ background: '#fffbe6' }}
+                title={<Text strong>📅 每日任务详情</Text>}
+              >
+                <Space direction="vertical" style={{ width: '100%' }}>
+                  {discoverPlan.taskList.map(task => (
+                    <Card
+                      key={task.taskId}
+                      size="small"
+                      style={{ background: '#fafafa' }}
+                      title={`任务 ${task.taskId}：${task.date}`}
+                    >
+                      <Descriptions column={1} size="small">
+                        <Descriptions.Item label="爬虫配置">{task.crawlerInfo.description}</Descriptions.Item>
+                        <Descriptions.Item label="预期航班数">{task.crawlerInfo.expectedFlights} 班</Descriptions.Item>
+                        <Descriptions.Item label="最大并发">{task.crawlerInfo.maxConcurrency} 个 page</Descriptions.Item>
+                        <Descriptions.Item label="预计耗时">{task.estimatedTaskTime}</Descriptions.Item>
+                      </Descriptions>
+                    </Card>
+                  ))}
+                </Space>
+              </Card>
+            </div>
+          )}
 
           <Form.Item>
             <Button
@@ -523,6 +664,7 @@ function DataManagement() {
               htmlType="submit"
               icon={<ReloadOutlined />}
               loading={discoverLoading}
+              disabled={!discoverPlan}
               block
             >
               开始发现机场
@@ -777,6 +919,17 @@ function DataManagement() {
                 value={logStats.runningCount}
                 valueStyle={{ fontSize: '24px', color: '#faad14' }}
               />
+              {logStats.runningCount > 0 && (
+                <Button
+                  danger
+                  size="small"
+                  loading={stopLoading}
+                  onClick={handleStop}
+                  style={{ marginTop: 8, width: '100%' }}
+                >
+                  停止任务
+                </Button>
+              )}
             </Card>
           </Col>
         </Row>
@@ -792,6 +945,17 @@ function DataManagement() {
         }
         extra={
           <Space>
+            {logStats && logStats.runningCount > 0 && (
+              <Button
+                danger
+                size="small"
+                loading={stopLoading}
+                icon={<ExclamationCircleOutlined />}
+                onClick={handleStop}
+              >
+                停止任务
+              </Button>
+            )}
             <Button
               type="text"
               size="small"
@@ -847,7 +1011,8 @@ function DataManagement() {
         open={logDetailVisible}
         onCancel={() => setLogDetailVisible(false)}
         footer={null}
-        width={700}
+        width={860}
+        styles={{ body: { maxHeight: '75vh', overflowY: 'auto' } }}
       >
         {selectedLog && (
           <Descriptions column={1} bordered size="small">
@@ -904,7 +1069,7 @@ function DataManagement() {
 
                     {/* 机场列表 */}
                     {(details.airports || details.airportNames) && (
-                      <Descriptions.Item label="机场列表" span={2}>
+                      <Descriptions.Item label="机场列表">
                         <div style={{ maxHeight: 200, overflow: 'auto' }}>
                           {(details.airports || details.airportNames).map((airport: string) => (
                             <Tag key={airport} style={{ marginBottom: 4 }}>
@@ -917,7 +1082,7 @@ function DataManagement() {
 
                     {/* 日期范围（仅 discover_airports 任务） */}
                     {details.dateRange && (
-                      <Descriptions.Item label="日期范围" span={2}>
+                      <Descriptions.Item label="日期范围">
                         {Array.isArray(details.dateRange)
                           ? details.dateRange.join(', ')
                           : details.dateRange}
@@ -926,7 +1091,7 @@ function DataManagement() {
 
                     {/* 种子机场（仅 discover_airports 任务） */}
                     {details.seedAirports && (
-                      <Descriptions.Item label="种子机场" span={2}>
+                      <Descriptions.Item label="种子机场">
                         {details.seedAirports.map((airport: string) => (
                           <Tag key={airport} color="blue" style={{ marginBottom: 4 }}>
                             {airport}
@@ -935,34 +1100,107 @@ function DataManagement() {
                       </Descriptions.Item>
                     )}
 
-                    {/* 执行计划（主任务日志） */}
-                    {details.executionPlan && (
-                      <Descriptions.Item label="执行计划" span={2}>
-                        <pre style={{ maxHeight: 300, overflow: 'auto', background: '#f5f5f5', padding: 8, borderRadius: 4, fontSize: 12 }}>
-                          {JSON.stringify(details.executionPlan, null, 2)}
-                        </pre>
+                    {/* 发现的机场列表 */}
+                    {details.discoveredAirports && details.discoveredAirports.length > 0 && (
+                      <Descriptions.Item label={`发现机场（${details.discoveredAirports.length} 个）`}>
+                        <div style={{ maxHeight: 120, overflow: 'auto', display: 'flex', flexWrap: 'wrap', gap: 4 }}>
+                          {details.discoveredAirports.map((airport: string) => (
+                            <Tag key={airport} color="green" style={{ marginBottom: 4 }}>{airport}</Tag>
+                          ))}
+                        </div>
                       </Descriptions.Item>
                     )}
 
-                    {/* 任务结果 */}
+                    {/* 各任务爬取结果（结构化展示，兼容对象格式和数组格式） */}
                     {details.taskResults && (
-                      <Descriptions.Item label="任务结果" span={2}>
-                        <pre style={{ maxHeight: 300, overflow: 'auto', background: '#f5f5f5', padding: 8, borderRadius: 4, fontSize: 12 }}>
-                          {JSON.stringify(details.taskResults, null, 2)}
-                        </pre>
+                      (() => {
+                        // discover_airports: { "机场@日期": count }
+                        // refresh_flights: [{ taskId, date, success, count }]
+                        const isArray = Array.isArray(details.taskResults);
+                        const rows: { key: string; airport?: string; date: string; count: number; success: boolean }[] = isArray
+                          ? details.taskResults.map((t: any) => ({
+                              key: `${t.taskId}-${t.date}`,
+                              date: t.date,
+                              count: t.count,
+                              success: t.success,
+                            }))
+                          : Object.entries(details.taskResults as Record<string, number>)
+                              .sort(([a], [b]) => a.localeCompare(b))
+                              .map(([key, count]) => {
+                                const [airport, date] = key.split('@');
+                                return { key, airport, date, count: count as number, success: (count as number) > 0 };
+                              });
+
+                        if (rows.length === 0) return null;
+                        return (
+                          <Descriptions.Item label={`任务明细（${rows.length} 个）`}>
+                            <div style={{ maxHeight: 300, overflow: 'auto' }}>
+                              <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 12 }}>
+                                <thead>
+                                  <tr style={{ background: '#f0f0f0', position: 'sticky', top: 0 }}>
+                                    {!isArray && <th style={{ padding: '4px 8px', textAlign: 'left', border: '1px solid #e0e0e0' }}>机场</th>}
+                                    <th style={{ padding: '4px 8px', textAlign: 'left', border: '1px solid #e0e0e0' }}>日期</th>
+                                    <th style={{ padding: '4px 8px', textAlign: 'right', border: '1px solid #e0e0e0' }}>航班数</th>
+                                    <th style={{ padding: '4px 8px', textAlign: 'center', border: '1px solid #e0e0e0' }}>状态</th>
+                                  </tr>
+                                </thead>
+                                <tbody>
+                                  {rows.map(row => (
+                                    <tr key={row.key} style={{ borderBottom: '1px solid #f0f0f0' }}>
+                                      {!isArray && <td style={{ padding: '3px 8px', border: '1px solid #e0e0e0' }}>{row.airport}</td>}
+                                      <td style={{ padding: '3px 8px', border: '1px solid #e0e0e0' }}>{row.date}</td>
+                                      <td style={{ padding: '3px 8px', textAlign: 'right', border: '1px solid #e0e0e0', color: row.count > 0 ? '#3f8600' : '#999', fontWeight: row.count > 0 ? 600 : 400 }}>
+                                        {row.count}
+                                      </td>
+                                      <td style={{ padding: '3px 8px', textAlign: 'center', border: '1px solid #e0e0e0' }}>
+                                        <Tag color={row.success ? 'success' : 'default'} style={{ margin: 0 }}>
+                                          {row.success ? '成功' : (isArray ? '失败' : '无数据')}
+                                        </Tag>
+                                      </td>
+                                    </tr>
+                                  ))}
+                                </tbody>
+                              </table>
+                            </div>
+                          </Descriptions.Item>
+                        );
+                      })()
+                    )}
+
+                    {/* 执行计划（主任务日志，结构化展示） */}
+                    {details.executionPlan && (
+                      <Descriptions.Item label="执行计划">
+                        <Space direction="vertical" size={4} style={{ width: '100%' }}>
+                          <div>
+                            <Tag>总天数：{details.executionPlan.totalDays} 天</Tag>
+                            <Tag>总任务：{details.executionPlan.totalTasks} 个</Tag>
+                            <Tag>机场数：{details.executionPlan.totalAirports} 个</Tag>
+                            <Tag color="blue">预计耗时：{details.executionPlan.estimatedTime}</Tag>
+                          </div>
+                          {details.executionPlan.dateRange && (
+                            <div style={{ fontSize: 12, color: '#666' }}>
+                              日期范围：{details.executionPlan.dateRange[0]} ~ {details.executionPlan.dateRange[details.executionPlan.dateRange.length - 1]}
+                            </div>
+                          )}
+                        </Space>
                       </Descriptions.Item>
                     )}
 
-                    {/* 其他详细信息 */}
+
+                    {/* 其他详细信息（排除已结构化展示的字段） */}
                     {Object.keys(details).filter(key =>
-                      !['date', 'taskId', 'airports', 'airportNames', 'dateRange', 'seedAirports', 'executionPlan', 'taskResults'].includes(key)
+                      !['date', 'taskId', 'airports', 'airportNames', 'dateRange', 'seedAirports',
+                        'executionPlan', 'taskResults', 'discoveredAirports',
+                        'totalDeleted', 'totalSaved', 'failedAirports'].includes(key)
                     ).length > 0 && (
-                      <Descriptions.Item label="其他信息" span={2}>
+                      <Descriptions.Item label="其他信息">
                         <pre style={{ maxHeight: 300, overflow: 'auto', background: '#f5f5f5', padding: 8, borderRadius: 4, fontSize: 12 }}>
                           {JSON.stringify(
                             Object.fromEntries(
                               Object.entries(details).filter(([key]) =>
-                                !['date', 'taskId', 'airports', 'airportNames', 'dateRange', 'seedAirports', 'executionPlan', 'taskResults'].includes(key)
+                                !['date', 'taskId', 'airports', 'airportNames', 'dateRange', 'seedAirports',
+                                  'executionPlan', 'taskResults', 'discoveredAirports',
+                                  'totalDeleted', 'totalSaved', 'failedAirports'].includes(key)
                               )
                             ),
                             null,
@@ -976,7 +1214,7 @@ function DataManagement() {
               } catch (e) {
                 // 如果解析失败，显示原始内容
                 return (
-                  <Descriptions.Item label="详细信息" span={2}>
+                  <Descriptions.Item label="详细信息">
                     <pre style={{ background: '#f5f5f5', padding: '8px', borderRadius: '4px' }}>
                       {typeof selectedLog.details === 'string'
                         ? selectedLog.details
@@ -987,6 +1225,84 @@ function DataManagement() {
               }
             })()}
           </Descriptions>
+        )}
+
+        {/* 子任务列表（仅发现航班父任务展示） */}
+        {selectedLog?.taskType === 'refresh_flights' && (
+          <>
+            <Divider orientation="left" style={{ marginTop: 20 }}>
+              子任务明细（每日爬取任务）
+            </Divider>
+            <Table
+              loading={subLogsLoading}
+              dataSource={subLogs}
+              rowKey="id"
+              size="small"
+              pagination={false}
+              locale={{ emptyText: subLogsLoading ? '加载中...' : '暂无子任务记录' }}
+              columns={[
+                {
+                  title: '日期',
+                  key: 'date',
+                  render: (_: any, record: CrawlerLog) => {
+                    try {
+                      const d = record.details ? JSON.parse(record.details) : {};
+                      // 兼容 d.date（旧格式）和 d.dateRange（新格式）
+                      if (d.date) return d.date;
+                      if (d.dateRange?.length) return d.dateRange[0];
+                      return '-';
+                    } catch { return '-'; }
+                  },
+                },
+                {
+                  title: '状态',
+                  dataIndex: 'status',
+                  key: 'status',
+                  render: (status: string) => {
+                    const map: Record<string, { text: string; color: string; icon?: React.ReactNode }> = {
+                      pending: { text: '等待中', color: 'default', icon: <ClockCircleOutlined /> },
+                      running: { text: '执行中', color: 'processing', icon: <SyncOutlined spin /> },
+                      success: { text: '成功', color: 'success', icon: <CheckCircleOutlined /> },
+                      failed: { text: '失败', color: 'error', icon: <ExclamationCircleOutlined /> },
+                    };
+                    const info = map[status];
+                    return <Tag color={info?.color} icon={info?.icon}>{info?.text || status}</Tag>;
+                  },
+                },
+                {
+                  title: '机场数',
+                  dataIndex: 'airportCount',
+                  key: 'airportCount',
+                  render: (v: number) => v || '-',
+                },
+                {
+                  title: '航班数',
+                  dataIndex: 'flightCount',
+                  key: 'flightCount',
+                  render: (v: number) => (
+                    <span style={{ color: '#3f8600', fontWeight: 'bold' }}>{v || 0} 条</span>
+                  ),
+                },
+                {
+                  title: '耗时',
+                  dataIndex: 'duration',
+                  key: 'duration',
+                  render: (v?: number) => {
+                    if (!v) return '-';
+                    return v < 60 ? `${v}s` : `${Math.round(v / 60)}m`;
+                  },
+                },
+                {
+                  title: '错误',
+                  dataIndex: 'errorMessage',
+                  key: 'errorMessage',
+                  render: (v?: string) => v
+                    ? <Text type="danger" style={{ fontSize: 12 }}>{v}</Text>
+                    : '-',
+                },
+              ]}
+            />
+          </>
         )}
       </Modal>
     </div>

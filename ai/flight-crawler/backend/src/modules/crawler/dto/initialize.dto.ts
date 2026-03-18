@@ -8,6 +8,11 @@ export class InitializeDiscoverDto {
   @Min(1)
   @Max(7)
   days?: number = 1; // 默认 1 天
+
+  @IsOptional()
+  @Type(() => Boolean)
+  @IsBoolean()
+  planOnly?: boolean = false; // true = 仅返回计划，不执行
 }
 
 /**
