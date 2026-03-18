@@ -32,9 +32,11 @@ import {
   updateFlight,
   deleteFlight,
   batchDeleteFlights,
+  deleteFlightsBeforeDays,
   getAvailableCities,
   type Flight,
 } from '@/api/flight';
+import { getDefaultOrigin, setOriginCookie } from '@/utils/cookie';
 
 const { Title, Paragraph } = Typography;
 const { RangePicker } = DatePicker;
@@ -89,7 +91,12 @@ function FlightManagement() {
     pageSize: 10,
     total: 0,
   });
-  const [filters, setFilters] = useState<any>({});
+  // 默认日期区间：今天起 30 天（与其他页面保持一致）
+  const defaultDateRange = [dayjs(), dayjs().add(30, 'day')];
+  const [filters, setFilters] = useState<any>({
+    startDate: defaultDateRange[0].format('YYYY-MM-DD'),
+    endDate: defaultDateRange[1].format('YYYY-MM-DD'),
+  });
   const [sorter, setSorter] = useState<any>({
     sortBy: 'departureTime',
     sortOrder: 'DESC',
@@ -111,19 +118,30 @@ function FlightManagement() {
   // 统计数据
   const [stats, setStats] = useState({
     total: 0,
-    todayCount: 0,
     cardType666Count: 0,
     cardType2666Count: 0,
   });
 
-  // 加载城市列表
+  // 初始化：设置表单默认值，加载城市和航班
   useEffect(() => {
-    loadCities();
-  }, []);
-
-  // 首次加载航班数据
-  useEffect(() => {
-    loadFlights();
+    const savedOrigin = getDefaultOrigin('');
+    filterForm.setFieldsValue({
+      origin: savedOrigin || undefined,
+      dateRange: defaultDateRange,
+    });
+    if (savedOrigin) {
+      const initFilters = {
+        startDate: defaultDateRange[0].format('YYYY-MM-DD'),
+        endDate: defaultDateRange[1].format('YYYY-MM-DD'),
+        origin: savedOrigin,
+      };
+      setFilters(initFilters);
+      loadCities();
+      loadFlights(1, 10, initFilters, sorter);
+    } else {
+      loadCities();
+      loadFlights();
+    }
   }, []);
 
   const loadCities = async () => {
@@ -157,15 +175,10 @@ function FlightManagement() {
         total: result.total,
       });
 
-      // 计算统计数据
-      const today = dayjs().format('YYYY-MM-DD');
       setStats({
         total: result.total,
-        todayCount: result.flights.filter((f) =>
-          dayjs(f.departureTime).format('YYYY-MM-DD') === today
-        ).length,
-        cardType666Count: result.flights.filter((f) => f.cardType === '666权益卡航班').length,
-        cardType2666Count: result.flights.filter((f) => f.cardType === '2666权益卡航班').length,
+        cardType666Count: result.cardType666Count ?? 0,
+        cardType2666Count: result.cardType2666Count ?? 0,
       });
     } catch (error) {
       message.error('加载航班数据失败');
@@ -179,7 +192,10 @@ function FlightManagement() {
   const handleFilter = (values: any) => {
     const newFilters: any = {};
 
-    if (values.origin) newFilters.origin = values.origin;
+    if (values.origin) {
+      newFilters.origin = values.origin;
+      setOriginCookie(values.origin);
+    }
     if (values.destination) newFilters.destination = values.destination;
     if (values.cardType) newFilters.cardType = values.cardType;
     if (values.flightNo) newFilters.flightNo = values.flightNo;
@@ -287,6 +303,32 @@ function FlightManagement() {
           loadFlights();
         } catch (error: any) {
           message.error(`批量删除失败: ${error.message || '未知错误'}`);
+        }
+      },
+    });
+  };
+
+  // 删除一周前的历史航班
+  const handleDeleteOldFlights = () => {
+    const days = 7;
+    const cutoffDate = new Date();
+    cutoffDate.setDate(cutoffDate.getDate() - days);
+    const cutoffStr = cutoffDate.toISOString().split('T')[0];
+
+    Modal.confirm({
+      title: '删除历史航班数据',
+      icon: <ExclamationCircleOutlined />,
+      content: `确定要删除 ${cutoffStr} 之前（${days} 天前）的所有航班数据吗？此操作不可恢复！`,
+      okText: '确认删除',
+      okType: 'danger',
+      cancelText: '取消',
+      onOk: async () => {
+        try {
+          const result = await deleteFlightsBeforeDays(days);
+          message.success(result.message);
+          loadFlights();
+        } catch (error: any) {
+          message.error(`删除失败: ${error.message || '未知错误'}`);
         }
       },
     });
@@ -421,11 +463,6 @@ function FlightManagement() {
         </Col>
         <Col xs={12} sm={6}>
           <Card>
-            <Statistic title="今日航班" value={stats.todayCount} valueStyle={{ color: '#3f8600' }} />
-          </Card>
-        </Col>
-        <Col xs={12} sm={6}>
-          <Card>
             <Statistic title="666权益卡航班" value={stats.cardType666Count} valueStyle={{ color: '#1890ff' }} />
           </Card>
         </Col>
@@ -476,7 +513,7 @@ function FlightManagement() {
           </Form.Item>
 
           <Form.Item name="dateRange" label="日期范围">
-            <RangePicker />
+            <RangePicker defaultValue={defaultDateRange as any} />
           </Form.Item>
 
           <Form.Item name="cardType" label="权益卡类型">
@@ -516,6 +553,13 @@ function FlightManagement() {
               disabled={selectedRowKeys.length === 0}
             >
               批量删除 ({selectedRowKeys.length})
+            </Button>
+            <Button
+              danger
+              icon={<DeleteOutlined />}
+              onClick={handleDeleteOldFlights}
+            >
+              删除一周前数据
             </Button>
             <Button icon={<ExportOutlined />} onClick={handleExport}>
               导出 Excel

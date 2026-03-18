@@ -10,6 +10,7 @@ import {
 @Entity('flights')
 @Index(['origin', 'destination', 'departureTime'])
 @Index(['crawledAt'])
+@Index(['flightNo', 'origin', 'destination', 'departureTime', 'cardType'], { unique: true })
 export class Flight {
   @PrimaryGeneratedColumn()
   id: number;

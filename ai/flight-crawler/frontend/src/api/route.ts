@@ -14,9 +14,11 @@ export interface PlanRouteParams {
 // 往返行程参数
 export interface PlanRoundTripParams {
   origin: string;
-  destination?: string; // 不填则自动发现所有往返方案
+  destination?: string;
   departureDate: string;
-  returnDate: string; // 必填
+  departureDateEnd?: string;  // 去程日期范围结束
+  returnDate: string;
+  returnDateEnd?: string;     // 返程日期范围结束
   maxTransfers?: number;
   minLayoverHours?: number;
   maxLayoverHours?: number;
@@ -57,24 +59,8 @@ export interface RoutePlanResponse {
 
 // 往返行程结果
 export interface RoundTripResult {
-  outbound: {
-    segments: FlightSegment[];
-    totalDuration: number;
-    transferCount: number;
-    layovers: {
-      city: string;
-      duration: number;
-    }[];
-  };
-  return: {
-    segments: FlightSegment[];
-    totalDuration: number;
-    transferCount: number;
-    layovers: {
-      city: string;
-      duration: number;
-    }[];
-  };
+  outbound: RouteResult;
+  return: RouteResult;
   totalDuration: number;
   totalTransferCount: number;
   score: number;
@@ -93,12 +79,46 @@ export interface RoundTripPlanResponse {
   };
 }
 
+// 探索模式：找所有可往返目的地
+export interface ExploreParams {
+  origin: string;
+  departureDate: string;
+  departureDateEnd?: string;
+  returnDate: string;
+  returnDateEnd?: string;
+  maxTransfers?: number;
+}
+
+export interface ExploreDestination {
+  city: string;
+  bestOutbound: RouteResult;
+  bestReturn: RouteResult;
+  outboundCount: number;
+  returnCount: number;
+  score: number;
+}
+
+export interface ExplorePlanResponse {
+  destinations: ExploreDestination[];
+  searchParams: {
+    origin: string;
+    departureDate: string;
+    returnDate: string;
+    maxTransfers: number;
+  };
+}
+
 // 规划单程路线
 export const planRoute = (params: PlanRouteParams): Promise<RoutePlanResponse> => {
   return api.post('/routes/plan', params);
 };
 
-// 规划往返行程
+// 规划往返行程（指定目的地）
 export const planRoundTrip = (params: PlanRoundTripParams): Promise<RoundTripPlanResponse> => {
   return api.post('/routes/round-trip', params);
+};
+
+// 探索模式：发现所有可往返目的地
+export const exploreDestinations = (params: ExploreParams): Promise<ExplorePlanResponse> => {
+  return api.post('/routes/explore', params);
 };

@@ -5,6 +5,7 @@ import RoutePlanner from './pages/RoutePlanner';
 import DataManagement from './pages/DataManagement';
 import FlightManagement from './pages/FlightManagement';
 import AirportManagement from './pages/AirportManagement';
+import FlightMap from './pages/FlightMap';
 
 function App() {
   return (
@@ -16,6 +17,7 @@ function App() {
         <Route path="data-management" element={<DataManagement />} />
         <Route path="flight-management" element={<FlightManagement />} />
         <Route path="airport-management" element={<AirportManagement />} />
+        <Route path="flight-map" element={<FlightMap />} />
       </Route>
     </Routes>
   );

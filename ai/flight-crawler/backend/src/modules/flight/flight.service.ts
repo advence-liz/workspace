@@ -121,9 +121,14 @@ export class FlightService {
       }
     }
 
-    const sortedDestinations = Array.from(destinationMap.values()).sort(
-      (a, b) => a.destination.localeCompare(b.destination),
-    );
+    const sortedDestinations = Array.from(destinationMap.values()).sort((a, b) => {
+      // 1. 可往返优先
+      if (a.hasReturn !== b.hasReturn) return a.hasReturn ? -1 : 1;
+      // 2. 同类型按去程航班数量降序
+      if (a.flightCount !== b.flightCount) return b.flightCount - a.flightCount;
+      // 3. 最后按目的地名称升序
+      return a.destination.localeCompare(b.destination);
+    });
 
     return {
       destinations: sortedDestinations,
@@ -211,12 +216,18 @@ export class FlightService {
 
   /**
    * 批量保存航班数据
+   * 使用 INSERT OR IGNORE 忽略唯一约束冲突，不会因重复数据报错终止
    */
-  async saveFlights(flights: Partial<Flight>[]): Promise<Flight[]> {
-    const entities = flights.map((flight) =>
-      this.flightRepository.create(flight),
-    );
-    return this.flightRepository.save(entities);
+  async saveFlights(flights: Partial<Flight>[]): Promise<void> {
+    if (flights.length === 0) return;
+
+    await this.flightRepository
+      .createQueryBuilder()
+      .insert()
+      .into(Flight)
+      .values(flights as Flight[])
+      .orIgnore()
+      .execute();
   }
 
   /**
@@ -265,6 +276,45 @@ export class FlightService {
       .createQueryBuilder()
       .delete()
       .where('departureTime >= :start AND departureTime <= :end', {
+        start: startOfDay,
+        end: endOfDay,
+      })
+      .execute();
+
+    return result.affected || 0;
+  }
+
+  /**
+   * 删除指定日期之前的历史航班数据
+   * @param beforeDate 截止日期（不含），删除 departureTime < beforeDate 的航班
+   * 返回删除的记录数
+   */
+  async deleteFlightsBeforeDate(beforeDate: Date): Promise<number> {
+    const result = await this.flightRepository
+      .createQueryBuilder()
+      .delete()
+      .where('departureTime < :beforeDate', { beforeDate })
+      .execute();
+
+    return result.affected || 0;
+  }
+
+  /**
+   * 删除指定出发地+日期的航班数据（按机场+日期粒度删除）
+   * 用于发现航班任务：只替换成功爬取的机场数据，失败的机场保留旧数据
+   */
+  async deleteFlightsByOriginAndDate(origin: string, date: string): Promise<number> {
+    const startOfDay = new Date(date);
+    startOfDay.setHours(0, 0, 0, 0);
+
+    const endOfDay = new Date(date);
+    endOfDay.setHours(23, 59, 59, 999);
+
+    const result = await this.flightRepository
+      .createQueryBuilder()
+      .delete()
+      .where('origin = :origin AND departureTime >= :start AND departureTime <= :end', {
+        origin,
         start: startOfDay,
         end: endOfDay,
       })
@@ -445,6 +495,8 @@ export class FlightService {
     total: number;
     page: number;
     pageSize: number;
+    cardType666Count: number;
+    cardType2666Count: number;
   }> {
     const {
       page = 1,
@@ -481,7 +533,8 @@ export class FlightService {
     }
 
     if (cardType && cardType !== '全部') {
-      queryBuilder.andWhere('flight.cardType = :cardType', { cardType });
+      // 使用 LIKE 匹配，支持组合类型（如"666权益卡航班,2666权益卡航班"）
+      queryBuilder.andWhere('flight.cardType LIKE :cardType', { cardType: `%${cardType}%` });
     }
 
     if (flightNo) {
@@ -498,11 +551,41 @@ export class FlightService {
     // 执行查询
     const [flights, total] = await queryBuilder.getManyAndCount();
 
+    // 基于相同筛选条件统计各权益卡数量（全量，不受分页影响）
+    const statsBuilder = this.flightRepository.createQueryBuilder('flight');
+    if (origin) statsBuilder.andWhere('flight.origin = :origin', { origin });
+    if (destination) statsBuilder.andWhere('flight.destination = :destination', { destination });
+    if (startDate && endDate) {
+      const startDateTime = new Date(startDate);
+      const endDateTime = new Date(endDate);
+      endDateTime.setHours(23, 59, 59, 999);
+      statsBuilder.andWhere('flight.departureTime BETWEEN :startDate AND :endDate', {
+        startDate: startDateTime,
+        endDate: endDateTime,
+      });
+    }
+    if (flightNo) statsBuilder.andWhere('flight.flightNo LIKE :flightNo', { flightNo: `%${flightNo}%` });
+
+    const allForStats = await statsBuilder.select('flight.cardType', 'cardType').getRawMany();
+    let cardType666Count = 0;
+    let cardType2666Count = 0;
+    allForStats.forEach(({ cardType: ct }) => {
+      if (!ct) return;
+      // 精确匹配：避免 "2666权益卡航班" 被 "666权益卡航班" 误匹配
+      // 666 可用：cardType 等于 "666权益卡航班" 或包含 "666权益卡航班,"（组合开头）或包含 ",666权益卡航班"（组合末尾）
+      const has666 = ct === '666权益卡航班' || ct.startsWith('666权益卡航班,') || ct.includes(',666权益卡航班');
+      const has2666 = ct.includes('2666权益卡航班');
+      if (has666) cardType666Count++;
+      if (has2666) cardType2666Count++;
+    });
+
     return {
       flights,
       total,
       page,
       pageSize,
+      cardType666Count,
+      cardType2666Count,
     };
   }
 

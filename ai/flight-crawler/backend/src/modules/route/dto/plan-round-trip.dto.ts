@@ -12,10 +12,18 @@ export class PlanRoundTripDto {
   destination?: string; // 不填则自动发现所有往返方案
 
   @IsDateString()
-  departureDate: string; // 出发日期
+  departureDate: string; // 出发日期（范围开始）
 
   @IsDateString()
-  returnDate: string; // 返程日期（必填）
+  @IsOptional()
+  departureDateEnd?: string; // 出发日期范围结束（不填则等于 departureDate）
+
+  @IsDateString()
+  returnDate: string; // 返程日期（范围开始，必填）
+
+  @IsDateString()
+  @IsOptional()
+  returnDateEnd?: string; // 返程日期范围结束（不填则等于 returnDate）
 
   @IsInt()
   @Min(0)

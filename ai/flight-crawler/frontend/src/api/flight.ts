@@ -53,14 +53,32 @@ export const getAvailableCities = (): Promise<{ origins: string[]; destinations:
   return api.get('/flights/cities');
 };
 
+// 发现机场执行计划类型
+export interface DiscoverAirportsExecutionPlan {
+  totalDays: number;
+  totalTasks: number;
+  dateRange: string[];
+  estimatedTime: string;
+  seedAirports: string[];
+  taskList: Array<{
+    taskId: number;
+    date: string;
+    airports: number;
+    airportNames: string[];
+    estimatedTaskTime: string;
+    crawlerInfo: { description: string; expectedFlights: number; maxConcurrency: number };
+  }>;
+}
+
 // 初始化阶段1：发现机场
-export const initializeDiscoverAirports = (days?: number): Promise<{
+export const initializeDiscoverAirports = (options: { days?: number; planOnly?: boolean }): Promise<{
   success: boolean;
   airportCount: number;
   flightCount: number;
   message: string;
+  executionPlan?: DiscoverAirportsExecutionPlan;
 }> => {
-  return api.post('/crawler/initialize/discover', { days });
+  return api.post('/crawler/initialize/discover', options);
 };
 
 // 初始化阶段2：发现航班数据（按日期区间）
@@ -109,7 +127,8 @@ export const initializeDiscoverFlights = (options: {
 // 执行日志相关接口
 export interface CrawlerLog {
   id: number;
-  taskType: 'discover_airports' | 'refresh_flights' | 'full_initialize';
+  taskType: 'discover_airports' | 'refresh_flights' | 'refresh_flights_daily' | 'full_initialize';
+  parentId?: number | null;
   status: 'running' | 'success' | 'failed';
   days?: number;
   airportCount: number;
@@ -159,6 +178,20 @@ export const getCrawlerLogStats = (): Promise<LogStats> => {
   return api.get('/crawler/logs-stats');
 };
 
+// 获取子任务日志列表
+export const getSubLogs = (parentId: number): Promise<CrawlerLog[]> => {
+  return api.get(`/crawler/logs/${parentId}/sub-tasks`);
+};
+
+// 强制停止当前运行中的爬虫任务
+export const stopCrawler = (): Promise<{
+  stopped: boolean;
+  taskId: number | null;
+  message: string;
+}> => {
+  return api.post('/crawler/stop');
+};
+
 // 清理日志
 export const cleanOldLogs = (days?: number): Promise<{ deletedCount: number; message: string }> => {
   return api.delete('/crawler/logs/clean', { data: { days } });
@@ -197,6 +230,8 @@ export const queryFlightsWithPagination = (params: {
   total: number;
   page: number;
   pageSize: number;
+  cardType666Count: number;
+  cardType2666Count: number;
 }> => {
   return api.get('/flights/paginated', { params });
 };
@@ -226,4 +261,13 @@ export const batchDeleteFlights = (ids: number[]): Promise<{
   message: string;
 }> => {
   return api.post('/flights/batch-delete', { ids });
+};
+
+// 删除 N 天前的历史航班
+export const deleteFlightsBeforeDays = (days: number): Promise<{
+  success: boolean;
+  deletedCount: number;
+  message: string;
+}> => {
+  return api.delete(`/flights/before-days/${days}`);
 };

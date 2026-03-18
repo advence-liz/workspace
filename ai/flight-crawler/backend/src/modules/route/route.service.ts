@@ -90,15 +90,17 @@ export class RouteService {
     origin: string;
     destination: string;
     departureDate: string;
+    departureDateEnd?: string;  // 不填则等于 departureDate（向后兼容）
     maxTransfers?: number;
     minLayoverHours?: number;
     maxLayoverHours?: number;
   }): Promise<RouteResultDto[]> {
+    const endDate = params.departureDateEnd || params.departureDate;
     const flights = await this.flightService.queryFlights({
       origin: params.origin,
       destination: params.destination,
       startDate: params.departureDate,
-      endDate: params.departureDate,
+      endDate,
     });
 
     const graph = this.buildGraph(flights);

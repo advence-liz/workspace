@@ -136,4 +136,27 @@ export class FlightController {
       message: `成功删除 ${deletedCount} 条航班`,
     };
   }
+
+  /**
+   * 删除指定天数前的历史航班
+   * DELETE /api/flights/before-days/:days
+   */
+  @Delete('before-days/:days')
+  @HttpCode(HttpStatus.OK)
+  async deleteFlightsBeforeDays(@Param('days') days: string) {
+    const daysNum = parseInt(days, 10);
+    if (isNaN(daysNum) || daysNum < 1) {
+      return { success: false, message: '天数参数无效' };
+    }
+    const beforeDate = new Date();
+    beforeDate.setDate(beforeDate.getDate() - daysNum);
+    beforeDate.setHours(0, 0, 0, 0);
+
+    const deletedCount = await this.flightService.deleteFlightsBeforeDate(beforeDate);
+    return {
+      success: true,
+      deletedCount,
+      message: `已删除 ${daysNum} 天前（${beforeDate.toISOString().split('T')[0]} 之前）的 ${deletedCount} 条航班`,
+    };
+  }
 }
