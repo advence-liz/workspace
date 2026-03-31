@@ -1,11 +1,14 @@
-import { Injectable, Logger } from '@nestjs/common';
+import { Injectable, Logger, OnApplicationBootstrap } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
-import { Cron } from '@nestjs/schedule';
-import * as puppeteer from 'puppeteer';
+import { Cron, SchedulerRegistry } from '@nestjs/schedule';
+// puppeteer 为可选依赖，仅本地爬虫环境需要，生产环境动态加载
+// eslint-disable-next-line @typescript-eslint/no-require-imports
+const puppeteer = (() => { try { return require('puppeteer'); } catch { return null; } })();
 import * as fs from 'fs';
 import * as path from 'path';
 import { FlightService } from '../flight/flight.service';
+import { RouteService } from '../route/route.service';
 import { Flight } from '../flight/entities/flight.entity';
 import {
   CrawlerLog,
@@ -14,21 +17,47 @@ import {
 } from './entities/crawler-log.entity';
 
 @Injectable()
-export class CrawlerService {
+export class CrawlerService implements OnApplicationBootstrap {
   private readonly logger = new Logger(CrawlerService.name);
-  private browser: puppeteer.Browser | null = null;
+  private browser: any | null = null;
   private readonly screenshotDir = path.join(process.cwd(), 'debug-screenshots');
   private isCrawlerRunning = false; // 并发锁：防止多个爬虫同时运行
   private runningTaskId: number | null = null; // 当前运行的任务 ID
   private stopRequested = false; // 停止信号：true 时后台任务应尽快退出
 
+  // ─── 并发常量（修改这里会同步影响执行逻辑和预估时间）─────────────────
+  /** 发现机场：共享浏览器，最多同时开几个 page */
+  private static readonly DISCOVER_AIRPORTS_PAGE_CONCURRENCY = 5;
+  /** 发现航班：最多同时执行几个日期任务（每个日期独立浏览器） */
+  private static readonly REFRESH_FLIGHTS_DATE_CONCURRENCY = 10;
+  /** 发现航班：每个日期任务内最多同时爬几个机场 page */
+  private static readonly REFRESH_FLIGHTS_AIRPORT_CONCURRENCY = 3;
+  /** 实测单机场单次爬取耗时（秒），用于预估总时间 */
+  private static readonly SECONDS_PER_AIRPORT = 30;
+
   constructor(
     private readonly flightService: FlightService,
+    private readonly routeService: RouteService,
+    private readonly schedulerRegistry: SchedulerRegistry,
     @InjectRepository(CrawlerLog)
     private readonly crawlerLogRepository: Repository<CrawlerLog>,
   ) {
     // 确保截图目录存在
     this.ensureScreenshotDir();
+  }
+
+  /**
+   * 应用启动后，根据环境变量决定是否停止自动爬取任务
+   * 默认关闭，CRAWLER_AUTO_CRAWL=true 时才开启
+   */
+  onApplicationBootstrap() {
+    const enabled = process.env.CRAWLER_AUTO_CRAWL === 'true';
+    if (!enabled) {
+      try {
+        this.schedulerRegistry.getCronJob('auto-crawl-flights').stop();
+        this.logger.log('⚙️ auto-crawl-flights 定时任务已禁用（需设置 CRAWLER_AUTO_CRAWL=true 开启）');
+      } catch { /* 任务不存在时忽略 */ }
+    }
   }
 
   /**
@@ -44,7 +73,7 @@ export class CrawlerService {
   /**
    * 安全截图：失败时只记录警告，不抛出异常
    */
-  private async safeScreenshot(page: puppeteer.Page, filePath: string, label: string): Promise<void> {
+  private async safeScreenshot(page: any, filePath: string, label: string): Promise<void> {
     try {
       this.ensureScreenshotDir();
       await page.screenshot({ path: filePath, fullPage: true });
@@ -176,7 +205,7 @@ export class CrawlerService {
     origin: string,
     date: string,
     cardTypes: string | string[],
-    externalBrowser?: puppeteer.Browser,
+    externalBrowser?: any,
     enableScreenshot = false,
   ): Promise<Partial<Flight>[]> {
     // 统一处理为数组
@@ -196,7 +225,7 @@ export class CrawlerService {
       );
 
       // 监听浏览器控制台输出
-      page.on('console', (msg) => {
+      page.on('console', (msg: any) => {
         const text = msg.text();
         // 只记录我们的调试信息
         if (text.includes('===') || text.includes('选择器') || text.includes('日期元素') || text.includes('✓') || text.includes('✗')) {
@@ -205,7 +234,7 @@ export class CrawlerService {
       });
 
       // 监听所有网络请求
-      page.on('response', async (response) => {
+      page.on('response', async (response: any) => {
         const url = response.url();
         const status = response.status();
 
@@ -903,7 +932,7 @@ export class CrawlerService {
   /**
    * 选择出发地（多种策略）
    */
-  private async selectOrigin(page: puppeteer.Page, origin: string): Promise<boolean> {
+  private async selectOrigin(page: any, origin: string): Promise<boolean> {
     this.logger.log(`🛫 尝试选择出发地: ${origin}`);
 
     try {
@@ -940,7 +969,7 @@ export class CrawlerService {
 
       // 策略 2: 查找出发地输入框（通过 placeholder）
       this.logger.log(`[策略2] 尝试通过 placeholder 查找输入框`);
-      const strategy2 = await page.evaluate((cityName) => {
+      const strategy2 = await page.evaluate((cityName: string) => {
         console.log(`[策略2] 查找出发地输入框`);
         const inputs = document.querySelectorAll('input[type="text"], input:not([type])');
         console.log(`[策略2] 找到 ${inputs.length} 个输入框`);
@@ -984,7 +1013,7 @@ export class CrawlerService {
 
       // 策略 3: 查找包含"出发地"文本的可点击元素
       this.logger.log(`[策略3] 尝试通过文本查找`);
-      const strategy3 = await page.evaluate((cityName) => {
+      const strategy3 = await page.evaluate((cityName: string) => {
         console.log(`[策略3] 查找包含"出发地"的元素`);
         const allElements = Array.from(document.querySelectorAll('div, span, button, a'));
         console.log(`[策略3] 找到 ${allElements.length} 个元素`);
@@ -1019,7 +1048,7 @@ export class CrawlerService {
 
       // 策略 4: 查找 select 下拉框
       this.logger.log(`[策略4] 尝试通过 select 下拉框`);
-      const strategy4 = await page.evaluate((cityName) => {
+      const strategy4 = await page.evaluate((cityName: string) => {
         console.log(`[策略4] 查找 select 下拉框`);
         const selects = document.querySelectorAll('select');
         console.log(`[策略4] 找到 ${selects.length} 个 select`);
@@ -1059,7 +1088,7 @@ export class CrawlerService {
   /**
    * 点击查询按钮（多种策略）
    */
-  private async clickSearchButton(page: puppeteer.Page): Promise<boolean> {
+  private async clickSearchButton(page: any): Promise<boolean> {
     this.logger.log('🔍 尝试点击查询按钮');
 
     try {
@@ -1201,11 +1230,11 @@ export class CrawlerService {
   /**
    * 从下拉列表中选择城市
    */
-  private async selectCityFromDropdown(page: puppeteer.Page, cityName: string): Promise<boolean> {
+  private async selectCityFromDropdown(page: any, cityName: string): Promise<boolean> {
     try {
       this.logger.log(`🔍 尝试从下拉列表选择城市: ${cityName}`);
 
-      const citySelected = await page.evaluate((city) => {
+      const citySelected = await page.evaluate((city: string) => {
         console.log(`查找城市: ${city}`);
         // 查找所有可能的城市列表项
         const selectors = [
@@ -1254,13 +1283,13 @@ export class CrawlerService {
   /**
    * 选择权益卡类型（多种策略）
    */
-  private async selectCardType(page: puppeteer.Page, cardType: string): Promise<boolean> {
+  private async selectCardType(page: any, cardType: string): Promise<boolean> {
     this.logger.log(`🎫 尝试选择权益卡类型: ${cardType}`);
 
     try {
       // 策略 1: 通过 .search-item 直接点击（针对海南航空页面）
       this.logger.log(`[策略1] 尝试通过 .search-item 选择`);
-      const strategy1 = await page.evaluate((targetCardType) => {
+      const strategy1 = await page.evaluate((targetCardType: string) => {
         const items = document.querySelectorAll('.search-item');
         console.log(`[策略1] 找到 ${items.length} 个 .search-item 元素`);
 
@@ -1288,7 +1317,7 @@ export class CrawlerService {
 
       // 策略 2: 通过 radio 单选按钮 + label 组合
       this.logger.log(`[策略2] 尝试通过 radio 选择`);
-      const strategy2 = await page.evaluate((targetCardType) => {
+      const strategy2 = await page.evaluate((targetCardType: string) => {
         // 查找所有 radio 输入框
         const radioInputs = document.querySelectorAll('input[type="radio"]');
         console.log(`[策略2] 找到 ${radioInputs.length} 个 radio 元素`);
@@ -1342,7 +1371,7 @@ export class CrawlerService {
       this.logger.log(`[策略3] 尝试通过文本匹配选择`);
       const cardTypeNumber = cardType.match(/\d+/)?.[0]; // 提取 "666" 或 "2666"
       if (cardTypeNumber) {
-        const strategy3 = await page.evaluate((number) => {
+        const strategy3 = await page.evaluate((number: string) => {
           console.log(`[策略3] 查找包含数字 "${number}" 的元素`);
           const allElements = Array.from(document.querySelectorAll('div, span, label, button, a'));
           console.log(`[策略3] 找到 ${allElements.length} 个元素`);
@@ -1380,7 +1409,7 @@ export class CrawlerService {
 
       // 策略 4: 通过 class 或 data 属性查找
       this.logger.log(`[策略4] 尝试通过属性选择`);
-      const strategy4 = await page.evaluate((targetCardType, number) => {
+      const strategy4 = await page.evaluate((targetCardType: string, number: string) => {
         console.log(`[策略4] 查找属性包含 "${number}" 的元素`);
         // 查找包含特定 class 或 data 属性的元素
         // 查找包含特定 class 或 data 属性的元素
@@ -1410,7 +1439,7 @@ export class CrawlerService {
 
       // 策略 5: 模糊匹配（最后的尝试）
       this.logger.log(`[策略5] 尝试完全匹配`);
-      const strategy5 = await page.evaluate((targetCardType) => {
+      const strategy5 = await page.evaluate((targetCardType: string) => {
         console.log(`[策略5] 查找完全匹配 "${targetCardType}" 的元素`);
         const allElements = Array.from(document.querySelectorAll('*'));
         console.log(`[策略5] 扫描 ${allElements.length} 个元素`);
@@ -1450,7 +1479,7 @@ export class CrawlerService {
    * - 日期格子：.cell，有 data-date="YYYYMMDD" 属性
    * - 禁用日期：.cell.disabled
    */
-  private async selectDate(page: puppeteer.Page, targetDate: string): Promise<boolean> {
+  private async selectDate(page: any, targetDate: string): Promise<boolean> {
     this.logger.log(`📅 尝试选择日期: ${targetDate}`);
 
     try {
@@ -1499,7 +1528,7 @@ export class CrawlerService {
 
       // 策略 2: 直接通过 data-date 属性精确选择日期
       this.logger.log(`[策略2] 通过 data-date="${dataDateValue}" 精确选择日期`);
-      const dateSelected = await page.evaluate((dataDate) => {
+      const dateSelected = await page.evaluate((dataDate: string) => {
         // 通过 data-date 属性精确定位日期格子
         const cell = document.querySelector(`.cell[data-date="${dataDate}"]`);
         if (!cell) {
@@ -1750,7 +1779,7 @@ export class CrawlerService {
 
   /**
    * 初始化逻辑1：发现所有机场
-   * 优化版：共享单个浏览器实例，信号量控制最大并发 page 数（3个）
+   * 优化版：共享单个浏览器实例，信号量控制最大并发 page 数（5个）
    * 所有（机场×日期）任务并发执行，显著提升效率
    * 支持 planOnly 模式：仅返回执行计划，不实际爬取
    */
@@ -1777,7 +1806,7 @@ export class CrawlerService {
   }> {
     this.logger.log(`🔍 【初始化阶段1】${planOnly ? '生成执行计划' : '开始发现机场'}（爬取未来 ${days} 天）...`);
 
-    const seedAirports = ['北京首都', '北京大兴', '上海浦东', '上海虹桥', '深圳'];
+    const seedAirports = ['北京首都', '北京大兴', '上海浦东', '上海虹桥', '深圳', '广州', '海口', '重庆江北', '西安'];
 
     // 生成日期范围（从明天开始）
     const dates: string[] = [];
@@ -1799,7 +1828,7 @@ export class CrawlerService {
       crawlerInfo: {
         description: `爬取 ${date} 日期的 ${seedAirports.length} 个种子机场（权益卡：666 + 2666）`,
         expectedFlights: Math.ceil(seedAirports.length * 15),
-        maxConcurrency: 3,
+        maxConcurrency: 5,
       },
     }));
 
@@ -1854,7 +1883,7 @@ export class CrawlerService {
     executionPlan: any,
   ): Promise<void> {
     // 独立浏览器实例（不使用 this.browser，避免与其他任务冲突）
-    let browser: puppeteer.Browser | null = null;
+    let browser: any | null = null;
 
     try {
       // 生成所有（机场, 日期）任务组合（seedAirports/dates 已在上方生成）
@@ -1865,7 +1894,7 @@ export class CrawlerService {
         }
       }
 
-      this.logger.log(`🚀 共 ${tasks.length} 个任务（${seedAirports.length} 机场 × ${dates.length} 天），最大并发 3`);
+      this.logger.log(`🚀 共 ${tasks.length} 个任务（${seedAirports.length} 机场 × ${dates.length} 天），最大并发 ${CrawlerService.DISCOVER_AIRPORTS_PAGE_CONCURRENCY}`);
 
       // 启动共享浏览器
       browser = await puppeteer.launch({
@@ -1874,8 +1903,8 @@ export class CrawlerService {
       });
       this.logger.log('🌐 共享浏览器已启动');
 
-      // 信号量：最多 3 个 page 同时运行
-      const MAX_CONCURRENT = 3;
+      // 信号量：最多 DISCOVER_AIRPORTS_PAGE_CONCURRENCY 个 page 同时运行
+      const MAX_CONCURRENT = CrawlerService.DISCOVER_AIRPORTS_PAGE_CONCURRENCY;
       let running = 0;
       let taskIndex = 0;
       const allFlights: Partial<Flight>[] = [];
@@ -1979,7 +2008,7 @@ export class CrawlerService {
    * 直接委托给 crawlFlightsByDate，传入 externalBrowser 参数
    */
   private async crawlSinglePageWithBrowser(
-    browser: puppeteer.Browser,
+    browser: any,
     origin: string,
     date: string,
   ): Promise<Partial<Flight>[]> {
@@ -2076,7 +2105,7 @@ export class CrawlerService {
         crawlerInfo: {
           description: `爬取 ${date} 日期的 ${airports.length} 个机场的航班数据（权益卡：666 + 2666）`,
           expectedFlights: Math.ceil(airports.length * 2.5), // 每个机场预期 2-3 班航班
-          maxConcurrency: 5, // 机场级最大并发数
+          maxConcurrency: CrawlerService.REFRESH_FLIGHTS_AIRPORT_CONCURRENCY,
         },
       };
     });
@@ -2088,6 +2117,8 @@ export class CrawlerService {
       estimatedTime,
       totalAirports: airports.length,
       airportList: airportNames,
+      dateConcurrency: CrawlerService.REFRESH_FLIGHTS_DATE_CONCURRENCY,
+      airportConcurrency: CrawlerService.REFRESH_FLIGHTS_AIRPORT_CONCURRENCY,
       taskList,
     };
 
@@ -2143,7 +2174,7 @@ export class CrawlerService {
     // 同步模式：等待执行完成（向后兼容）
     try {
       // 执行所有日期任务（分批并行）
-      const MAX_CONCURRENT_TASKS = 10; // 最多同时执行 10 个日期任务
+      const MAX_CONCURRENT_TASKS = CrawlerService.REFRESH_FLIGHTS_DATE_CONCURRENCY;
       const taskResults: Array<{ taskId: number; date: string; success: boolean; count: number }> = [];
       let totalCount = 0;
 
@@ -2240,7 +2271,7 @@ export class CrawlerService {
         details: JSON.stringify({ dateRange: [date], totalAirports: airports.length }),
       });
     }
-    let browser: puppeteer.Browser | null = null;
+    let browser: any | null = null;
 
     const launchBrowser = () => puppeteer.launch({
       headless: true,
@@ -2252,8 +2283,8 @@ export class CrawlerService {
       // 每个子任务独立浏览器，由父任务控制并发数（MAX_CONCURRENT_DATES）
       browser = await launchBrowser();
 
-      // 信号量：最多 3 个 page 同时运行（避免资源耗尽）
-      const MAX_CONCURRENT = 3;
+      // 信号量：最多 REFRESH_FLIGHTS_AIRPORT_CONCURRENCY 个 page 同时运行
+      const MAX_CONCURRENT = CrawlerService.REFRESH_FLIGHTS_AIRPORT_CONCURRENCY;
       let running = 0;
       let airportIndex = 0;
       let totalSaved = 0;
@@ -2380,6 +2411,8 @@ export class CrawlerService {
     airports: string[],
     executionPlan: any,
   ): Promise<void> {
+    // 确保停止信号已清除（防止上次 forceStop 的残留信号影响本次任务）
+    this.stopRequested = false;
     this.logger.log(`📋 [父任务 #${mainLogId}] 后台开始执行：${dates.length} 天 × ${airports.length} 个机场`);
 
     try {
@@ -2397,14 +2430,14 @@ export class CrawlerService {
       }
       this.logger.log(`📝 [父任务 #${mainLogId}] 预创建 ${dates.length} 个子任务记录`);
 
-      // 日期子任务并行执行，每个子任务独立浏览器，最多 MAX_CONCURRENT_DATES 个同时运行
-      const MAX_CONCURRENT_DATES = 3;
+      // 日期子任务并行执行，每个子任务独立浏览器，最多 REFRESH_FLIGHTS_DATE_CONCURRENCY 个同时运行
+      const MAX_CONCURRENT_DATES = CrawlerService.REFRESH_FLIGHTS_DATE_CONCURRENCY;
       const taskResults: Array<{ taskId: number; date: string; success: boolean; count: number }> = [];
       let totalCount = 0;
       let dateIndex = 0;
       let running = 0;
 
-      this.logger.log(`🚀 [父任务 #${mainLogId}] 最多 ${MAX_CONCURRENT_DATES} 个日期并行，每日 3 个机场并发`);
+      this.logger.log(`🚀 [父任务 #${mainLogId}] 最多 ${MAX_CONCURRENT_DATES} 个日期并行，每日 ${CrawlerService.REFRESH_FLIGHTS_AIRPORT_CONCURRENCY} 个机场并发`);
 
       await new Promise<void>((resolve, reject) => {
         const runNext = () => {
@@ -2496,20 +2529,18 @@ export class CrawlerService {
    * 计算预估执行时间
    */
   private calculateEstimatedTime(totalDays: number, airportCount: number): string {
-    // 估算：每个机场每天需要 30-60 秒
-    // 10 个任务并行，每个任务 5 个机场并行
-    const timePerAirportPerDay = 45; // 秒
-    const concurrentTasks = 10;
-    const airportsPerTask = Math.ceil(airportCount / concurrentTasks);
+    // 直接从执行常量推导，修改并发度时预估自动更新：
+    // 总耗时 = 日期批次数 × 机场批次数 × 单机场耗时
+    const dateBatches = Math.ceil(totalDays / CrawlerService.REFRESH_FLIGHTS_DATE_CONCURRENCY);
+    const airportBatches = Math.ceil(airportCount / CrawlerService.REFRESH_FLIGHTS_AIRPORT_CONCURRENCY);
+    const totalSeconds = dateBatches * airportBatches * CrawlerService.SECONDS_PER_AIRPORT;
+    const totalMinutes = Math.ceil(totalSeconds / 60);
 
-    const estimatedSeconds = Math.ceil((totalDays / concurrentTasks) * (airportsPerTask * timePerAirportPerDay));
-    const minutes = Math.ceil(estimatedSeconds / 60);
-
-    if (minutes < 1) return '小于 1 分钟';
-    if (minutes < 60) return `约 ${minutes} 分钟`;
-
-    const hours = Math.ceil(minutes / 60);
-    return `约 ${hours} 小时`;
+    if (totalMinutes < 1) return '小于 1 分钟';
+    if (totalMinutes < 60) return `约 ${totalMinutes} 分钟`;
+    const hours = Math.floor(totalMinutes / 60);
+    const mins = totalMinutes % 60;
+    return mins > 0 ? `约 ${hours} 小时 ${mins} 分钟` : `约 ${hours} 小时`;
   }
 
 
@@ -2776,6 +2807,97 @@ export class CrawlerService {
     } catch (error) {
       this.logger.error('❌ 定时任务失败', error);
     }
+  }
+
+  /**
+   * 每小时清理过期缓存
+   */
+  @Cron('0 * * * *', {
+    name: 'clean-expired-cache',
+    timeZone: 'Asia/Shanghai',
+  })
+  async scheduledCleanExpiredCache() {
+    this.logger.log('⏰ 定时任务：开始清理过期缓存');
+    try {
+      await this.routeService.cleanExpiredCache();
+    } catch (error) {
+      this.logger.error('❌ 清理过期缓存失败', error);
+    }
+  }
+
+  /**
+   * 每小时刷新所有城市的目的地查询缓存
+   * 刷新内容：destinations 缓存 + transfer 缓存
+   */
+  @Cron('7 * * * *', {
+    name: 'refresh-destination-cache',
+    timeZone: 'Asia/Shanghai',
+  })
+  async scheduledRefreshDestinationCache() {
+    this.logger.log('⏰ 定时缓存刷新：开始刷新所有城市目的地查询缓存');
+
+    // 获取所有城市
+    const { cityList } = await this.flightService.getAvailableCities();
+    if (cityList.length === 0) {
+      this.logger.warn('⚠️ 无城市数据，跳过缓存刷新');
+      return;
+    }
+
+    // 与前端 getDefaultDateRange() 保持一致：今天 ~ 今天+1个月
+    const today = new Date();
+    const nextMonth = new Date(today);
+    nextMonth.setMonth(nextMonth.getMonth() + 1);
+    const fmt = (d: Date) => d.toISOString().split('T')[0];
+    const startDate = fmt(today);
+    const endDate = fmt(nextMonth);
+
+    this.logger.log(`📋 共 ${cityList.length} 个城市待刷新，日期范围 ${startDate} ~ ${endDate}，并发度 3`);
+
+    let successCount = 0;
+    let failCount = 0;
+
+    // 并发度 3：每个城市需做 destinations + transfer 两次重计算，避免压垮数据库
+    const CONCURRENCY = 3;
+    let i = 0;
+    const run = async () => {
+      while (i < cityList.length) {
+        const city = cityList[i++];
+        try {
+          // 删除旧缓存
+          const destCacheList = await this.flightService.listQueryCache({ type: 'destinations' });
+          const keysToDelete = destCacheList.list
+            .filter(c => c.cacheKey.startsWith(`destinations|${city}|`))
+            .map(c => c.cacheKey);
+          if (keysToDelete.length > 0) {
+            await this.flightService.deleteCacheByKeys(keysToDelete);
+          }
+          await this.routeService.clearTransferCacheByOrigin(city);
+
+          // 重新查询（自动写入新缓存，key 与前端默认日期一致，首次加载直接命中）
+          await this.flightService.queryDestinations({
+            origin: city,
+            startDate,
+            endDate,
+            includeReturn: true,
+          });
+          await this.routeService.discoverTransferDestinations({
+            origin: city,
+            departureDate: startDate,
+            endDate,
+            maxTransfers: 1,
+          });
+
+          this.logger.log(`✅ [${successCount + failCount + 1}/${cityList.length}] ${city} 缓存刷新完成`);
+          successCount++;
+        } catch (error) {
+          this.logger.warn(`⚠️ ${city} 缓存刷新失败: ${error.message}`);
+          failCount++;
+        }
+      }
+    };
+
+    await Promise.all(Array.from({ length: Math.min(CONCURRENCY, cityList.length) }, run));
+    this.logger.log(`⏰ 缓存刷新完成：${successCount} 成功 / ${failCount} 失败`);
   }
 
   /**

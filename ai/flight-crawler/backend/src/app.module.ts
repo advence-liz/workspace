@@ -1,5 +1,7 @@
-import { Module } from '@nestjs/common';
+import { Module, NestModule, MiddlewareConsumer } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
+import { AppController } from './app.controller';
+import { HttpLoggerMiddleware } from './http-logger.middleware';
 import { ScheduleModule } from '@nestjs/schedule';
 import { ConfigModule } from '@nestjs/config';
 import { WinstonModule } from 'nest-winston';
@@ -9,6 +11,7 @@ import { RouteModule } from './modules/route/route.module';
 import { winstonConfig } from './config/logger.config';
 
 @Module({
+  controllers: [AppController],
   imports: [
     // 配置模块
     ConfigModule.forRoot({
@@ -37,4 +40,8 @@ import { winstonConfig } from './config/logger.config';
     RouteModule,
   ],
 })
-export class AppModule {}
+export class AppModule implements NestModule {
+  configure(consumer: MiddlewareConsumer) {
+    consumer.apply(HttpLoggerMiddleware).forRoutes('*');
+  }
+}

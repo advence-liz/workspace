@@ -6,10 +6,10 @@ dist/
 logs/
 *.log
 
-# 数据库
-data/
-*.db
+# 数据库（保留主数据库文件，忽略临时文件）
 *.db-journal
+*.db-shm
+*.db-wal
 
 # 环境变量
 .env

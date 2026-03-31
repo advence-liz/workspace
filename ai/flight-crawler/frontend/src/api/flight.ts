@@ -5,7 +5,7 @@ export interface QueryFlightsParams {
   destination?: string;
   startDate: string;
   endDate: string;
-  flightType?: '全部' | '666权益卡' | '2666权益卡';
+  flightType?: '666权益卡航班' | '2666权益卡航班';
 }
 
 export interface DestinationResult {
@@ -42,14 +42,14 @@ export interface Flight {
 
 // 查询所有可达目的地
 export const queryDestinations = (
-  params: QueryFlightsParams
+  params: QueryFlightsParams & { includeReturn?: boolean }
 ): Promise<DestinationsResponse> => {
   return api.get('/flights/destinations', { params });
 };
 
 
 // 获取所有可用的城市列表
-export const getAvailableCities = (): Promise<{ origins: string[]; destinations: string[] }> => {
+export const getAvailableCities = (): Promise<{ origins: string[]; destinations: string[]; cityList: string[]; minDate: string | null; maxDate: string | null }> => {
   return api.get('/flights/cities');
 };
 
@@ -201,6 +201,63 @@ export const cleanAllLogs = (): Promise<{ deletedCount: number; message: string 
   return api.delete('/crawler/logs/clean-all');
 };
 
+// 定时任务相关
+export interface CronJob {
+  name: string;
+  cron: string;
+  desc: string;
+  active: boolean;
+  running: boolean;
+  nextDate: string | null;
+}
+
+export const getCronJobs = (): Promise<CronJob[]> => {
+  return api.get('/crawler/cron/list');
+};
+
+export const triggerCronJob = (name: string): Promise<{ success: boolean; message: string }> => {
+  return api.post('/crawler/cron/trigger', { name });
+};
+
+export const toggleCronJob = (name: string, enable: boolean): Promise<{ success: boolean; running: boolean; message: string }> => {
+  return api.post('/crawler/cron/toggle', { name, enable });
+};
+
+// 清除所有查询缓存
+export const clearQueryCache = (): Promise<{ deletedCount: number; message: string }> => {
+  return api.delete('/crawler/cache/clear');
+};
+
+// 查询缓存统计（含缓存开关状态）
+export const getQueryCacheStats = (): Promise<{ total: number; expired: number; valid: number; disabled: boolean }> => {
+  return api.get('/crawler/cache/stats');
+};
+
+// 缓存条目
+export interface CacheItem {
+  cacheKey: string;
+  type: string;
+  createdAt: string;
+  expireAt: string;
+  expired: boolean;
+  dataSize: number;
+}
+
+// 查询缓存列表
+export const listQueryCache = (params?: { page?: number; pageSize?: number; type?: string }): Promise<{ list: CacheItem[]; total: number }> => {
+  return api.get('/crawler/cache/list', { params });
+};
+
+// 批量删除缓存
+export const deleteCacheByKeys = (keys: string[]): Promise<{ deletedCount: number }> => {
+  return api.delete('/crawler/cache/batch', { data: { keys } });
+};
+
+// 切换缓存开关
+export const toggleCache = (enable: boolean): Promise<{ disabled: boolean }> => {
+  return api.post('/crawler/cache/toggle', { enable });
+};
+
 // 查询往返航班详情
 export interface RoundTripFlights {
   outboundFlights: Flight[];
@@ -270,4 +327,96 @@ export const deleteFlightsBeforeDays = (days: number): Promise<{
   message: string;
 }> => {
   return api.delete(`/flights/before-days/${days}`);
+};
+
+// 路由规划相关类型
+export interface FlightSegment {
+  flightNo: string;
+  origin: string;
+  destination: string;
+  departureTime: string;
+  arrivalTime: string;
+  duration: number; // 分钟
+}
+
+export interface RouteResult {
+  segments: FlightSegment[];
+  totalDuration: number; // 分钟
+  transferCount: number;
+  layovers: { city: string; duration: number }[];
+  score: number;
+}
+
+export interface RoutePlanResponse {
+  routes: RouteResult[];
+  searchParams: {
+    origin: string;
+    destination?: string;
+    departureDate: string;
+    endDate?: string;
+    maxTransfers: number;
+  };
+}
+
+// 规划路线（支持中转）
+export const planRoute = (params: {
+  origin: string;
+  destination: string;
+  departureDate: string;
+  endDate?: string;
+  maxTransfers?: number;
+  minLayoverHours?: number;
+  maxLayoverHours?: number;
+}): Promise<RoutePlanResponse> => {
+  return api.post('/routes/plan', params);
+};
+
+// 发现中转目的地（中转往返 + 中转单程）
+export interface TransferRoundTripDest {
+  city: string;
+  outboundRoutes: RouteResult[];
+  returnRoutes: RouteResult[];
+  outboundCount: number;
+  returnCount: number;
+}
+
+export interface TransferOneWayDest {
+  city: string;
+  routes: RouteResult[];
+  routeCount: number;
+}
+
+export interface DiscoverTransferResponse {
+  roundTrip: TransferRoundTripDest[];
+  oneWay: TransferOneWayDest[];
+  total: number;
+}
+
+// 手动触发中转缓存预热
+export const warmupTransferCache = (): Promise<{ message: string }> => {
+  return api.post('/routes/warmup-cache');
+};
+
+// 查询缓存预热状态
+export interface WarmupStatus {
+  running: boolean;
+  total: number;
+  warmed: number;
+  skipped: number;
+  current: string | null;
+  startedAt: string | null;
+  finishedAt: string | null;
+}
+
+export const getWarmupCacheStatus = (): Promise<WarmupStatus> => {
+  return api.get('/routes/warmup-cache/status');
+};
+
+export const discoverTransferDestinations = (params: {
+  origin: string;
+  departureDate: string;
+  endDate?: string;
+  maxTransfers?: number;
+}): Promise<DiscoverTransferResponse> => {
+  return api.post('/routes/discover-transfer', params, { timeout: 120000 }); // 中转搜索最多等 2 分钟
 };

@@ -1,4 +1,4 @@
-import { IsString, IsDateString, IsOptional, IsInt, Min, Max } from 'class-validator';
+import { IsString, IsDateString, IsOptional, IsInt, Min, Max, IsIn } from 'class-validator';
 
 /**
  * 单程行程规划 DTO
@@ -6,6 +6,11 @@ import { IsString, IsDateString, IsOptional, IsInt, Min, Max } from 'class-valid
 export class PlanRouteDto {
   @IsString()
   origin: string;
+
+  @IsString()
+  @IsIn(['666权益卡航班', '2666权益卡航班'])
+  @IsOptional()
+  flightType?: string; // 不传则显示全部（2666 含全部）
 
   @IsString()
   @IsOptional()

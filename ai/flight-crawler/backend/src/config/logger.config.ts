@@ -8,7 +8,7 @@ const logDir = path.join(process.cwd(), 'logs');
 
 // 日志格式
 const logFormat = winston.format.combine(
-  winston.format.timestamp({ format: 'YYYY-MM-DD HH:mm:ss' }),
+  winston.format.timestamp({ format: () => new Date().toLocaleString('zh-CN', { timeZone: 'Asia/Shanghai', hour12: false }).replace(/\//g, '-') }),
   winston.format.errors({ stack: true }),
   winston.format.splat(),
   winston.format.printf(({ timestamp, level, message, context, stack }) => {
@@ -21,7 +21,7 @@ const logFormat = winston.format.combine(
 // 控制台输出格式（带颜色）
 const consoleFormat = winston.format.combine(
   winston.format.colorize({ all: true }),
-  winston.format.timestamp({ format: 'YYYY-MM-DD HH:mm:ss' }),
+  winston.format.timestamp({ format: () => new Date().toLocaleString('zh-CN', { timeZone: 'Asia/Shanghai', hour12: false }).replace(/\//g, '-') }),
   winston.format.printf(({ timestamp, level, message, context }) => {
     const contextStr = context ? `[${context}]` : '';
     return `${timestamp} ${level} ${contextStr} ${message}`;

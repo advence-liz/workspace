@@ -11,7 +11,9 @@ import {
   Body,
   NotFoundException,
   BadRequestException,
+  UseGuards,
 } from '@nestjs/common';
+import { AdminGuard } from '../../admin.guard';
 import { AirportService } from './airport.service';
 import { QueryAirportsWithPaginationDto } from './dto/query-airports-pagination.dto';
 import { UpdateAirportDto } from './dto/update-airport.dto';
@@ -64,6 +66,7 @@ export class AirportController {
    * PUT /api/airports/:id
    */
   @Put(':id')
+  @UseGuards(AdminGuard)
   @HttpCode(HttpStatus.OK)
   async updateAirport(
     @Param('id') id: number,
@@ -85,6 +88,7 @@ export class AirportController {
    * DELETE /api/airports/:id
    */
   @Delete(':id')
+  @UseGuards(AdminGuard)
   @HttpCode(HttpStatus.OK)
   async deleteAirport(@Param('id') id: number) {
     try {
@@ -100,6 +104,7 @@ export class AirportController {
    * POST /api/airports/batch-delete
    */
   @Post('batch-delete')
+  @UseGuards(AdminGuard)
   @HttpCode(HttpStatus.OK)
   async batchDeleteAirports(@Body() body: BatchDeleteAirportsDto) {
     const deletedCount = await this.airportService.batchDeleteAirports(body.ids);

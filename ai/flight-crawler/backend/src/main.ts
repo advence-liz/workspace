@@ -18,10 +18,11 @@ async function bootstrap() {
     }),
   );
 
-  // 启用 CORS
+  // 启用 CORS（未配置时允许所有来源，适配线上前后端不同域场景）
+  const corsOrigin = process.env.CORS_ORIGIN || '*';
   app.enableCors({
-    origin: process.env.CORS_ORIGIN || 'http://localhost:5173',
-    credentials: true,
+    origin: corsOrigin,
+    credentials: corsOrigin !== '*',
   });
 
   // 设置全局路由前缀

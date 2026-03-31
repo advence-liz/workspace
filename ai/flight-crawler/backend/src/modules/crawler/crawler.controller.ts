@@ -1,12 +1,28 @@
-import { Controller, Post, Get, Delete, HttpCode, HttpStatus, Body, Query, Param, BadRequestException } from '@nestjs/common';
+import { Controller, Post, Get, Delete, HttpCode, HttpStatus, Body, Query, Param, BadRequestException, Inject, UseGuards } from '@nestjs/common';
+import { SchedulerRegistry } from '@nestjs/schedule';
+import { AdminGuard } from '../../admin.guard';
 import { CrawlerService } from './crawler.service';
+import { CrawlerServiceStub } from './crawler.service.stub';
+import { FlightService } from '../flight/flight.service';
 import { InitializeDiscoverDto, InitializeRefreshFlightsDto } from './dto/initialize.dto';
 import { QueryLogsDto } from './dto/query-logs.dto';
 import { CleanLogsDto } from './dto/clean-logs.dto';
 
+// 定时任务元数据（固定配置，与 crawler.service.ts 中的 @Cron 保持一致）
+const CRON_JOB_META = [
+  { name: 'auto-crawl-flights',          cron: '0 2 * * *',  desc: '每日凌晨 2 点自动爬取航班数据' },
+  { name: 'clean-expired-cache',         cron: '0 * * * *',  desc: '每小时清理过期缓存' },
+  { name: 'refresh-destination-cache',   cron: '7 * * * *',  desc: '每小时刷新所有城市目的地查询缓存' },
+];
+
 @Controller('crawler')
 export class CrawlerController {
-  constructor(private readonly crawlerService: CrawlerService) {}
+  constructor(
+    @Inject('CrawlerService')
+    private readonly crawlerService: CrawlerService | CrawlerServiceStub,
+    private readonly flightService: FlightService,
+    private readonly schedulerRegistry: SchedulerRegistry,
+  ) {}
 
   /**
    * 调试爬虫 - 单次爬取指定城市和日期
@@ -14,6 +30,7 @@ export class CrawlerController {
    * 如果不提供 date，则爬取明天的数据
    */
   @Get('debug')
+  @UseGuards(AdminGuard)
   @HttpCode(HttpStatus.OK)
   async debugPage(@Query('origin') origin?: string, @Query('date') date?: string) {
     const crawlOrigin = origin || '北京';
@@ -30,6 +47,7 @@ export class CrawlerController {
    * Body: { days?: number } // 可选，默认 1 天
    */
   @Post('initialize/discover')
+  @UseGuards(AdminGuard)
   @HttpCode(HttpStatus.OK)
   async initializeDiscover(@Body() dto: InitializeDiscoverDto) {
     const result = await this.crawlerService.initializeDiscoverAirports(dto.days, dto.planOnly);
@@ -59,6 +77,7 @@ export class CrawlerController {
    * 2. 仅获取计划：{ "startDate": "2026-03-18", "endDate": "2026-03-25", "planOnly": true }
    */
   @Post('initialize/refresh')
+  @UseGuards(AdminGuard)
   @HttpCode(HttpStatus.OK)
   async initializeRefresh(@Body() dto: InitializeRefreshFlightsDto) {
     // 验证日期有效性
@@ -82,7 +101,7 @@ export class CrawlerController {
 
     if (dto.planOnly) {
       return {
-        message: `执行计划已生成：${result.executionPlan.totalTasks} 个任务，预计 ${result.executionPlan.estimatedTime}`,
+        message: `执行计划已生成：${result.executionPlan?.totalTasks} 个任务，预计 ${result.executionPlan?.estimatedTime}`,
         ...result,
       };
     }
@@ -110,6 +129,7 @@ export class CrawlerController {
    * POST /api/crawler/stop
    */
   @Post('stop')
+  @UseGuards(AdminGuard)
   @HttpCode(HttpStatus.OK)
   async stopCrawler() {
     return this.crawlerService.forceStop();
@@ -170,6 +190,7 @@ export class CrawlerController {
    * Body: { days?: number } // 保留最近多少天的日志，默认 90 天
    */
   @Delete('logs/clean')
+  @UseGuards(AdminGuard)
   @HttpCode(HttpStatus.OK)
   async cleanOldLogs(@Body() dto: CleanLogsDto) {
     const result = await this.crawlerService.cleanOldLogs(dto.days);
@@ -184,6 +205,7 @@ export class CrawlerController {
    * DELETE /api/crawler/logs/clean-all
    */
   @Delete('logs/clean-all')
+  @UseGuards(AdminGuard)
   @HttpCode(HttpStatus.OK)
   async cleanAllLogs() {
     const result = await this.crawlerService.cleanAllLogs();
@@ -191,5 +213,133 @@ export class CrawlerController {
       message: `成功清理 ${result.deletedCount} 条日志`,
       ...result,
     };
+  }
+
+  /**
+   * 清除所有查询缓存（destinations + explore）
+   * DELETE /api/crawler/cache/clear
+   */
+  @Delete('cache/clear')
+  @UseGuards(AdminGuard)
+  @HttpCode(HttpStatus.OK)
+  async clearQueryCache() {
+    const result = await this.flightService.clearQueryCache();
+    return {
+      message: `已清除所有查询缓存`,
+      ...result,
+    };
+  }
+
+  /**
+   * 查询缓存统计（含缓存开关状态）
+   * GET /api/crawler/cache/stats
+   */
+  @Get('cache/stats')
+  @HttpCode(HttpStatus.OK)
+  async getQueryCacheStats() {
+    return this.flightService.getQueryCacheStats();
+  }
+
+  /**
+   * 查询缓存列表（分页 + 类型筛选）
+   * GET /api/crawler/cache/list
+   */
+  @Get('cache/list')
+  @HttpCode(HttpStatus.OK)
+  async listQueryCache(
+    @Query('page') page?: string,
+    @Query('pageSize') pageSize?: string,
+    @Query('type') type?: string,
+  ) {
+    return this.flightService.listQueryCache({
+      page: page ? parseInt(page) : 1,
+      pageSize: pageSize ? parseInt(pageSize) : 20,
+      type,
+    });
+  }
+
+  /**
+   * 批量删除缓存
+   * DELETE /api/crawler/cache/batch
+   */
+  @Delete('cache/batch')
+  @UseGuards(AdminGuard)
+  @HttpCode(HttpStatus.OK)
+  async deleteCacheByKeys(@Body('keys') keys: string[]) {
+    if (!keys?.length) throw new BadRequestException('keys 不能为空');
+    return this.flightService.deleteCacheByKeys(keys);
+  }
+
+  /**
+   * 切换缓存开关
+   * POST /api/crawler/cache/toggle
+   */
+  @Post('cache/toggle')
+  @UseGuards(AdminGuard)
+  @HttpCode(HttpStatus.OK)
+  async toggleCache(@Body('enable') enable: boolean) {
+    return this.flightService.toggleCache(enable);
+  }
+
+  /**
+   * 查询所有定时任务状态
+   * GET /api/crawler/cron/list
+   */
+  @Get('cron/list')
+  @HttpCode(HttpStatus.OK)
+  getCronJobs() {
+    return CRON_JOB_META.map(meta => {
+      let active = false;
+      let running = false;
+      let nextDate: string | null = null;
+      try {
+        const job = this.schedulerRegistry.getCronJob(meta.name);
+        active = true;
+        running = job.running; // true=运行中，false=已停止
+        const next = job.nextDate();
+        nextDate = next ? next.toISO() : null;
+      } catch {
+        // 任务不存在（如生产环境禁用了爬虫）
+      }
+      return { ...meta, active, running, nextDate };
+    });
+  }
+
+  /**
+   * 立即触发指定定时任务
+   * POST /api/crawler/cron/trigger
+   */
+  @Post('cron/trigger')
+  @UseGuards(AdminGuard)
+  @HttpCode(HttpStatus.OK)
+  async triggerCronJob(@Body('name') name: string) {
+    try {
+      const job = this.schedulerRegistry.getCronJob(name);
+      job.fireOnTick();
+      return { success: true, message: `已触发任务: ${name}` };
+    } catch {
+      return { success: false, message: `任务不存在: ${name}` };
+    }
+  }
+
+  /**
+   * 启动/停止指定定时任务
+   * POST /api/crawler/cron/toggle
+   */
+  @Post('cron/toggle')
+  @UseGuards(AdminGuard)
+  @HttpCode(HttpStatus.OK)
+  toggleCronJob(@Body('name') name: string, @Body('enable') enable: boolean) {
+    try {
+      const job = this.schedulerRegistry.getCronJob(name);
+      if (enable) {
+        job.start();
+      } else {
+        job.stop();
+      }
+      return { success: true, running: job.running, message: `任务 ${name} 已${enable ? '启动' : '停止'}` };
+    } catch {
+      return { success: false, message: `任务不存在: ${name}` };
+    }
   }
 }

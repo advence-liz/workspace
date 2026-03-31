@@ -1,10 +1,11 @@
-import { Entity, Column, PrimaryGeneratedColumn, CreateDateColumn, UpdateDateColumn } from 'typeorm';
+import { Entity, Column, PrimaryGeneratedColumn, CreateDateColumn, UpdateDateColumn, Index } from 'typeorm';
 
 /**
  * 机场实体
  * 用于存储自动发现的机场信息
  */
 @Entity('airports')
+@Index(['city', 'enableCrawl']) // expandCityToAirports 的高频查询
 export class Airport {
   @PrimaryGeneratedColumn()
   id: number;

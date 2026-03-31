@@ -4,6 +4,7 @@ import {
   IsDateString,
   IsOptional,
   IsInt,
+  IsIn,
   Min,
   Max,
 } from 'class-validator';
@@ -32,4 +33,9 @@ export class ExploreRouteDto {
   @Min(0)
   @Max(2)
   maxTransfers?: number;
+
+  @IsOptional()
+  @IsString()
+  @IsIn(['666权益卡航班', '2666权益卡航班'])
+  flightType?: string;
 }

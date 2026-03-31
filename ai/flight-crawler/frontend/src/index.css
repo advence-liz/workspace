@@ -16,3 +16,117 @@ body {
 #root {
   min-height: 100vh;
 }
+
+/* ─── 移动端全局优化 ─────────────────────────────────────── */
+
+@media (max-width: 768px) {
+  /* 减少页面内边距 */
+  .ant-layout-content {
+    padding: 16px !important;
+  }
+
+  /* 表格字体缩小 */
+  .ant-table {
+    font-size: 13px;
+  }
+
+  /* Modal 全屏优化 */
+  .ant-modal {
+    max-width: 95vw;
+    margin: 10px auto;
+  }
+
+  /* Card 间距优化 */
+  .ant-card {
+    margin-bottom: 12px;
+  }
+
+  /* 统计卡片字体调整 */
+  .ant-statistic-title {
+    font-size: 11px;
+  }
+
+  .ant-statistic-content {
+    font-size: 16px;
+  }
+
+  /* Form 表单优化 */
+  .ant-form-vertical .ant-form-item {
+    margin-bottom: 12px !important;
+  }
+
+  .ant-form-item-label {
+    padding-bottom: 4px !important;
+  }
+
+  /* Space 组件间距优化 */
+  .ant-space-vertical.ant-space-middle {
+    gap: 12px !important;
+  }
+
+  /* 日期选择器弹出层优化 */
+  .ant-picker-dropdown {
+    max-width: 95vw !important;
+  }
+
+  /* 日期范围选择器面板优化 */
+  .ant-picker-panel-container {
+    max-width: 95vw !important;
+  }
+
+  /* 日期范围选择器双面板改为单面板（移动端友好） */
+  .ant-picker-panels {
+    flex-direction: column !important;
+  }
+
+  /* 日期选择器面板内边距调整 */
+  .ant-picker-panel {
+    width: 100% !important;
+  }
+
+  /* 日期选择器日期单元格大小调整 */
+  .ant-picker-cell {
+    padding: 2px 0 !important;
+  }
+
+  .ant-picker-cell-inner {
+    min-width: 20px !important;
+    height: 20px !important;
+    line-height: 20px !important;
+    font-size: 12px !important;
+  }
+
+  /* Tab 标签优化 */
+  .ant-tabs-nav {
+    margin-bottom: 8px !important;
+  }
+
+  .ant-tabs-tab {
+    padding: 8px 8px !important;
+    font-size: 13px !important;
+  }
+
+  .ant-tabs-tab-btn {
+    white-space: nowrap;
+  }
+
+  /* Tab 标签徽章优化 */
+  .ant-tabs-tab .ant-badge {
+    margin-left: 2px;
+  }
+
+  .ant-tabs-tab .ant-badge-count {
+    font-size: 11px !important;
+    height: 16px !important;
+    line-height: 16px !important;
+    min-width: 16px !important;
+    padding: 0 4px !important;
+  }
+}
+
+/* 平板优化 */
+@media (min-width: 768px) and (max-width: 992px) {
+  .ant-layout-content {
+    padding: 20px !important;
+  }
+}

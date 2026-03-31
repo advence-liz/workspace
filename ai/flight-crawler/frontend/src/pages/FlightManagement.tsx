@@ -36,7 +36,7 @@ import {
   getAvailableCities,
   type Flight,
 } from '@/api/flight';
-import { getDefaultOrigin, setOriginCookie } from '@/utils/cookie';
+import { getOriginCookie, setOriginCookie } from '@/utils/cookie';
 
 const { Title, Paragraph } = Typography;
 const { RangePicker } = DatePicker;
@@ -124,7 +124,7 @@ function FlightManagement() {
 
   // 初始化：设置表单默认值，加载城市和航班
   useEffect(() => {
-    const savedOrigin = getDefaultOrigin('');
+    const savedOrigin = getOriginCookie(); // 航班管理用机场名精确查询，直接读原始 cookie
     filterForm.setFieldsValue({
       origin: savedOrigin || undefined,
       dateRange: defaultDateRange,
@@ -308,9 +308,9 @@ function FlightManagement() {
     });
   };
 
-  // 删除一周前的历史航班
+  // 删除一天前的历史航班
   const handleDeleteOldFlights = () => {
-    const days = 7;
+    const days = 1;
     const cutoffDate = new Date();
     cutoffDate.setDate(cutoffDate.getDate() - days);
     const cutoffStr = cutoffDate.toISOString().split('T')[0];
@@ -424,6 +424,7 @@ function FlightManagement() {
             size="small"
             icon={<EditOutlined />}
             onClick={() => handleEdit(record)}
+            disabled
           >
             编辑
           </Button>
@@ -433,6 +434,7 @@ function FlightManagement() {
             danger
             icon={<DeleteOutlined />}
             onClick={() => handleDelete(record.id, record.flightNo)}
+            disabled
           >
             删除
           </Button>
@@ -519,8 +521,8 @@ function FlightManagement() {
           <Form.Item name="cardType" label="权益卡类型">
             <Select placeholder="请选择" allowClear style={{ width: 180 }}>
               <Select.Option value="全部">全部</Select.Option>
-              <Select.Option value="666权益卡航班">666权益卡航班</Select.Option>
-              <Select.Option value="2666权益卡航班">2666权益卡航班</Select.Option>
+              <Select.Option value="666权益卡航班">666</Select.Option>
+              <Select.Option value="2666权益卡航班">2666</Select.Option>
             </Select>
           </Form.Item>
 
@@ -550,7 +552,7 @@ function FlightManagement() {
               danger
               icon={<DeleteOutlined />}
               onClick={handleBatchDelete}
-              disabled={selectedRowKeys.length === 0}
+              disabled
             >
               批量删除 ({selectedRowKeys.length})
             </Button>
@@ -559,7 +561,7 @@ function FlightManagement() {
               icon={<DeleteOutlined />}
               onClick={handleDeleteOldFlights}
             >
-              删除一周前数据
+              删除一天前数据
             </Button>
             <Button icon={<ExportOutlined />} onClick={handleExport}>
               导出 Excel
@@ -618,8 +620,8 @@ function FlightManagement() {
           <Form.Item name="cardType" label="权益卡类型" rules={[{ required: true, message: '请选择权益卡类型' }]}>
             <Select>
               <Select.Option value="全部">全部</Select.Option>
-              <Select.Option value="666权益卡航班">666权益卡航班</Select.Option>
-              <Select.Option value="2666权益卡航班">2666权益卡航班</Select.Option>
+              <Select.Option value="666权益卡航班">666</Select.Option>
+              <Select.Option value="2666权益卡航班">2666</Select.Option>
             </Select>
           </Form.Item>
 

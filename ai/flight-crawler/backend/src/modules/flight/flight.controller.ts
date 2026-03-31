@@ -11,7 +11,9 @@ import {
   Body,
   NotFoundException,
   BadRequestException,
+  UseGuards,
 } from '@nestjs/common';
+import { AdminGuard } from '../../admin.guard';
 import { FlightService } from './flight.service';
 import { QueryFlightsDto } from './dto/query-flights.dto';
 import { QueryFlightsWithPaginationDto } from './dto/query-flights-pagination.dto';
@@ -91,6 +93,7 @@ export class FlightController {
    * PUT /api/flights/:id
    */
   @Put(':id')
+  @UseGuards(AdminGuard)
   @HttpCode(HttpStatus.OK)
   async updateFlight(
     @Param('id') id: number,
@@ -112,6 +115,7 @@ export class FlightController {
    * DELETE /api/flights/:id
    */
   @Delete(':id')
+  @UseGuards(AdminGuard)
   @HttpCode(HttpStatus.OK)
   async deleteFlight(@Param('id') id: number) {
     try {
@@ -127,6 +131,7 @@ export class FlightController {
    * POST /api/flights/batch-delete
    */
   @Post('batch-delete')
+  @UseGuards(AdminGuard)
   @HttpCode(HttpStatus.OK)
   async batchDeleteFlights(@Body() body: BatchDeleteFlightsDto) {
     const deletedCount = await this.flightService.batchDeleteFlights(body.ids);
@@ -142,6 +147,7 @@ export class FlightController {
    * DELETE /api/flights/before-days/:days
    */
   @Delete('before-days/:days')
+  @UseGuards(AdminGuard)
   @HttpCode(HttpStatus.OK)
   async deleteFlightsBeforeDays(@Param('days') days: string) {
     const daysNum = parseInt(days, 10);

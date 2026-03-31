@@ -17,7 +17,10 @@ import {
   DatePicker,
   Descriptions,
   InputNumber,
+  Input,
 } from 'antd';
+import { SaveOutlined } from '@ant-design/icons';
+import { getAdminToken, setAdminToken } from '@/utils/auth';
 import type { ColumnsType } from 'antd/es/table';
 import {
   ReloadOutlined,
@@ -54,6 +57,10 @@ function DataManagement() {
   const [discoverForm] = Form.useForm();
   const [refreshForm] = Form.useForm();
 
+  // Admin Token 相关状态
+  const [adminToken, setAdminTokenState] = useState(getAdminToken);
+  const [tokenInput, setTokenInput] = useState(getAdminToken);
+
   // 发现机场相关状态
   const [discoverLoading, setDiscoverLoading] = useState(false);
   const [discoverResult, setDiscoverResult] = useState<any>(null);
@@ -71,6 +78,8 @@ function DataManagement() {
   // 停止任务
   const [stopLoading, setStopLoading] = useState(false);
 
+
+
   // 日志相关状态
   const [logs, setLogs] = useState<CrawlerLog[]>([]);
   const [logsLoading, setLogsLoading] = useState(false);
@@ -87,7 +96,7 @@ function DataManagement() {
   const [logDetailVisible, setLogDetailVisible] = useState(false);
   const [subLogs, setSubLogs] = useState<CrawlerLog[]>([]);
   const [subLogsLoading, setSubLogsLoading] = useState(false);
-  const [autoRefresh, setAutoRefresh] = useState(false);
+  const [autoRefresh, setAutoRefresh] = useState(true);
   const [refreshInterval] = useState(5); // 默认 5 秒
   const autoRefreshTimerRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const [logStats, setLogStats] = useState<LogStats | null>(null);
@@ -149,6 +158,7 @@ function DataManagement() {
       console.error(error);
     }
   };
+
 
   // 初始加载
   useEffect(() => {
@@ -467,16 +477,19 @@ function DataManagement() {
       render: (details?: string) => {
         if (!details) return '-';
         try {
-          const detailsObj = JSON.parse(details);
-          if (detailsObj.dateRange && Array.isArray(detailsObj.dateRange) && detailsObj.dateRange.length > 0) {
-            const startDate = detailsObj.dateRange[0];
-            const endDate = detailsObj.dateRange[detailsObj.dateRange.length - 1];
-            if (startDate === endDate) {
-              return startDate;
-            }
-            return `${startDate} ~ ${endDate}`;
-          }
-          return '-';
+          const d = JSON.parse(details);
+          // 兼容三种结构：
+          // 1. d.dateRange（顶层数组，discover_airports / refresh_flights 写入时）
+          // 2. d.executionPlan.dateRange（refresh_flights 父任务完成后写入）
+          // 3. d.date（refresh_flights_daily 子任务单日字段）
+          const range: string[] | undefined =
+            (Array.isArray(d.dateRange) && d.dateRange.length > 0 ? d.dateRange : null) ??
+            (Array.isArray(d.executionPlan?.dateRange) && d.executionPlan.dateRange.length > 0 ? d.executionPlan.dateRange : null) ??
+            (d.date ? [d.date] : null);
+          if (!range) return '-';
+          const start = range[0];
+          const end = range[range.length - 1];
+          return start === end ? start : `${start} ~ ${end}`;
         } catch {
           return '-';
         }
@@ -528,6 +541,39 @@ function DataManagement() {
       <Paragraph type="secondary">
         管理航班数据的爬取和更新
       </Paragraph>
+
+      {/* Admin Token 配置（仅生产环境显示） */}
+      {import.meta.env.PROD && (
+        <Card
+          size="small"
+          style={{ marginBottom: 24, background: '#fafafa' }}
+        >
+          <Space align="center" style={{ width: '100%' }}>
+            <Text strong style={{ whiteSpace: 'nowrap' }}>管理员 Token：</Text>
+            <Input.Password
+              value={tokenInput}
+              onChange={(e) => setTokenInput(e.target.value)}
+              placeholder="输入管理员 Token（未配置时留空）"
+              style={{ width: 320 }}
+              allowClear
+            />
+            <Button
+              type="primary"
+              icon={<SaveOutlined />}
+              onClick={() => {
+                setAdminToken(tokenInput);
+                setAdminTokenState(tokenInput);
+                message.success(tokenInput ? 'Token 已保存' : 'Token 已清除');
+              }}
+            >
+              保存
+            </Button>
+            {adminToken && (
+              <Text type="success" style={{ fontSize: 12 }}>✓ Token 已配置</Text>
+            )}
+          </Space>
+        </Card>
+      )}
 
       <Divider />
 
@@ -664,7 +710,6 @@ function DataManagement() {
               htmlType="submit"
               icon={<ReloadOutlined />}
               loading={discoverLoading}
-              disabled={!discoverPlan}
               block
             >
               开始发现机场
@@ -755,10 +800,10 @@ function DataManagement() {
                     {executionPlan.totalAirports} 个
                   </Descriptions.Item>
                   <Descriptions.Item label="并发度">
-                    10 个任务/批
+                    {(executionPlan as any).dateConcurrency ?? 10} 个日期/批，每日 {(executionPlan as any).airportConcurrency ?? 3} 个机场并发
                   </Descriptions.Item>
                   <Descriptions.Item label="预计耗时">
-                    {executionPlan.estimatedTime}
+                    {executionPlan.estimatedTime}（仅供参考，实际取决于航班数量）
                   </Descriptions.Item>
                   <Descriptions.Item label="日期范围">
                     {executionPlan.dateRange[0]} ~ {executionPlan.dateRange[executionPlan.dateRange.length - 1]}
@@ -839,7 +884,6 @@ function DataManagement() {
               htmlType="submit"
               icon={<ReloadOutlined />}
               loading={refreshLoading}
-              disabled={!executionPlan}
               block
             >
               开始执行

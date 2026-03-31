@@ -302,6 +302,7 @@ function AirportManagement() {
         <Switch
           checked={enableCrawl}
           onChange={() => handleToggleEnable(record)}
+          disabled
         />
       ),
     },
@@ -339,6 +340,7 @@ function AirportManagement() {
             size="small"
             icon={<EditOutlined />}
             onClick={() => handleEditAirport(record)}
+            disabled
           >
             编辑
           </Button>
@@ -347,6 +349,7 @@ function AirportManagement() {
             size="small"
             icon={<DeleteOutlined />}
             onClick={() => handleDeleteAirport(record)}
+            disabled
           >
             删除
           </Button>
@@ -471,6 +474,7 @@ function AirportManagement() {
               danger
               icon={<DeleteOutlined />}
               onClick={handleBatchDelete}
+              disabled
             >
               批量删除 ({selectedRowKeys.length})
             </Button>

@@ -1,6 +1,5 @@
 # Dependencies
 node_modules/
-package-lock.json
 yarn.lock
 pnpm-lock.yaml
 
@@ -30,6 +29,8 @@ Thumbs.db
 *.db
 *.sqlite
 *.sqlite3
+# 保留初始数据库（供首次部署使用）
+!backend/data/flight-crawler.db
 
 # Logs
 logs/
@@ -55,3 +56,5 @@ screenshots/
 debug-screenshots/
 debug-screenshots-view/
 debug-*.png
+.deploy.pid
+.claude/

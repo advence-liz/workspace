@@ -270,13 +270,25 @@ cd frontend && npm run dev
 
 ## 文档参考
 
-- [需求文档](./docs/REQUIREMENTS.md) - 详细功能需求和技术方案
-- [爬虫分析](./docs/CRAWLER_ANALYSIS.md) - 爬虫实现原理和反爬策略
+### 入门
 - [快速开始](./docs/QUICK_START.md) - 快速上手指南
+- [需求文档](./docs/REQUIREMENTS.md) - 详细功能需求和技术方案
+- [项目总结](./docs/PROJECT_SUMMARY.md) - 已完成功能全览
+
+### 功能说明
+- [数据管理](./docs/DATA_MANAGEMENT_FEATURE.md) - 数据管理界面和自定义时间范围
+- [航班管理](./docs/FLIGHT_MANAGEMENT_FEATURE.md) - 航班数据 CRUD 管理
+- [机场管理](./docs/AIRPORT_MANAGEMENT_FEATURE.md) - 机场数据管理
+- [往返航班](./docs/ROUND_TRIP_FEATURE.md) - 往返航班查询功能
+- [执行日志](./docs/CRAWLER_LOG_FEATURE.md) - 日志记录和查询
+- [日志清理](./docs/LOG_CLEANUP_FEATURE.md) - 日志清理和存储管理
+
+### 爬虫技术
+- [爬虫分析](./docs/CRAWLER_ANALYSIS.md) - 实现原理和反爬策略
+- [日期机制](./docs/CRAWLER_DATE_MECHANISM.md) - 页面日期处理逻辑
+- [爬虫配置](./docs/CRAWLER_SETUP.md) - 调试和配置步骤
+- [按日期调试](./docs/DEBUG_CRAWLER_BY_DATE.md) - 调试特定日期和出发地
+- [城市机场识别](./docs/CITY_AIRPORT_IDENTIFICATION.md) - 城市名和机场名识别流程
+
+### 部署
 - [部署指南](./docs/DEPLOYMENT.md) - 生产环境部署说明
-- [往返航班功能](./docs/ROUND_TRIP_FEATURE.md) - 往返航班查询功能说明
-- [数据管理功能](./docs/DATA_MANAGEMENT_FEATURE.md) - 数据管理界面和自定义时间范围
-- [执行日志功能](./docs/CRAWLER_LOG_FEATURE.md) - 执行日志记录和查询功能
-- [日志清理功能](./docs/LOG_CLEANUP_FEATURE.md) - 日志清理和存储空间管理
-- [日志自动刷新功能](./日志自动刷新功能.md) - 实时监控执行日志
-- [按日期调试爬虫](./docs/DEBUG_CRAWLER_BY_DATE.md) - 调试特定日期和出发地的爬虫功能
